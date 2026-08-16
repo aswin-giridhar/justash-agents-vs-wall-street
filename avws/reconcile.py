@@ -18,6 +18,10 @@ from avws.estimators.base import Estimate
 # weighted low because it exists mainly to guarantee a number.
 BASE_WEIGHTS = {
     "build_up": 1.0,
+    # A driver decomposition is an independent route to the same number, weighted
+    # just below the primary identity because its inputs (ticket, transactions) are
+    # forecast rather than guided.
+    "build_up_drivers": 0.8,
     "guidance_anchor": 1.0,
     "seasonal_trend": 0.25,
 }

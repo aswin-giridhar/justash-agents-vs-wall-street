@@ -118,6 +118,23 @@ def estimate_metric(metric: Metric) -> tuple[object, list, list]:
                 log(f"  [{metric.key}] build_up -> {composed.value:.6g}")
             else:
                 log(f"  [{metric.key}] build_up -> unavailable: {composed.warnings}")
+
+    # A second, independent decomposition of the same metric where one exists. Two
+    # routes to a number that agree are far stronger evidence than one route, and
+    # when they disagree the decision layer sees the disagreement rather than
+    # inheriting a single unchecked path.
+    if metric.key + "_drivers" in buildup.COMPOSITIONS:
+        drivers = buildup.estimate(
+            metric.key, facts, metric.period,
+            documents=extract.guidance_documents(metric), variant="_drivers",
+        )
+        if drivers:
+            candidates.append(drivers)
+            if drivers.confidence > 0:
+                log(f"  [{metric.key}] build_up_drivers -> {drivers.value:.6g}")
+            else:
+                log(f"  [{metric.key}] build_up_drivers -> unavailable: "
+                    f"{drivers.warnings}")
     else:
         log(f"  [{metric.key}] build_up -> no composition registered")
 
@@ -181,7 +198,8 @@ def run_company(ticker: str) -> dict:
                for f in facts_by_metric.get(m.key, []))
     }
     values, derivations, linkage_notes = linkage.apply(
-        ticker, metrics[0].company, values, guided_labels=guided_labels
+        ticker, metrics[0].company, values, guided_labels=guided_labels,
+        facts_by_metric=facts_by_metric,
     )
     for note in linkage_notes:
         log(f"  [{ticker}] LINKAGE {note}")

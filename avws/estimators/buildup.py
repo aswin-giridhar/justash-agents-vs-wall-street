@@ -142,6 +142,34 @@ COMPOSITIONS: dict[str, Composition] = {
             f"{c['non_comp_contribution']:g}%) = {v:.4g} USDm"
         ),
     ),
+    "HD:Comparable sales, total company_drivers": Composition(
+        description=(
+            "Driver decomposition. Home Depot reports comparable sales as the product "
+            "of two drivers it discloses separately: average ticket and customer "
+            "transactions. Modelling them apart is what an analyst does, because they "
+            "move for different reasons - ticket tracks commodity prices and big-ticket "
+            "demand, transactions track footfall - and a forecast that gets the right "
+            "answer from offsetting wrong drivers is not a forecast worth trusting."
+        ),
+        components=(
+            Component("expected_ticket_growth", "Expected year-on-year growth in "
+                      "comparable average ticket for the target quarter, from the "
+                      "recent trend and management commentary", "%",
+                      lo=-15.0, hi=15.0),
+            Component("expected_transaction_growth", "Expected year-on-year growth in "
+                      "comparable customer transactions for the target quarter", "%",
+                      lo=-15.0, hi=15.0),
+        ),
+        # Comparable sales compound the two drivers rather than summing them.
+        formula=lambda c: (
+            (1 + c["expected_ticket_growth"] / 100.0)
+            * (1 + c["expected_transaction_growth"] / 100.0) - 1
+        ) * 100.0,
+        render=lambda c, v: (
+            f"(1 + ticket {c['expected_ticket_growth']:g}%) x (1 + transactions "
+            f"{c['expected_transaction_growth']:g}%) - 1 = {v:.4g}% comparable sales"
+        ),
+    ),
     "HD:Adjusted diluted EPS": Composition(
         description=(
             "Home Depot guides full-year adjusted diluted EPS growth rather than "
@@ -362,8 +390,13 @@ def estimate(
     facts: list[Fact],
     period: str,
     documents: str = "",
+    variant: str = "",
 ) -> Estimate | None:
-    composition = COMPOSITIONS.get(metric_key)
+    """Run a composition. `variant` selects an alternative decomposition of the same
+    metric - "_drivers" builds comparable sales from ticket and transactions rather
+    than from the implied full-year guide, giving two independent routes to the same
+    number instead of one."""
+    composition = COMPOSITIONS.get(metric_key + variant)
     if composition is None or (not facts and not documents):
         return None
 
@@ -438,7 +471,7 @@ def estimate(
     return Estimate(
         metric_key=metric_key,
         value=value,
-        method="build_up",
+        method="build_up" + (variant.replace("_", "_") if variant else ""),
         derivation=composition.render(sourced, value)
         + "\n  " + "\n  ".join(notes),
         assumptions=sourced,

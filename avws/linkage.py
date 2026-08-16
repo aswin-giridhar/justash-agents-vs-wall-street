@@ -41,6 +41,12 @@ Rules:
    in the most recent reported quarter, i.e. adjusted gross margin percentage MINUS
    adjusted operating margin percentage. If a company reported a 73.0% adjusted gross
    margin and a 49.0% adjusted operating margin, that is 24.0.
+8. `prior_year_same_quarter_net_sales` is the reported net sales in the SAME quarter
+   of the PRIOR fiscal year - not the latest quarter, and not a full year.
+9. `non_comp_contribution_pct` is the part of total sales growth NOT explained by
+   comparable sales: new stores, acquisitions and foreign exchange. Derive it from a
+   recent quarter as (total sales growth %) minus (comparable sales growth %). For a
+   mature retailer it is typically between -2 and +4 percentage points.
 5. Net finance charge is a POSITIVE number representing a cost to be subtracted.
    If the company earns net finance income, return it as a negative number.
 6. Prefer the basis the metric requires: pre-exceptional or adjusted figures where
@@ -67,6 +73,8 @@ DRIVER_SCHEMA = {
                             "effective_tax_rate_pct",
                             "minority_interest",
                             "recent_opex_ratio_pct",
+                            "prior_year_same_quarter_net_sales",
+                            "non_comp_contribution_pct",
                         ],
                     },
                     "value": {"type": "number"},
@@ -107,6 +115,8 @@ def fetch_drivers(ticker: str, company: str) -> tuple[dict[str, float], list[str
         "effective tax rate income tax expense profit before tax",
         "adjusted gross margin percentage adjusted operating margin percentage "
         "operating expenses percentage of revenue",
+        "net sales for the quarter comparable sales increased total sales growth "
+        "new stores foreign exchange impact",
     ):
         for doc, _s, chunk in search(query, ticker=ticker, doc_type="FILING",
                                     since="2024-06-01", k=5):
@@ -233,10 +243,113 @@ def derive_adi_eps(
     )
 
 
+def prior_year_value(facts: list[Fact], target_period: str) -> float | None:
+    """The metric's own value in the same period one year earlier, from the series.
+
+    Taken from evidence we already hold rather than asked for again. A company-level
+    driver fetch does not know which quarter is wanted and returned Home Depot's Q1
+    net sales when Q2 was needed; the series extraction already carries the right
+    period with a verified quote.
+    """
+    from avws import periods
+
+    target = periods.parse(target_period)
+    if target is None:
+        return None
+    wanted = target.prior_year()
+    for fact in facts:
+        if fact.label != "historical series":
+            continue
+        if periods.parse(fact.period) == wanted:
+            return fact.value
+    return None
+
+
+def _implied_non_comp(
+    facts_by_metric: dict[str, list[Fact]]
+) -> tuple[float | None, str]:
+    """Non-comparable contribution, computed rather than asked for.
+
+    Total sales growth minus comparable sales growth is, by definition, everything
+    else: new stores, acquisitions and foreign exchange. Both series are already
+    extracted with verified quotes, so the residual is arithmetic on evidence we
+    hold rather than another inference.
+
+    Uses the most recent year for which both series exist. The known weakness is
+    acquisition lapping: Home Depot's SRS purchase inflated non-comparable growth in
+    fiscal 2025 and anniversaries out during fiscal 2026, so a residual measured on
+    last year overstates this year. That is why the result is offered as a driver
+    for the model to adjust rather than used blind.
+    """
+    from avws import periods
+
+    sales = {str(periods.parse(f.period)): f.value
+             for f in facts_by_metric.get("HD:Net sales", [])
+             if f.label == "historical series" and periods.parse(f.period)}
+    comps = {str(periods.parse(f.period)): f.value
+             for f in facts_by_metric.get("HD:Comparable sales, total company", [])
+             if f.label == "historical series" and periods.parse(f.period)}
+
+    shared = sorted(set(sales) & set(comps), key=periods.sort_key, reverse=True)
+    for key in shared:
+        period = periods.parse(key)
+        prior_key = str(period.prior_year())
+        if prior_key not in sales or not sales[prior_key]:
+            continue
+        total_growth = (sales[key] - sales[prior_key]) / abs(sales[prior_key]) * 100.0
+        non_comp = total_growth - comps[key]
+        return non_comp, (
+            f"{key} total growth {total_growth:.2f}% minus comparable "
+            f"{comps[key]:.2f}% = {non_comp:.2f}%"
+        )
+    return None, "no period with both a net-sales and a comparable-sales series value"
+
+
+def derive_hd_net_sales(
+    values: dict[str, float], drivers: dict[str, float]
+) -> Derivation | None:
+    """Derive Home Depot net sales from comparable sales.
+
+    Two of Home Depot's three metrics are the same quantity viewed differently:
+
+        net sales = prior-year net sales x (1 + comparable growth + non-comparable)
+
+    where non-comparable is new stores, acquisitions and foreign exchange. Estimating
+    both independently let them contradict each other - our net sales implied +4.9%
+    total growth while our comparable sales said +1.0%, a gap far wider than new
+    square footage can explain for a retailer that opens a handful of stores a year.
+
+    Deriving net sales from the comp forecast makes the pair consistent and inherits
+    the comp number's stronger evidence: comps come from the company's own reaffirmed
+    full-year guidance, net sales came from a trend fit.
+    """
+    comp = values.get("Comparable sales, total company")
+    independent = values.get("Net sales")
+    prior_year = drivers.get("prior_year_same_quarter_net_sales")
+    non_comp = drivers.get("non_comp_contribution_pct")
+    if comp is None or independent is None or not prior_year or non_comp is None:
+        return None
+
+    total_growth = comp + non_comp
+    derived = prior_year * (1 + total_growth / 100.0)
+    arithmetic = (
+        f"prior-year same quarter net sales {prior_year:.6g} x (1 + comparable "
+        f"{comp:.4g}% + non-comparable {non_comp:.4g}%) = {derived:.6g} USDm"
+    )
+    return Derivation(
+        metric_key="HD:Net sales", derived_value=derived,
+        independent_value=independent, arithmetic=arithmetic,
+        drivers={"prior_year_same_quarter_net_sales": prior_year,
+                 "comparable_sales_pct": comp,
+                 "non_comp_contribution_pct": non_comp},
+    )
+
+
 # Which metric each company's linked chain derives, and the function that does it.
 DERIVERS = {
     "HAS": ("Pre-exceptional basic EPS", lambda v, d: derive_eps("HAS", v, d)),
     "ADI": ("Adjusted diluted EPS", derive_adi_eps),
+    "HD": ("Net sales", derive_hd_net_sales),
 }
 
 # Beyond this divergence the derived value is reported but NOT substituted: a gap
@@ -250,6 +363,7 @@ def apply(
     company: str,
     values: dict[str, float],
     guided_labels: set[str] | None = None,
+    facts_by_metric: dict[str, list[Fact]] | None = None,
 ) -> tuple[dict[str, float], list[Derivation], list[str]]:
     """Replace derivable metrics with their derived values.
 
@@ -264,6 +378,30 @@ def apply(
 
     label, derive = registered
     drivers, notes = fetch_drivers(ticker, company)
+
+    # Prefer evidence we already hold over asking for it again. The series carries
+    # the prior-year same-period value with a verified quote and the right period.
+    if facts_by_metric:
+        from avws.registry import metrics_for as _metrics_for
+
+        for metric in _metrics_for(ticker):
+            if metric.label != label:
+                continue
+            prior = prior_year_value(facts_by_metric.get(metric.key, []), metric.period)
+            if prior is not None:
+                drivers["prior_year_same_quarter_net_sales"] = prior
+                notes.append(
+                    f"prior_year_same_quarter_net_sales = {prior:g} taken from the "
+                    f"extracted series rather than re-asked"
+                )
+
+        if ticker == "HD" and "non_comp_contribution_pct" not in drivers:
+            implied, detail = _implied_non_comp(facts_by_metric)
+            if implied is not None:
+                drivers["non_comp_contribution_pct"] = implied
+                notes.append(f"non_comp_contribution_pct = {implied:.3g} computed "
+                             f"from the series: {detail}")
+
     derivation = derive(values, drivers)
     if derivation is None:
         return values, [], notes + [
