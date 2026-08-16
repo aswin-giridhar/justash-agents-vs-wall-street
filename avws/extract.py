@@ -162,6 +162,24 @@ def plan_for(metric: Metric) -> list[Probe]:
     return probes + extra.get(metric.ticker, [])
 
 
+def guidance_documents(metric: Metric, max_chunks: int = 10) -> str:
+    """Retrieved text for the build-up's component sourcing.
+
+    Kept small and guidance-focused: published work on LLM forecasting reports that
+    accuracy rises then *falls* as context grows, so this is a targeted supplement
+    to the ledger rather than a dump of everything retrieved.
+    """
+    wanted = {"guidance", "component"}
+    chunks = [
+        (doc, chunk) for doc, chunk, intent in _gather_chunks(metric)
+        if intent in wanted
+    ][:max_chunks]
+    return "\n\n".join(
+        f"<<<{doc.path} | published {doc.published_at}>>>\n{chunk}"
+        for doc, chunk in chunks
+    )
+
+
 def _gather_chunks(metric: Metric) -> list[tuple[Doc, str, str]]:
     """Run the plan and return unique (doc, chunk, intent) triples."""
     build_index()

@@ -27,6 +27,7 @@ from avws import (
 from avws.config import LOG_DIR, ROOT, ensure_dirs
 from avws.corpus import build_index
 from avws.estimators import buildup, guidance, seasonal
+from avws import extract
 from avws.extract import extract_facts
 from avws.registry import Metric, metrics_for, tickers
 from avws.report import write_report
@@ -99,7 +100,10 @@ def estimate_metric(metric: Metric) -> tuple[object, list, list]:
         log(f"  [{metric.key}] guidance_anchor -> no guidance fact, skipped")
 
     if metric.key in buildup.COMPOSITIONS:
-        composed = buildup.estimate(metric.key, facts, metric.period)
+        composed = buildup.estimate(
+            metric.key, facts, metric.period,
+            documents=extract.guidance_documents(metric),
+        )
         if composed:
             candidates.append(composed)
             if composed.confidence > 0:
@@ -294,3 +298,4 @@ def main(argv: list[str] | None = None) -> int:
 
 if __name__ == "__main__":
     sys.exit(main())
+

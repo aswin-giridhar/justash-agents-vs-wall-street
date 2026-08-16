@@ -44,9 +44,27 @@ Rules:
 
 @dataclass(frozen=True)
 class Component:
+    """A named model assumption.
+
+    `lo` and `hi` bound it. Components are assumptions, and an unconstrained
+    assumption is the same hazard as an unconstrained fact: asked for Q3's share of
+    Deere's annual segment operating profit, the model returned 55.3% - a quarter
+    cannot be over half a year - and the composition produced a figure twice what
+    the guidance implies. Bounds are stated where a defensible range exists.
+    """
+
     name: str
     description: str
     unit: str
+    lo: float | None = None
+    hi: float | None = None
+
+    def check(self, value: float) -> str | None:
+        if self.lo is not None and value < self.lo:
+            return f"{self.name}={value:g} below the plausible floor {self.lo:g}"
+        if self.hi is not None and value > self.hi:
+            return f"{self.name}={value:g} above the plausible ceiling {self.hi:g}"
+        return None
 
 
 @dataclass(frozen=True)
@@ -137,7 +155,7 @@ COMPOSITIONS: dict[str, Composition] = {
             Component("fy26_guided_adjusted_eps_growth", "Company guidance for FY2026 "
                       "adjusted diluted EPS growth", "%"),
             Component("q2_share_of_annual_adjusted_eps", "Q2's historical share of "
-                      "full-year adjusted diluted EPS, from prior years", "%"),
+                      "full-year adjusted diluted EPS, from prior years", "%", lo=8.0, hi=45.0),
         ),
         formula=lambda c: (
             c["fy25_adjusted_diluted_eps"]
@@ -189,7 +207,7 @@ COMPOSITIONS: dict[str, Composition] = {
             Component("fy26_net_finance_charge", "Expected FY2026 net finance charge "
                       "as a positive number to be subtracted", "GBPm"),
             Component("fy26_effective_tax_rate", "Expected FY2026 effective tax rate "
-                      "on pre-exceptional profit", "%"),
+                      "on pre-exceptional profit", "%", lo=0.0, hi=45.0),
             Component("weighted_average_basic_shares", "Weighted average number of "
                       "basic shares outstanding", "millions"),
         ),
@@ -267,7 +285,7 @@ COMPOSITIONS: dict[str, Composition] = {
             Component("fy26_guided_net_income", "Company-guided FY2026 net income "
                       "attributable to Deere & Company", "USDm"),
             Component("q3_share_of_annual_net_income", "Q3's historical share of "
-                      "full-year net income, from prior years", "%"),
+                      "full-year net income, from prior years", "%", lo=8.0, hi=40.0),
             Component("diluted_shares", "Weighted average diluted shares outstanding",
                       "millions"),
         ),
@@ -293,10 +311,10 @@ COMPOSITIONS: dict[str, Composition] = {
                       "net sales. A guide of 'down 5-10%' means -7.5.", "%"),
             Component("fy26_segment_operating_margin", "MIDPOINT of the company's "
                       "FY2026 outlook for Production & Precision Ag segment "
-                      "operating margin. A guide of '11-13%' means 12.", "%"),
+                      "operating margin. A guide of '11-13%' means 12.", "%", lo=0.0, hi=45.0),
             Component("q3_share_of_segment_annual_profit", "Q3's historical share of "
                       "the full-year Production & Precision Ag operating profit, "
-                      "from prior years", "%"),
+                      "from prior years", "%", lo=8.0, hi=40.0),
         ),
         formula=lambda c: (
             c["fy25_segment_net_sales"] * (1 + c["fy26_segment_sales_change"] / 100.0)
@@ -339,9 +357,14 @@ def _schema(components: tuple[Component, ...]) -> dict:
     }
 
 
-def estimate(metric_key: str, facts: list[Fact], period: str) -> Estimate | None:
+def estimate(
+    metric_key: str,
+    facts: list[Fact],
+    period: str,
+    documents: str = "",
+) -> Estimate | None:
     composition = COMPOSITIONS.get(metric_key)
-    if composition is None or not facts:
+    if composition is None or (not facts and not documents):
         return None
 
     ledger_text = "\n".join(
@@ -358,20 +381,40 @@ def estimate(metric_key: str, facts: list[Fact], period: str) -> Estimate | None
         f"Components required:\n{wanted}\n\n"
         f"Evidence ledger:\n{ledger_text}"
     )
+    if documents:
+        # Components are inputs of arbitrary type - a guided percentage change, a
+        # margin range, a share count - and the ledger holds only values in the
+        # metric's own unit, so a guide of "down 5-10%" has nowhere to live in it.
+        # Deere publishes its whole FY2026 outlook that way, which is why every
+        # Deere composition reported its components unsourced until the sourcing
+        # step could read the documents as well as the ledger.
+        user += (
+            "\n\nSource documents (use these for components the ledger cannot hold, "
+            "such as guided percentage changes and guidance ranges; quote from here "
+            "exactly as you would from the ledger):\n" + documents
+        )
 
     payload = complete(
         SOURCING_SYSTEM, user, _schema(composition.components),
         schema_name="components",
     )
 
+    by_name = {c.name: c for c in composition.components}
     sourced: dict[str, float] = {}
     used: list[Fact] = []
     notes: list[str] = []
+    rejected: list[str] = []
     for item in payload.get("components", []):
         if not item.get("available"):
             continue
-        sourced[item["name"]] = float(item["value"])
-        notes.append(f"{item['name']} = {item['value']:g} ({item['reasoning']})")
+        spec = by_name.get(item["name"])
+        value = float(item["value"])
+        problem = spec.check(value) if spec else None
+        if problem:
+            rejected.append(problem)
+            continue
+        sourced[item["name"]] = value
+        notes.append(f"{item['name']} = {value:g} ({item['reasoning']})")
         index = item.get("fact_index", -1)
         if isinstance(index, int) and 0 <= index < len(facts):
             used.append(facts[index])
@@ -381,11 +424,14 @@ def estimate(metric_key: str, facts: list[Fact], period: str) -> Estimate | None
         missing = sorted(required - set(sourced))
         # Zero confidence rather than None: the reconciler drops it, but the
         # evidence report can still explain why the build-up did not fire.
+        detail = f"composition incomplete; unsourced components: {missing}"
+        if rejected:
+            detail += f"; rejected as implausible: {rejected}"
         return Estimate(
             metric_key=metric_key, value=0.0, method="build_up",
-            derivation=f"composition incomplete; unsourced components: {missing}",
-            confidence=0.0,
-            warnings=[f"build-up unavailable, missing components: {missing}"],
+            derivation=detail, confidence=0.0,
+            warnings=[f"build-up unavailable, missing components: {missing}"]
+            + [f"component rejected: {r}" for r in rejected],
         )
 
     value = composition.formula(sourced)
@@ -399,3 +445,4 @@ def estimate(metric_key: str, facts: list[Fact], period: str) -> Estimate | None
         inputs=used,
         confidence=0.8,
     )
+

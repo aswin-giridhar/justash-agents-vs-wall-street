@@ -19,20 +19,12 @@
     --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
     --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
   }
-  @media (prefers-color-scheme: dark){
-    :root:not([data-theme="light"]){
-      --paper:#0e1015; --card:#161a22; --ink:#e9ecf3; --muted:#98a1b3;
-      --rule:#242a36; --accent:#77a6ff; --accent-wash:#141f33;
-      --amber:#e2ab6b; --amber-wash:#241d12;
-      --green:#5fd3a0; --green-wash:#0f261d;
-    }
-  }
-  :root[data-theme="dark"]{
-    --paper:#0e1015; --card:#161a22; --ink:#e9ecf3; --muted:#98a1b3;
-    --rule:#242a36; --accent:#77a6ff; --accent-wash:#141f33;
-    --amber:#e2ab6b; --amber-wash:#241d12;
-    --green:#5fd3a0; --green-wash:#0f261d;
-  }
+  /* Deliberately light-only. This is a document to be read closely for five
+     minutes, and the inline SVG figures use printed-figure fills, so committing
+     to one look guarantees every reader sees the same page rather than whatever
+     their system theme happens to be. `color-scheme: light` stops the browser
+     from auto-darkening form controls and scrollbars around it. */
+  :root{color-scheme:light}
 
   *{box-sizing:border-box}
   html{-webkit-text-size-adjust:100%}
