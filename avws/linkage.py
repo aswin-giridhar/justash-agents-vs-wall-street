@@ -219,6 +219,10 @@ def derive_adi_eps(
         return None
 
     operating_margin = gross_margin - opex_ratio
+    # A negative or implausible operating margin means the opex ratio was mis-sourced.
+    # Failing here is far better than propagating it into an EPS.
+    if not (0.0 < operating_margin < 80.0):
+        return None
     operating_income = revenue * operating_margin / 100.0
     finance = drivers.get("net_finance_charge", 0.0)
     tax_rate = drivers.get("effective_tax_rate_pct", 12.0)
@@ -442,8 +446,33 @@ def apply(
         )
         return values, [], notes
 
+    # The plausibility band, applied to the DERIVED value before it can overwrite
+    # anything. Bounds guard facts, components and the seasonal estimator, but the
+    # one place that overwrites a value wholesale had no guard on what it wrote:
+    # a mis-sourced opex ratio drove ADI's implied operating margin negative and the
+    # chain produced an adjusted EPS of -90.12 against company guidance of 3.30.
+    from avws.registry import get_metric as _get_metric
+    from avws.table_facts import BANDS as _BANDS
+
+    band = _BANDS.get(f"{ticker}:{label}")
+    value = derivation.derived_value
+    if band and not (band[0] <= abs(value) <= band[1]):
+        notes.append(
+            f"REJECTED {label}: derived {value:.4g} falls outside the plausible band "
+            f"{band}, so the independent estimate {derivation.independent_value:.4g} "
+            f"stands. A derivation is only as good as its weakest input, and one of "
+            f"them is wrong. Chain: {derivation.arithmetic}"
+        )
+        return values, [derivation], notes
+    if value <= 0 and _get_metric(f"{ticker}:{label}").is_eps:
+        notes.append(
+            f"REJECTED {label}: derived {value:.4g} is non-positive for an EPS "
+            f"metric. Chain: {derivation.arithmetic}"
+        )
+        return values, [derivation], notes
+
     corrected = dict(values)
-    corrected[label] = derivation.derived_value
+    corrected[label] = value
     notes.append(
         f"{label} derived from the P&L: {derivation.arithmetic}; independent "
         f"estimate was {derivation.independent_value:.4g} "

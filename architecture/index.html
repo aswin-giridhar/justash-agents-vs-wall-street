@@ -719,6 +719,19 @@ level in the low thousands.</p>
 candidates is simply the heavier one. It discarded exactly the disagreement the decision layer
 exists to handle. The median of two values is their midpoint.</p>
 
+<h3><span class="tag fixed">fixed</span>The one component that overwrote a value had no guard on what it wrote</h3>
+<p>Plausibility bounds guard extracted facts, sourced components and the seasonal estimator. The
+linked derivation — the only thing in the system that <em>replaces</em> a value wholesale — had
+none. A mis-sourced operating-expense ratio drove ADI's implied operating margin negative and the
+chain produced an adjusted EPS of <strong>−90.12</strong> against company guidance of $3.30. It
+reached a workbook.</p>
+<p>Three guards now apply, in the order a defect would meet them: the chain refuses to derive at all
+when the implied operating margin is outside 0–80%; a derived value outside the metric's plausible
+band cannot overwrite; and an EPS derivation that comes out non-positive is rejected outright. Each
+leaves the independent estimate standing and records why.</p>
+<p>The lesson is narrower than "add more checks": we had the right guard, applied it in three
+places, and missed the fourth — which happened to be the only one with the authority to overwrite.</p>
+
 <h3><span class="tag fixed">reverted</span>Model tiering, measured and rejected</h3>
 <p>We hypothesised that extraction is transcription and would run correctly on a smaller model.
 Measured: 40% faster and materially less accurate. Deciding whether "£45.6m" is a half year or a
@@ -809,7 +822,7 @@ npm run check:forecasts             # official structural check</code></pre>
 
 <pre><code>python -m avws.corpus --query "net fees by division" --ticker HAS -k 5
 python -m avws.backtest
-python -m pytest tests -q           # 88 tests</code></pre>
+python -m pytest tests -q           # 92 tests</code></pre>
 </section>
 
 <footer>
