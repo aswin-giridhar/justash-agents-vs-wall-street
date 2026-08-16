@@ -180,3 +180,7 @@
 2026-08-16T14:54:32Z  [DE] wrote submission\DE-FY2026Q3.xlsx
 2026-08-16T14:54:32Z  [DE] wrote research\DE.md
 2026-08-16T14:54:42Z    [HAS:Pre-exceptional basic EPS] GATE critic: You computed FY2026 pre-exceptional EPS off a pre-exceptional operating profit of £26.21m, but management’s own guidance says FY2026 pre-exceptional operating profit will be at the top of a £37–£46m range. £26.21m looks like the FY2025 actual, not FY2026. Using the guided FY2026 basis (≈£46m), EPS would be roughly (46−13.4)×(1−35.1%)/1,590.2m×100 ≈ 1.3p, not 0.52p. The proposed figure is therefore anchored to the wrong period/basis and is too low.
+2026-08-16T14:55:15Z    [HAS:Pre-exceptional operating profit] GATE critic: Your £26.2m forecast for FY2026 is below the company’s own stated guidance/consensus range for pre-exceptional operating profit. You quote management guiding “towards the top end” of £37–£46m (consensus midpoint ~£43.5m), yet submit £26.2m—i.e., c.£11m below even the bottom of the guided range for the same metric and unit (GBPm). That’s a concrete mismatch to the stated FY2026 basis and period.
+2026-08-16T14:55:15Z  [HAS] wrote submission\HAS-FY2026.xlsx
+2026-08-16T14:55:15Z  [HAS] wrote research\HAS.md
+2026-08-16T14:55:15Z  run complete: 4 companies written, 0 failed, 84 model calls

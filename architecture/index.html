@@ -295,8 +295,8 @@ completely different information states, and one uniform prompt across all four 
     <text x="250" y="215" text-anchor="middle" fill="#5a6373" font-size="10.5">value · unit · basis · period · source_doc · source_quote</text>
 
     <rect x="24" y="262" width="452" height="58" rx="6" fill="#ffffff" stroke="#8b93a5"/>
-    <text x="250" y="284" text-anchor="middle" fill="#101828">estimators/</text>
-    <text x="250" y="303" text-anchor="middle" fill="#5a6373" font-size="10.5">guidance · build_up · seasonal · signals (capped tilt)</text>
+    <text x="250" y="284" text-anchor="middle" fill="#101828">estimators/ + tilts</text>
+    <text x="250" y="303" text-anchor="middle" fill="#5a6373" font-size="10.5">guidance · build_up · seasonal · signals · revision</text>
 
     <rect x="24" y="358" width="452" height="48" rx="6" fill="#ffffff" stroke="#8b93a5"/>
     <text x="250" y="379" text-anchor="middle" fill="#101828">reconcile → decide</text>
@@ -325,7 +325,7 @@ completely different information states, and one uniform prompt across all four 
   </g>
 </svg>
 <figcaption>Every box is a module in <code>avws/</code>, and every arrow is a call that exists in
-the code. Three extraction paths feed one ledger; four estimators feed one decision; nothing
+the code. Three extraction paths feed one ledger; the estimators feed one decision; nothing
 reaches a workbook without passing the gate. <code>backtest.py</code> is dashed because it is a
 separate command that replays the same estimator chain offline rather than a stage of the
 run.</figcaption>
@@ -391,8 +391,9 @@ into −0.04% invents a number rather than correcting one.</p>
 <span class="note-no">Note 5</span>
 <h2>How research becomes a number</h2>
 
-<p>Four estimator families produce candidates. The model's role is confined to reading and to
-setting <em>named</em> assumptions; every arithmetic step is Python, and every step is printed.</p>
+<p>Three estimator families produce candidates, and two bounded tilts adjust them. The model's role
+is confined to reading and to setting <em>named</em> assumptions; every arithmetic step is Python,
+and every step is printed.</p>
 
 <h3>Guidance anchor, with measured bias</h3>
 <p>Where a company guides the period, that is the strongest input available. But companies are
@@ -429,6 +430,24 @@ An estimator that always finds something is not measuring anything.</p>
   <p>The extractor now treats top-of-range and ahead-of-consensus as strong ABOVE signals, in-line
   as no signal, and a later statement as superseding an earlier one. It fires three signals on that
   metric and surfaces the range itself: <strong>£37m–£46m</strong>.</p>
+</div>
+
+<h3>Revision breadth, recovered without a data vendor</h3>
+
+<p>Whether estimates are being raised or cut is one of the most robust published predictors of the
+direction of an earnings surprise. Funds buy it from vendors. A usable version is recoverable from
+the filings: companies restate consensus over time when managing expectations against it, and their
+own successive outlooks for the same period — raised, narrowed, cut, reaffirmed — are management's
+own revisions.</p>
+
+<p><code>revision.py</code> reads both and produces a tilt smaller than the post-guidance one,
+because it is a second-order signal about a period the anchor already covers.</p>
+
+<div class="callout warn">
+  <p><strong>Honest result: on this corpus it finds nothing.</strong> No metric yielded two dated
+  restatements of the same forward number, so it reports zero observations for all twelve rather
+  than manufacturing a trend from a single statement. It is built, tested and reporting a null —
+  which is a real finding about a four-company corpus frozen mid-cycle, not a broken component.</p>
 </div>
 
 <h3>Build-up identities</h3>
