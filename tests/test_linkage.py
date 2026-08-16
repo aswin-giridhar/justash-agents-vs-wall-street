@@ -61,9 +61,13 @@ def test_guided_metric_is_checked_not_substituted(monkeypatch):
     monkeypatch.setattr(linkage, "fetch_drivers", fake_drivers)
     values = {"Revenue": 3900.0, "Adjusted gross margin": 73.0,
               "Adjusted diluted EPS": 3.30}
-    out, _d, notes = linkage.apply(
+    out, derivations, notes = linkage.apply(
         "ADI", "Analog Devices", values,
         guided_labels={"Adjusted diluted EPS"},
     )
     assert out["Adjusted diluted EPS"] == 3.30
     assert any("consistency check" in n for n in notes)
+    # The caller substitutes every derivation it is handed, so a check-only path
+    # must hand back none. Returning one "just for reporting" overwrote the guided
+    # value with the check that was supposed to protect it.
+    assert derivations == [], "a check-only derivation was returned as an instruction"

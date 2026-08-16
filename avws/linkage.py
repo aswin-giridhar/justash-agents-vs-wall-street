@@ -432,7 +432,12 @@ def apply(
                 f"estimate and the P&L chain means one of the other two metrics for "
                 f"this company is probably mis-forecast"
             )
-        return values, [derivation], notes
+        # Empty list, deliberately. The caller substitutes every derivation it is
+        # handed, so returning one "just for reporting" was returning a command
+        # through the channel meant for data - and ADI's guided EPS was overwritten
+        # by the very check that was supposed to protect it. The chain is preserved
+        # in the notes above, which is where an explanation belongs.
+        return values, [], notes
 
     if derivation.divergence > MAX_SUBSTITUTION_DIVERGENCE:
         # Reporting without substituting. A divergence this large means one of the
@@ -463,13 +468,13 @@ def apply(
             f"stands. A derivation is only as good as its weakest input, and one of "
             f"them is wrong. Chain: {derivation.arithmetic}"
         )
-        return values, [derivation], notes
+        return values, [], notes
     if value <= 0 and _get_metric(f"{ticker}:{label}").is_eps:
         notes.append(
             f"REJECTED {label}: derived {value:.4g} is non-positive for an EPS "
             f"metric. Chain: {derivation.arithmetic}"
         )
-        return values, [derivation], notes
+        return values, [], notes
 
     corrected = dict(values)
     corrected[label] = value
