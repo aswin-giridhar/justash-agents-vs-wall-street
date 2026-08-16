@@ -24,7 +24,7 @@ from avws.ledger import Fact
 from avws.registry import Metric
 
 
-def _ordered_actuals(facts: list[Fact], target) -> list[Fact]:
+def _ordered_actuals(facts: list[Fact], target, metric: Metric | None = None) -> list[Fact]:
     """Actuals COMPARABLE WITH THE TARGET, deduplicated, oldest first.
 
     Comparability is the whole point. A full year and a single quarter are different
@@ -37,6 +37,10 @@ def _ordered_actuals(facts: list[Fact], target) -> list[Fact]:
     So: a full-year target admits only full-year actuals; a quarterly target admits
     only the SAME quarter of other years.
     """
+    from avws.table_facts import BANDS
+
+    band = BANDS.get(metric.key) if metric is not None else None
+
     deduped: dict[str, Fact] = {}
     for fact in facts:
         if fact.basis not in ("reported", "adjusted"):
@@ -45,6 +49,14 @@ def _ordered_actuals(facts: list[Fact], target) -> list[Fact]:
         if period is None:
             continue
         if target is not None and period.quarter != target.quarter:
+            continue
+        # The TIGHT band, not the widened fact-admission band. A build-up needs the
+        # components of a figure and those are smaller than it; a trend estimate is
+        # of the figure itself, so anything outside its own plausible range is a
+        # different quantity that happened to match a row label. Without this the
+        # estimator anchored Deere segment operating profit on a 13.6 and returned
+        # 0.16 against a true level in the low thousands.
+        if band and not (band[0] <= abs(fact.value) <= band[1]):
             continue
         key = str(period)
         existing = deduped.get(key)
@@ -75,7 +87,7 @@ def _recent_yoy_growth(actuals: list[Fact]) -> tuple[float | None, list[str]]:
 
 def estimate(metric: Metric, facts: list[Fact]) -> Estimate:
     target = periods.parse(metric.period)
-    actuals = _ordered_actuals(facts, target)
+    actuals = _ordered_actuals(facts, target, metric)
 
     if not actuals:
         return Estimate(

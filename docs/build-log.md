@@ -88,6 +88,58 @@ checking for every request the agent makes, including the API calls carrying the
 Worth recording because the same interception will still be present at 17:15. A run
 that works now works then; one relying on an ad-hoc environment variable might not.
 
+## 12:25 — The guard ate its own inputs
+
+`HAS:Net fees` rejected 8 of 10 extracted facts as implausible. The band was
+400–1,600 GBPm, sized for the **group** figure near 972. The build-up needs the
+**divisional** components — Germany 308.9, UK&I 192.2, ANZ 116.2 — every one of which
+falls below 400.
+
+One band was doing two jobs: admitting facts and guarding the final forecast. Those
+need different widths, because the parts of a figure are smaller than the figure.
+Money and EPS metrics now admit facts across a 10× wider band, which still catches a
+1000× scale error. Percentages deliberately do **not** widen — a margin's components
+are still margins, and widening there would readmit the basis-point error below.
+
+## 12:45 — The critic found one root cause behind seven bad numbers
+
+The first complete run produced twelve numbers, and the critic objected to most of
+them in near-identical language: *"the median of a mixed set"*, *"you mixed
+quarters"*, *"the −64.9% input is an H1 FY2026 vs H1 FY2025 change"*.
+
+One defect underneath all of it: the seasonal estimator pooled **full-year figures
+with quarterly ones** and paired **different quarters** with each other, so a
+year-to-quarter ratio was being used as a growth rate. Consequences:
+
+| Metric | Produced | Reality |
+|---|---:|---|
+| DE Production & Precision Ag operating profit | 441 | low thousands |
+| HAS Pre-exceptional basic EPS | 0.46p | an order of magnitude light |
+| HAS Net fees | 849 | FY25 was 972, decline ~5% |
+
+Fixed by making comparability explicit: a quarterly target admits only the same
+quarter of other years; a full-year target only full years.
+
+Worth recording that the **critic caught this and we did not**. The unit tests all
+passed. The numbers looked like numbers. It took a model instructed to argue the
+figure was wrong to notice that the arithmetic was comparing incompatible periods.
+
+## 12:50 — Two more from the same run
+
+**Percentages arriving as fractions.** HD comparable sales averaged 0.004 and 0.1504
+— readings of 0.4% and 15.04% expressed as decimals — and produced 0.073%. Both sat
+inside the ±25 band, so nothing objected. Percentage readings below 0.2 are now
+rejected rather than guessed at, because guessing which convention was meant is how
+a 100× error gets laundered into a plausible-looking figure.
+
+**A trend fit outvoted the company.** ADI revenue came out at 3,593 against
+management's published guidance of $3.9bn ± $100m — *outside the range the company
+itself had given*. When guidance exists for the exact period, the trend now carries
+weight 0.06, and a new check flags any forecast falling outside its guided range.
+Landing outside a published range is allowed — companies beat the top end, and ADI
+said exactly that about its own last quarter — but it should be a decision with a
+reason, not an accident of a weighted average.
+
 ## 11:33 — `.env` lives outside the repository
 
 `python-dotenv`'s `find_dotenv` walks parent directories, so the key sits in the
