@@ -111,6 +111,18 @@ def choose(
         chosen, method, why = values[0], usable[0].method, (
             "single candidate; submitted as produced"
         )
+    elif len(usable) == 2:
+        # The median of two values is their midpoint, not the higher-weighted one.
+        # The cumulative-weight walk degenerates to argmax-weight with two
+        # candidates: on Deere segment operating profit it returned the build-up's
+        # 263.7 and discarded the trend's 498.6 entirely, throwing away exactly the
+        # disagreement the decision layer exists to handle.
+        chosen, method = weighted_mean, "weighted_mean_of_two"
+        why = (
+            f"only two candidates ({values[0]:.6g} and {values[1]:.6g}, disagreeing "
+            f"by {spread:.1%}); a weighted median is undefined for two values, so "
+            f"submitted their weighted midpoint {weighted_mean:.6g}"
+        )
     elif spread > 0.15:
         chosen, method = median, "weighted_median"
         why = (

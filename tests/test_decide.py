@@ -32,12 +32,24 @@ def test_wide_disagreement_uses_the_median_not_the_mean():
     assert decision.value > 3000, "the outlier must not drag the submitted value"
 
 
+def test_two_candidates_use_their_midpoint_not_the_heavier_one():
+    """A weighted median is undefined for two values. The cumulative-weight walk
+    degenerated to argmax-weight and discarded the disagreement outright."""
+    metric = get_metric("ADI:Revenue")
+    candidates = [_est(2000, "build_up", confidence=0.8),
+                  _est(4000, "seasonal_trend", confidence=0.4)]
+    weights = {"build_up": 0.877, "seasonal_trend": 0.123}
+    decision = choose(metric, candidates, weights, [])
+    assert decision.method == "weighted_mean_of_two"
+    assert 2000 < decision.value < 4000, "the disagreement must not be discarded"
+
+
 def test_close_agreement_uses_the_mean():
     metric = get_metric("ADI:Revenue")
     candidates = [_est(3900, "guidance_anchor"), _est(3950, "build_up")]
     weights = {"guidance_anchor": 0.5, "build_up": 0.5}
     decision = choose(metric, candidates, weights, [])
-    assert decision.method == "weighted_mean"
+    assert decision.method.startswith("weighted_mean")
     assert 3900 <= decision.value <= 3950
 
 

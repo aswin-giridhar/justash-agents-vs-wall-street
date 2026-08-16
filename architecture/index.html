@@ -88,7 +88,7 @@
     <span class="chip">Python 3.14</span>
     <span class="chip">OpenAI gpt-5</span>
     <span class="chip">BM25 retrieval, no embeddings</span>
-    <span class="chip">62 tests</span>
+    <span class="chip">87 tests</span>
   </div>
 </header>
 
@@ -241,8 +241,16 @@ Hays net fees, with the reason stated, rather than hiding the preference inside 
 
     <g>
       <rect x="30" y="360" width="390" height="50" rx="7" fill="#ffffff" stroke="#8b93a5"/>
-      <text x="225" y="381" text-anchor="middle" fill="#14171f">reconcile.py</text>
-      <text x="225" y="399" text-anchor="middle" fill="#5b6472" font-size="10.5">confidence weights + declared overrides</text>
+      <text x="225" y="381" text-anchor="middle" fill="#14171f">reconcile.py &rarr; decide.py</text>
+      <text x="225" y="399" text-anchor="middle" fill="#5b6472" font-size="10.5">weights, then weighted median vs consensus proxy</text>
+    </g>
+
+    <g>
+      <rect x="470" y="24" width="260" height="38" rx="7" fill="#ffffff" stroke="#8b93a5"/>
+      <text x="600" y="48" text-anchor="middle" fill="#14171f">calibration.py</text>
+    </g>
+    <g fill="none" stroke="#8b93a5" stroke-width="1.4" color="#8b93a5" marker-end="url(#ar)">
+      <path d="M470 43 L440 43 L440 288 L420 288"/>
     </g>
 
     <g>
@@ -259,8 +267,8 @@ Hays net fees, with the reason stated, rather than hiding the preference inside 
 
     <g>
       <rect x="470" y="360" width="260" height="50" rx="7" fill="#e8f6ef" stroke="#0f6b45" stroke-width="1.2"/>
-      <text x="600" y="381" text-anchor="middle" fill="#0f6b45" font-weight="600">workbook.py</text>
-      <text x="600" y="399" text-anchor="middle" fill="#5b6472" font-size="10.5">4 &times; .xlsx &rarr; submission/</text>
+      <text x="600" y="381" text-anchor="middle" fill="#0f6b45" font-weight="600">linkage.py &rarr; workbook.py</text>
+      <text x="600" y="399" text-anchor="middle" fill="#5b6472" font-size="10.5">derive EPS, then 4 &times; .xlsx</text>
     </g>
 
     <g>
@@ -391,7 +399,57 @@ a statement the company has publicly committed to.</p>
 <p>"The model said 3958" is unreviewable. "H1 actual 464.6 plus H2 prior-year 507.8 grown at &minus;4.0%
 = 952.1" can be checked line by line by someone who has never seen the code.</p>
 
-<h2>4. The validation gate</h2>
+<h2>4. Three things a real analyst does that a weighted average does not</h2>
+
+<h3>EPS is derived, not estimated</h3>
+
+<p>The structural weakness of producing twelve numbers independently and checking them
+afterwards is that consistency is <em>checked</em> rather than <em>structural</em>. A sell-side analyst
+does not estimate EPS. They build one linked model — revenue, gross margin, operating expenses,
+operating profit, net finance, tax, share count — and EPS falls out of it.</p>
+
+<p>Our system demonstrated exactly why that matters. It produced Hays pre-exceptional basic EPS of
+<strong>36.6 pence</strong> alongside pre-exceptional operating profit of <strong>£44.5m</strong>. With
+roughly 1,600m shares in issue those cannot both be true; £44.5m supports about 1.3 pence. Independent
+estimation permits the contradiction. A linked model forbids it.</p>
+
+<pre><code>(45.43 operating profit &minus; 13.40 net finance) x (1 &minus; 25% tax)
+    / 1,590.2m basic shares x 100 = 1.31 pence</code></pre>
+
+<p><code>linkage.py</code> extracts the drivers once per company with the same quote verification used
+everywhere else, derives the metric, and reports <em>both</em> the derived and independent values with the
+divergence, so the disagreement is visible rather than silently resolved.</p>
+
+<h3>Guidance bias is measured, not assumed</h3>
+
+<p>Companies are systematically biased against their own outlook — ADI's Q2 release says its quarter came
+in "above the high end of our outlook". That bias is measurable, but measuring it needs a sample. The
+guidance anchor was previously calibrated on whatever pairs happened to surface while extracting the
+target metric: zero to two observations, which is noise wearing the costume of a calibration.</p>
+
+<p><code>calibration.py</code> goes looking for guidance-and-outcome pairs across the corpus. Both quotes
+must verify; a gap above 60% is treated as a mis-paired basis rather than a guidance miss. Below three
+pairs it returns zero and <em>says so</em> rather than pretending to a calibration it does not have. On
+Hays pre-exceptional operating profit it measured a <strong>+0.51% bias across 3 pairs with a 100% beat
+rate</strong>.</p>
+
+<h3>The submitted number optimises the score, not the average</h3>
+
+<div class="callout">
+  <p>The metric score is linear in absolute error inside the cap. Expected absolute error is minimised
+  by the <strong>median</strong> of the predictive distribution, not its mean — and the 5.0 cap makes the
+  loss more robust still, pushing further toward the median.</p>
+  <p>This is not academic. Our candidates disagreed by <strong>111%</strong> on ADI adjusted EPS. The
+  weighted mean would have landed in an empty region between two clusters that no estimator considers
+  plausible; the weighted median landed on <strong>$3.30</strong> — exactly the company's guidance.</p>
+</div>
+
+<p><code>decide.py</code> also builds an explicit <strong>consensus proxy</strong>. We are scored against
+a consensus mean we cannot see, but for a guided metric consensus clusters near the guidance midpoint,
+because that is the strongest public signal every analyst also holds. Making the proxy explicit turns an
+accidental deviation into a stated decision, and any deviation above 5% is flagged in the run log.</p>
+
+<h2>5. The validation gate</h2>
 
 <p>Three stages, in order, each logged whether or not it finds anything — a log that records only
 successes cannot evidence that the gate ran.</p>
@@ -427,7 +485,7 @@ successes cannot evidence that the gate ran.</p>
 <p>When the gate cannot resolve a concern it emits the best available estimate with a loud warning. It
 never blanks a value, because a blank scores 5.0 — the same as being wrong by ten times the floor.</p>
 
-<h2>5. Backtest</h2>
+<h2>6. Backtest</h2>
 
 <p>We cannot measure the thing we are graded on, because the Wall Street benchmark is not visible to us.
 We <em>can</em> measure the statistic the scoring function is built from: how often our absolute error
@@ -449,7 +507,7 @@ sound in the ordinary case. The residual leak is restatements: an earlier period
 filing carries the later filing's knowledge. We did not have time to filter on publication date, and
 we would rather state that than present the number as cleaner than it is.</p>
 
-<h2>6. What we got wrong</h2>
+<h2>7. What we got wrong</h2>
 
 <p>Recorded as they happened, in <code>docs/build-log.md</code>, rather than reconstructed at the end.</p>
 
@@ -482,7 +540,7 @@ blocking anything; it presents a private CA that only the OS trust store carries
 disabling verification, which would have worked and would have switched off certificate checking for
 every request carrying our API key.</p>
 
-<h2>7. Known weaknesses</h2>
+<h2>8. Known weaknesses</h2>
 
 <ul>
   <li><span class="tag weak">thin</span><strong>Guidance residuals are calibrated on few
@@ -514,7 +572,7 @@ every request carrying our API key.</p>
   targets the floor band instead.</li>
 </ul>
 
-<h2>8. Deliberate non-choices</h2>
+<h2>9. Deliberate non-choices</h2>
 
 <p>Things we considered and rejected, with reasons, since "we did not have time" and "we decided not to"
 are different claims.</p>
@@ -540,7 +598,7 @@ are different claims.</p>
 </table>
 </div>
 
-<h2>9. Reproducing the run</h2>
+<h2>10. Reproducing the run</h2>
 
 <pre><code>python -m venv .venv
 .venv/bin/pip install -e .
@@ -570,3 +628,5 @@ python -m pytest tests -q</code></pre>
 </div>
 </body>
 </html>
+
+
