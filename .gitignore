@@ -16,3 +16,6 @@ logs/llm/
 .venv/
 *.log
 !logs/README.md
+
+scratch/
+.cache/

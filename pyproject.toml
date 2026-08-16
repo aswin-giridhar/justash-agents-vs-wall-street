@@ -1,0 +1,26 @@
+[project]
+name = "avws"
+version = "0.1.0"
+description = "JustAsh earnings forecasting agent for Agents vs Wall Street"
+requires-python = ">=3.12"
+dependencies = [
+    "openpyxl>=3.1",
+    "openai>=1.40",
+    "python-dotenv>=1.0",
+    # Routes Python TLS through the OS trust store. Required on networks that
+    # intercept TLS with a private CA - see docs/build-log.md, 11:30.
+    "truststore>=0.9",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0"]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["avws*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
