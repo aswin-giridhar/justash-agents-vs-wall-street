@@ -263,7 +263,9 @@ completely different information states, and one uniform prompt across all four 
     <path d="M250 406 L250 444"/>
     <path d="M470 470 L556 470"/>
     <!-- calibration supplies the measured guidance residual to the estimators -->
-    <path d="M510 89 L494 89 L494 291 L480 291"/>
+    <path d="M510 77 L494 77 L494 291 L480 291"/>
+    <!-- consensus supplies the stated mean and its dispersion to the decision layer -->
+    <path d="M510 119 L488 119 L488 382 L480 382"/>
     <!-- the run writes its report and logs after the gate -->
     <path d="M700 444 L700 412"/>
   </g>
@@ -304,8 +306,10 @@ completely different information states, and one uniform prompt across all four 
     <text x="247" y="466" text-anchor="middle" fill="#8a5200" font-weight="700">validate.py</text>
     <text x="247" y="484" text-anchor="middle" fill="#5a6373" font-size="10.5">scale bands → identities → adversarial critic</text>
 
-    <rect x="510" y="72" width="220" height="34" rx="6" fill="#ffffff" stroke="#8b93a5"/>
-    <text x="620" y="94" text-anchor="middle" fill="#101828">calibration.py</text>
+    <rect x="510" y="60" width="220" height="34" rx="6" fill="#ffffff" stroke="#8b93a5"/>
+    <text x="620" y="82" text-anchor="middle" fill="#101828">calibration.py</text>
+    <rect x="510" y="102" width="220" height="34" rx="6" fill="#edf3fd" stroke="#1f5fd0" stroke-width="1.2"/>
+    <text x="620" y="124" text-anchor="middle" fill="#1f5fd0" font-weight="600">consensus.py</text>
 
     <rect x="510" y="262" width="220" height="58" rx="6" fill="#ffffff" stroke="#8b93a5" stroke-dasharray="5 4"/>
     <text x="620" y="284" text-anchor="middle" fill="#101828">backtest.py</text>
@@ -428,9 +432,15 @@ An estimator that always finds something is not measuring anything.</p>
 </div>
 
 <h3>Build-up identities</h3>
-<p>Nine of twelve metrics have a registered composition — named components and a formula. The model
-sources each component from the ledger and says which fact it used; it is told explicitly that a
-missing component is recoverable and a fabricated one is not.</p>
+<p>Ten of twelve metrics have a registered composition — named components and a formula. The model
+sources each component from the ledger <em>and</em> from retrieved documents, and says which it used;
+it is told explicitly that a missing component is recoverable and a fabricated one is not.</p>
+
+<p>Components carry <strong>plausibility bounds</strong>, because an unconstrained assumption is the
+same hazard as an unconstrained fact. Asked for Q3's share of Deere's annual segment operating
+profit, the model returned <strong>55.3%</strong> — a quarter cannot be over half a year — and the
+composition produced a figure twice what the guidance implies. Out-of-range components are rejected
+with the reason recorded, and the estimator falls back rather than using a fabricated one.</p>
 
 <div class="trace">
   <div class="trace-head">
