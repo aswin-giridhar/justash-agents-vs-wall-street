@@ -213,8 +213,11 @@ COMPOSITIONS: dict[str, Composition] = {
             "the company itself has committed to."
         ),
         components=(
-            Component("fy26_guided_comp_sales_growth", "Company guidance for FY2026 "
-                      "total company comparable sales growth", "%"),
+            Component("fy26_guided_comp_sales_growth", "The MIDPOINT of company "
+                      "guidance for FY2026 total company comparable sales growth. "
+                      "If guidance is a range such as 'approximately 1.0%' or "
+                      "'0.5% to 1.5%', use the central value, NOT the high end.",
+                      "%"),
             Component("q1_fy26_actual_comp_sales", "Reported actual Q1 FY2026 total "
                       "company comparable sales growth", "%"),
         ),
@@ -222,9 +225,33 @@ COMPOSITIONS: dict[str, Composition] = {
             4 * c["fy26_guided_comp_sales_growth"] - c["q1_fy26_actual_comp_sales"]
         ) / 3.0,
         render=lambda c, v: (
-            f"(4 x FY guidance {c['fy26_guided_comp_sales_growth']:g}% - Q1 actual "
-            f"{c['q1_fy26_actual_comp_sales']:g}%) / 3 remaining quarters = {v:.4g}% "
-            f"required average for Q2-Q4"
+            f"(4 x FY guidance midpoint {c['fy26_guided_comp_sales_growth']:g}% - "
+            f"Q1 actual {c['q1_fy26_actual_comp_sales']:g}%) / 3 remaining quarters "
+            f"= {v:.4g}% required average for Q2-Q4 (equal-quarter weighting; Q2 is "
+            f"seasonally larger, so the true Q2 requirement is slightly lower)"
+        ),
+    ),
+    "DE:Worldwide net sales and revenues": Composition(
+        description=(
+            "Deere does not guide quarterly revenue, but its full-year outlook "
+            "states expected net sales changes by segment. Applying the implied "
+            "full-year change to the prior-year quarter is better founded than "
+            "extrapolating a trend, because two of the last three years were "
+            "double-digit declines and a third is a claim the outlook does not make."
+        ),
+        components=(
+            Component("prior_year_q3_net_sales", "Reported worldwide net sales and "
+                      "revenues in Q3 of the prior fiscal year", "USDm"),
+            Component("fy26_guided_net_sales_change", "Expected full-year FY2026 "
+                      "change in worldwide net sales and revenues implied by the "
+                      "company's outlook, including its segment net sales guidance",
+                      "%"),
+        ),
+        formula=lambda c: c["prior_year_q3_net_sales"]
+        * (1 + c["fy26_guided_net_sales_change"] / 100.0),
+        render=lambda c, v: (
+            f"prior-year Q3 {c['prior_year_q3_net_sales']:g} x (1 + "
+            f"{c['fy26_guided_net_sales_change']:g}% guided FY change) = {v:.4g} USDm"
         ),
     ),
     "DE:Diluted EPS (GAAP)": Composition(

@@ -102,8 +102,16 @@ def _recent_yoy_growth(actuals: list[Fact]) -> tuple[float | None, list[str]]:
         return None, []
     pairs.sort(key=lambda p: -p[0])
     recent = pairs[:3]
-    return (statistics.median(g for _y, g, _d in recent),
-            [d for _y, _g, d in recent])
+    # Recency-weighted rather than a flat median. Last year's growth says more
+    # about next year than the year before it does, and a plain median of two
+    # pairs gave Deere a third consecutive double-digit revenue decline by
+    # averaging a -16.8% year with a -8.6% one.
+    weights = [0.5, 0.3, 0.2][: len(recent)]
+    total = sum(weights)
+    blended = sum(g * w for (_y, g, _d), w in zip(recent, weights)) / total
+    detail = [f"{d} (weight {w / total:.2f})"
+              for (_y, _g, d), w in zip(recent, weights)]
+    return blended, detail
 
 
 def estimate(metric: Metric, facts: list[Fact]) -> Estimate:

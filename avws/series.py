@@ -96,6 +96,10 @@ EXTRA_QUERIES: dict[str, tuple[str, ...]] = {
     "DE:Worldwide net sales and revenues": (
         "worldwide net sales and revenues for the third quarter",
     ),
+    "DE:Diluted EPS (GAAP)": (
+        "net income attributable to Deere and Company per share diluted third quarter",
+        "third quarter net income per diluted share results",
+    ),
     "HAS:Net fees": (
         "group net fees for the year ended 30 June actual reported",
         "net fees Germany United Kingdom Ireland Australia New Zealand Rest of World "
