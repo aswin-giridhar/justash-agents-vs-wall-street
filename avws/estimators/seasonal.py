@@ -205,6 +205,27 @@ def estimate(metric: Metric, facts: list[Fact]) -> Estimate:
             "seasonal fallback had no prior-year anchor; treat as weak evidence"
         )
 
+    # Clamp to the metric's plausible band. Compounding growth across a gap has no
+    # natural upper bound - latest x (1+g)^gap with a large g and a three-year gap
+    # produced ADI revenue of 71,165 against company guidance of 3,900. An estimator
+    # that can emit an arbitrary number is a hazard regardless of how it got there.
+    from avws.table_facts import BANDS
+
+    band = BANDS.get(metric.key)
+    if band and not (band[0] <= abs(value) <= band[1]):
+        clamped = max(band[0], min(band[1], abs(value)))
+        clamped = clamped if value >= 0 else -clamped
+        warnings.append(
+            f"seasonal output {value:.6g} fell outside the plausible band "
+            f"{band}; clamped to {clamped:.6g}"
+        )
+        derivation += (
+            f"\n  CLAMPED: {value:.6g} was outside the plausible band {band} "
+            f"for this metric; emitted {clamped:.6g}"
+        )
+        value = clamped
+        confidence = min(confidence, 0.15)
+
     return Estimate(
         metric_key=metric.key, value=value, method="seasonal_trend",
         derivation=derivation,

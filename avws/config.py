@@ -32,15 +32,18 @@ LEDGER_PATH = CACHE_DIR / "ledger.jsonl"
 
 MODEL = os.environ.get("AVWS_MODEL", "gpt-5")
 
-# Model tiering. Extraction and series building are transcription tasks against a
-# strict schema: copy a figure, copy its quote, label its basis. They do not need a
-# reasoning model, and the quote-verification step catches errors mechanically
-# rather than relying on model judgement.
+# Model tiering was tried and REVERTED after measurement.
 #
-# The critic and component sourcing DO reason - the critic has to notice that
-# "40 basis points" is not -40 percentage points, and component sourcing has to
-# distinguish like-for-like growth from actual growth. Those keep the larger model.
-TRANSCRIPTION_MODEL = os.environ.get("AVWS_TRANSCRIPTION_MODEL", "gpt-5-mini")
+# The hypothesis was that extraction and series building are transcription against
+# a strict schema and so would run correctly on a smaller model. That was wrong.
+# Deciding whether "£45.6m" is a full year or a half year, and whether a figure is
+# the quarter or the year-to-date cumulative, is the judgement that separates a
+# correct series from a wrong one. On gpt-5-mini the run was 40% faster and
+# materially less accurate: Hays half-year figures were labelled as full years,
+# and ADI revenue came out at $71bn against company guidance of $3.9bn.
+#
+# Kept as a switch so the experiment is reproducible rather than merely asserted.
+TRANSCRIPTION_MODEL = os.environ.get("AVWS_TRANSCRIPTION_MODEL", MODEL)
 REASONING_MODEL = os.environ.get("AVWS_REASONING_MODEL", MODEL)
 
 # Competition denominator floors, from JUDGING.md. Used by the backtest harness to

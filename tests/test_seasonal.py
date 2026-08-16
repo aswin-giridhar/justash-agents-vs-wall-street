@@ -85,6 +85,31 @@ def test_compounds_across_a_gap_instead_of_carrying_a_stale_value_forward():
     assert "compounded over 2 year" in est.derivation, est.derivation
 
 
+def test_clamps_a_runaway_compounded_value_to_the_plausible_band():
+    """Compounding across a gap has no upper bound. A large growth rate over three
+    years produced ADI revenue of 71,165 against company guidance of 3,900."""
+    metric = get_metric("ADI:Revenue")  # band 1,000-12,000 USDm
+    facts = [
+        _fact("FY2021Q3", 1_000.0, "ADI:Revenue"),
+        _fact("FY2022Q3", 3_000.0, "ADI:Revenue"),   # +200% consecutive pair
+        _fact("FY2023Q3", 9_000.0, "ADI:Revenue"),   # +200% again; no 2024/2025
+    ]
+    est = seasonal.estimate(metric, facts)
+    assert 1_000 <= est.value <= 12_000, est.derivation
+    assert "CLAMPED" in est.derivation
+    assert est.confidence <= 0.15
+
+
+def test_a_plausible_value_is_not_clamped():
+    metric = get_metric("ADI:Revenue")
+    facts = [
+        _fact("FY2024Q3", 3_000.0, "ADI:Revenue"),
+        _fact("FY2025Q3", 3_200.0, "ADI:Revenue"),
+    ]
+    est = seasonal.estimate(metric, facts)
+    assert "CLAMPED" not in est.derivation
+
+
 def test_returns_a_placeholder_rather_than_nothing_when_no_comparable_history():
     metric = get_metric("DE:Production & Precision Ag operating profit")
     est = seasonal.estimate(metric, [_fact("FY2025Q1", 300.0)])
