@@ -3,630 +3,742 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>JustAsh — Agents vs Wall Street</title>
+<title>JustAsh — Notes to a forecasting model</title>
 <style>
+  /* No external assets: the judging preview runs no scripts and fetches nothing.
+     Personality therefore comes from system faces. Georgia is doing real work here
+     - its old-style figures are the vernacular of financial print, and setting
+     narrative in a serif against data in tabular monospace is the same distinction
+     a statement page makes. */
   :root{
-    --bg:#fbfbfd; --panel:#ffffff; --ink:#14171f; --muted:#5b6472;
-    --line:#e2e6ee; --accent:#1f5fd0; --accent-soft:#eaf1fd;
-    --warn:#9a5b00; --warn-soft:#fdf3e3; --good:#0f6b45; --good-soft:#e8f6ef;
-    --mono:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+    --paper:#f7f8fa; --card:#ffffff; --ink:#101828; --muted:#5a6373;
+    --rule:#dfe3ec; --accent:#1f5fd0; --accent-wash:#edf3fd;
+    --amber:#8a5200; --amber-wash:#fdf4e6;
+    --green:#0f6b45; --green-wash:#e9f6f0;
+    --serif:Georgia,"Iowan Old Style","Palatino Linotype",Palatino,"Times New Roman",serif;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,Helvetica,Arial,sans-serif;
+    --mono:ui-monospace,"SF Mono",SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
   }
   @media (prefers-color-scheme: dark){
     :root:not([data-theme="light"]){
-      --bg:#0f1116; --panel:#161922; --ink:#e8ebf2; --muted:#98a1b3;
-      --line:#252a36; --accent:#6ea2ff; --accent-soft:#16243d;
-      --warn:#e8b473; --warn-soft:#2a2113; --good:#5fd3a0; --good-soft:#11291f;
+      --paper:#0e1015; --card:#161a22; --ink:#e9ecf3; --muted:#98a1b3;
+      --rule:#242a36; --accent:#77a6ff; --accent-wash:#141f33;
+      --amber:#e2ab6b; --amber-wash:#241d12;
+      --green:#5fd3a0; --green-wash:#0f261d;
     }
   }
   :root[data-theme="dark"]{
-    --bg:#0f1116; --panel:#161922; --ink:#e8ebf2; --muted:#98a1b3;
-    --line:#252a36; --accent:#6ea2ff; --accent-soft:#16243d;
-    --warn:#e8b473; --warn-soft:#2a2113; --good:#5fd3a0; --good-soft:#11291f;
+    --paper:#0e1015; --card:#161a22; --ink:#e9ecf3; --muted:#98a1b3;
+    --rule:#242a36; --accent:#77a6ff; --accent-wash:#141f33;
+    --amber:#e2ab6b; --amber-wash:#241d12;
+    --green:#5fd3a0; --green-wash:#0f261d;
   }
+
   *{box-sizing:border-box}
+  html{-webkit-text-size-adjust:100%}
   body{
-    margin:0; background:var(--bg); color:var(--ink);
-    font:16px/1.65 -apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,sans-serif;
-    -webkit-font-smoothing:antialiased;
+    margin:0; background:var(--paper); color:var(--ink);
+    font:400 16.5px/1.68 var(--sans); -webkit-font-smoothing:antialiased;
   }
-  .wrap{max-width:60rem; margin:0 auto; padding:3rem 1.5rem 5rem}
-  header.top{border-bottom:1px solid var(--line); padding-bottom:1.75rem; margin-bottom:2.5rem}
-  .eyebrow{font:600 .72rem/1 var(--mono); letter-spacing:.14em; text-transform:uppercase; color:var(--accent)}
-  h1{font-size:2.35rem; line-height:1.15; margin:.6rem 0 .5rem; letter-spacing:-.02em}
-  .sub{color:var(--muted); font-size:1.05rem; margin:0}
-  .meta{margin-top:1.25rem; display:flex; flex-wrap:wrap; gap:.5rem}
-  .chip{font:500 .78rem/1 var(--mono); background:var(--accent-soft); color:var(--accent);
-        padding:.42rem .7rem; border-radius:999px; white-space:nowrap}
-  h2{font-size:1.45rem; letter-spacing:-.01em; margin:3rem 0 .9rem; padding-top:.4rem}
-  h3{font-size:1.05rem; margin:1.9rem 0 .55rem}
-  p{margin:0 0 1rem}
-  a{color:var(--accent)}
-  .lede{font-size:1.12rem; color:var(--ink)}
-  .panel{background:var(--panel); border:1px solid var(--line); border-radius:12px;
-         padding:1.4rem 1.5rem; margin:1.4rem 0}
-  .callout{border-left:3px solid var(--accent); background:var(--accent-soft);
-           padding:1.1rem 1.3rem; border-radius:0 10px 10px 0; margin:1.4rem 0}
-  .callout.warn{border-left-color:var(--warn); background:var(--warn-soft)}
-  .callout.good{border-left-color:var(--good); background:var(--good-soft)}
-  .callout p:last-child{margin-bottom:0}
-  code,kbd{font-family:var(--mono); font-size:.88em; background:var(--accent-soft);
-       padding:.12em .38em; border-radius:4px}
-  pre{background:var(--panel); border:1px solid var(--line); border-radius:10px;
-      padding:1rem 1.15rem; overflow-x:auto; font-family:var(--mono);
-      font-size:.83rem; line-height:1.6; margin:1.1rem 0}
+  .wrap{max-width:56rem; margin:0 auto; padding:clamp(2rem,5vw,4rem) 1.35rem 6rem}
+
+  .mast{border-bottom:2px solid var(--ink); padding-bottom:1.5rem; margin-bottom:2rem}
+  .kicker{
+    font:600 .68rem/1.5 var(--mono); letter-spacing:.16em; text-transform:uppercase;
+    color:var(--accent); margin-bottom:1rem;
+  }
+  h1{font:400 clamp(2rem,5.5vw,3rem)/1.08 var(--serif); letter-spacing:-.015em; margin:0 0 .6rem}
+  .standfirst{
+    font:400 clamp(1.05rem,2.2vw,1.2rem)/1.5 var(--serif); color:var(--muted);
+    margin:0; max-width:44rem;
+  }
+  .facts{
+    margin:1.5rem 0 0; display:grid; gap:.1rem 2rem;
+    grid-template-columns:repeat(auto-fit,minmax(8rem,1fr));
+    border-top:1px solid var(--rule); padding-top:1rem;
+  }
+  .facts div{padding:.2rem 0}
+  .facts dt{
+    font:600 .64rem/1.4 var(--mono); letter-spacing:.1em; text-transform:uppercase;
+    color:var(--muted);
+  }
+  .facts dd{margin:.15rem 0 0; font:500 .95rem/1.3 var(--mono); font-variant-numeric:tabular-nums}
+
+  /* Financial statements reference their notes; these sections are notes to a
+     model, so they are numbered as notes rather than decorated with 01/02/03. */
+  section{margin-top:3.25rem}
+  .note-no{
+    font:600 .64rem/1 var(--mono); letter-spacing:.14em; text-transform:uppercase;
+    color:var(--accent); display:block; margin-bottom:.5rem;
+  }
+  h2{font:400 clamp(1.4rem,3vw,1.75rem)/1.2 var(--serif); margin:0 0 .9rem; letter-spacing:-.01em}
+  h3{font:600 1rem/1.4 var(--sans); margin:2rem 0 .5rem}
+  p{margin:0 0 1rem; max-width:44rem}
+  .lede{font:400 1.1rem/1.6 var(--serif)}
+  a{color:var(--accent); text-underline-offset:2px}
+  strong{font-weight:650}
+  ul,ol{margin:0 0 1rem; padding-left:1.15rem; max-width:44rem}
+  li{margin-bottom:.5rem}
+  code{font:.86em var(--mono); background:var(--accent-wash); padding:.1em .35em; border-radius:3px}
+  pre{
+    background:var(--card); border:1px solid var(--rule); border-left:3px solid var(--accent);
+    border-radius:0 6px 6px 0; padding:1rem 1.1rem; overflow-x:auto;
+    font:.82rem/1.65 var(--mono); font-variant-numeric:tabular-nums; margin:1.1rem 0;
+  }
   pre code{background:none; padding:0}
-  .scroll{overflow-x:auto; margin:1.2rem 0}
-  table{border-collapse:collapse; width:100%; font-size:.9rem; min-width:32rem}
-  th,td{text-align:left; padding:.6rem .75rem; border-bottom:1px solid var(--line); vertical-align:top}
-  th{font:600 .74rem/1.3 var(--mono); text-transform:uppercase; letter-spacing:.06em; color:var(--muted)}
-  td.num,th.num{text-align:right; font-family:var(--mono); font-variant-numeric:tabular-nums}
+
+  /* SIGNATURE: the derivation trace. Every submitted figure is arithmetic on quoted
+     inputs, so the page shows numbers the way the system produces them - the value,
+     then the working underneath, then why it is defensible. */
+  .trace{margin:1.5rem 0; border:1px solid var(--rule); border-radius:8px;
+         background:var(--card); overflow:hidden}
+  .trace-head{display:flex; flex-wrap:wrap; align-items:baseline; gap:.6rem;
+              padding:.85rem 1.1rem; border-bottom:1px dashed var(--rule)}
+  .trace-label{font:600 .68rem/1.4 var(--mono); letter-spacing:.09em;
+               text-transform:uppercase; color:var(--muted)}
+  .trace-value{font:400 1.6rem/1 var(--serif); font-variant-numeric:tabular-nums lining-nums;
+               margin-left:auto}
+  .trace-unit{font:500 .8rem/1 var(--mono); color:var(--muted)}
+  .trace-body{padding:.9rem 1.1rem; font:.82rem/1.85 var(--mono);
+              font-variant-numeric:tabular-nums; overflow-x:auto}
+  .trace-body .op{color:var(--accent); font-weight:700}
+  .trace-src{padding:.75rem 1.1rem; border-top:1px dashed var(--rule);
+             background:var(--accent-wash); font:italic .88rem/1.55 var(--serif); color:var(--muted)}
+
+  .callout{border-left:3px solid var(--accent); background:var(--accent-wash);
+           padding:1rem 1.2rem; border-radius:0 8px 8px 0; margin:1.35rem 0}
+  .callout.warn{border-left-color:var(--amber); background:var(--amber-wash)}
+  .callout.good{border-left-color:var(--green); background:var(--green-wash)}
+  .callout > :last-child{margin-bottom:0}
+  .quote{font:italic .95rem/1.55 var(--serif); color:var(--muted);
+         border-left:2px solid var(--rule); padding-left:.9rem; margin:.8rem 0}
+
+  .scroll{overflow-x:auto; margin:1.25rem 0; border:1px solid var(--rule); border-radius:8px}
+  table{border-collapse:collapse; width:100%; font-size:.9rem; min-width:30rem; background:var(--card)}
+  th,td{text-align:left; padding:.62rem .85rem; border-bottom:1px solid var(--rule); vertical-align:top}
+  thead th{font:600 .64rem/1.4 var(--mono); letter-spacing:.09em; text-transform:uppercase;
+           color:var(--muted); background:var(--paper)}
   tbody tr:last-child td{border-bottom:none}
-  ul,ol{margin:0 0 1rem; padding-left:1.3rem}
-  li{margin-bottom:.45rem}
+
   figure{margin:1.6rem 0}
-  figcaption{color:var(--muted); font-size:.86rem; margin-top:.7rem; text-align:center}
+  figcaption{color:var(--muted); font:.85rem/1.5 var(--sans); margin-top:.7rem}
   svg{display:block; width:100%; height:auto}
-  .quote{font-style:italic; color:var(--muted); border-left:2px solid var(--line);
-         padding-left:1rem; margin:1rem 0}
-  .tag{display:inline-block; font:600 .68rem/1 var(--mono); text-transform:uppercase;
-       letter-spacing:.06em; padding:.3rem .5rem; border-radius:5px; margin-right:.4rem}
-  .tag.fix{background:var(--good-soft); color:var(--good)}
-  .tag.weak{background:var(--warn-soft); color:var(--warn)}
-  footer{margin-top:4rem; padding-top:1.5rem; border-top:1px solid var(--line);
-         color:var(--muted); font-size:.87rem}
+
+  .tag{display:inline-block; font:600 .62rem/1 var(--mono); letter-spacing:.08em;
+       text-transform:uppercase; padding:.28rem .45rem; border-radius:4px; margin-right:.45rem}
+  .tag.fixed{background:var(--green-wash); color:var(--green)}
+  .tag.open{background:var(--amber-wash); color:var(--amber)}
+
+  footer{margin-top:4rem; padding-top:1.4rem; border-top:2px solid var(--ink);
+         color:var(--muted); font:.86rem/1.6 var(--sans)}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
 <div class="wrap">
 
-<header class="top">
-  <div class="eyebrow">Agents vs Wall Street &middot; AI Tinkerers London</div>
-  <h1>JustAsh: an evidence-ledger forecasting agent</h1>
-  <p class="sub">Twelve earnings figures across four companies, each traceable to a quoted line in a filing.</p>
-  <div class="meta">
-    <span class="chip">16 August 2026</span>
-    <span class="chip">Python 3.14</span>
-    <span class="chip">OpenAI gpt-5</span>
-    <span class="chip">BM25 retrieval, no embeddings</span>
-    <span class="chip">87 tests</span>
-  </div>
+<header class="mast">
+  <div class="kicker">Agents vs Wall Street · AI Tinkerers London · 16 August 2026</div>
+  <h1>JustAsh</h1>
+  <p class="standfirst">Notes to a forecasting model. Twelve earnings figures across four
+  companies, each one arithmetic on evidence that can be quoted back to a filing.</p>
+  <dl class="facts">
+    <div><dt>Agent</dt><dd>JustAsh</dd></div>
+    <div><dt>Corpus</dt><dd>1,139 docs</dd></div>
+    <div><dt>Tests</dt><dd>88</dd></div>
+    <div><dt>Model</dt><dd>gpt-5</dd></div>
+    <div><dt>Retrieval</dt><dd>BM25</dd></div>
+    <div><dt>Run time</dt><dd>~6 min</dd></div>
+  </dl>
 </header>
 
-<p class="lede">The system reads a frozen corpus of 1,139 filings, transcripts and slide decks; extracts
-<strong>facts, never forecasts</strong>, into an append-only evidence ledger; routes each metric to the
-estimator its evidence actually supports; and puts every candidate number through a validation gate
-that ends with a model instructed to <strong>prove the number wrong</strong>.</p>
+<p class="lede">Nothing on this page was asserted by a language model. Every submitted figure is
+the output of arithmetic whose inputs carry verbatim quotes, and whose working is printed beside
+the number. The model reads, transcribes, and sets named assumptions. Python does the sums.</p>
 
-<p>Nothing here is asserted by a language model. Every submitted figure is the output of arithmetic
-whose inputs are quoted, and whose derivation is printed in plain English next to the number.</p>
+<section>
+<span class="note-no">Note 1</span>
+<h2>The scoring function is the specification</h2>
 
-<h2>1. The scoring function is the specification</h2>
-
-<p>Before designing anything we read how accuracy is scored, because it determines what "good" means:</p>
+<p>We read how accuracy is scored before looking at a single company, because it defines what
+"good" means here.</p>
 
 <pre><code>metric score = min(5.0, |team miss| / max(|Wall St miss|, floor))
-floor        = 0.5pp                      for percentage metrics
-             = 0.5% of the reported result for money and EPS metrics</code></pre>
-
-<p>Three properties of that formula shaped every later decision.</p>
-
-<div class="callout">
-  <p><strong>The floor decouples us from Wall Street when consensus is good.</strong> If consensus is
-  near-perfect the denominator does not collapse toward zero — it is pinned at the floor. An absolute
-  error below the floor therefore scores under 1.0 <em>regardless</em> of how accurate consensus was.
-  The objective is absolute precision, not contrarianism.</p>
-</div>
-
-<div class="callout warn">
-  <p><strong>Downside is ten times the upside band.</strong> The cap is 5.0 while the floor band is 1.0.
-  Eleven metrics at a strong 0.6 plus a single capped 5.0 averages 0.97 — par with consensus. One scale
-  error erases the entire edge, so unit handling is a subsystem with its own tests rather than a
-  helper function.</p>
-</div>
-
-<div class="callout">
-  <p><strong>A missing forecast scores 5.0.</strong> No estimator chain may terminate in <code>None</code>.
-  The seasonal-trend estimator exists mainly to guarantee that every metric has a number.</p>
-</div>
-
-<h2>2. The four companies are not the same problem</h2>
-
-<p>The most useful thing we found was not in any model — it was in the corpus. The four companies sit in
-completely different information states, and a single uniform prompt across all four throws that away.</p>
-
-<div class="scroll">
-<table>
-  <thead>
-    <tr><th>Company</th><th>Information state</th><th>Dominant method</th></tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td><strong>Hays</strong><br>FY2026</td>
-      <td>The fiscal year <strong>ended 30 June 2026</strong>. The 10 July trading update discloses
-          Q4 net-fee growth by division. The period is closed and partly disclosed.</td>
-      <td>Reconstruction</td>
-    </tr>
-    <tr>
-      <td><strong>Analog Devices</strong><br>FY2026 Q3</td>
-      <td>The Q2 8-K guides Q3 explicitly: revenue $3.9bn &plusmn;$100m, adjusted operating margin
-          49.0% &plusmn;100bps, adjusted EPS $3.30 &plusmn;$0.15.</td>
-      <td>Guidance anchor</td>
-    </tr>
-    <tr>
-      <td><strong>Home Depot</strong><br>FY2026 Q2</td>
-      <td>Full-year guidance reaffirmed at Q1; the quarter itself is not separately guided.</td>
-      <td>Phasing and build-up</td>
-    </tr>
-    <tr>
-      <td><strong>Deere</strong><br>FY2026 Q3</td>
-      <td>Full-year outlook; quarter not separately guided. Segment-level reporting available.</td>
-      <td>Phasing and build-up</td>
-    </tr>
-  </tbody>
-</table>
-</div>
-
-<p>For Hays we are not predicting the future. We are reconstructing a period that has already happened.
-The system reflects that: <code>reconcile.OVERRIDES</code> declares in the open that the build-up wins for
-Hays net fees, with the reason stated, rather than hiding the preference inside a weight.</p>
-
-<div class="callout warn">
-  <p><strong>A trap we found and defended against.</strong> Hays' headline "Group net fees decreased by 5%"
-  is a <em>like-for-like</em> figure, excluding divested operations. The metric we must submit is
-  <em>actual reported</em> net fees, which includes them. The divisional table makes the gap concrete:
-  ANZ was <strong>+7% actual but &minus;2% like-for-like</strong>. A system that scrapes the headline growth
-  rate and applies it to prior-year fees produces a confidently wrong number. Our component sourcing
-  prompt names this distinction explicitly and marks a component unavailable rather than substituting
-  the wrong basis.</p>
-</div>
-
-<h2>3. Architecture</h2>
+floor        = 0.5pp                       percentage metrics
+             = 0.5% of the reported result money and EPS metrics</code></pre>
 
 <figure>
-<svg viewBox="0 0 900 470" role="img" aria-label="Pipeline diagram: corpus feeds two extraction paths into an evidence ledger, then three estimators, a reconciler, a validation gate, and workbook output.">
-  <defs>
-    <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-      <path d="M0,0 L10,5 L0,10 z" fill="currentColor"/>
-    </marker>
-  </defs>
-  <g fill="none" stroke="currentColor" stroke-width="1.4" color="#8b93a5" marker-end="url(#ar)">
-    <path d="M150 62 L150 96"/>
-    <path d="M120 148 L120 190"/>
-    <path d="M330 148 L330 190"/>
-    <path d="M225 240 L225 274"/>
-    <path d="M600 130 L600 186"/>
-    <path d="M600 244 L600 274"/>
-    <path d="M225 326 L225 360"/>
-    <path d="M600 326 L600 360"/>
-    <path d="M420 396 L470 396"/>
-  </g>
-
-  <g font-family="ui-monospace,Menlo,Consolas,monospace" font-size="12.5">
-    <g>
-      <rect x="40" y="24" width="220" height="38" rx="7" fill="#eaf1fd" stroke="#1f5fd0" stroke-width="1.2"/>
-      <text x="150" y="48" text-anchor="middle" fill="#1f5fd0" font-weight="600">corpus.py &middot; 1,139 docs</text>
-    </g>
-
-    <g>
-      <rect x="30" y="98" width="180" height="50" rx="7" fill="#ffffff" stroke="#8b93a5"/>
-      <text x="120" y="119" text-anchor="middle" fill="#14171f">table_facts.py</text>
-      <text x="120" y="137" text-anchor="middle" fill="#5b6472" font-size="10.5">deterministic rows</text>
-    </g>
-    <g>
-      <rect x="240" y="98" width="180" height="50" rx="7" fill="#ffffff" stroke="#8b93a5"/>
-      <text x="330" y="119" text-anchor="middle" fill="#14171f">extract.py</text>
-      <text x="330" y="137" text-anchor="middle" fill="#5b6472" font-size="10.5">LLM, quote-verified</text>
-    </g>
-
-    <g>
-      <rect x="30" y="190" width="390" height="50" rx="7" fill="#eaf1fd" stroke="#1f5fd0" stroke-width="1.2"/>
-      <text x="225" y="211" text-anchor="middle" fill="#1f5fd0" font-weight="600">ledger.jsonl &mdash; facts only, never forecasts</text>
-      <text x="225" y="229" text-anchor="middle" fill="#5b6472" font-size="10.5">value &middot; unit &middot; basis &middot; period &middot; source_doc &middot; source_quote</text>
-    </g>
-
-    <g>
-      <rect x="30" y="274" width="390" height="52" rx="7" fill="#ffffff" stroke="#8b93a5"/>
-      <text x="225" y="295" text-anchor="middle" fill="#14171f">estimators/</text>
-      <text x="225" y="313" text-anchor="middle" fill="#5b6472" font-size="10.5">guidance &middot; build_up &middot; seasonal</text>
-    </g>
-
-    <g>
-      <rect x="470" y="190" width="260" height="50" rx="7" fill="#eaf1fd" stroke="#1f5fd0" stroke-width="1.2"/>
-      <text x="600" y="211" text-anchor="middle" fill="#1f5fd0" font-weight="600">signals.py</text>
-      <text x="600" y="229" text-anchor="middle" fill="#5b6472" font-size="10.5">post-guidance tilt, capped</text>
-    </g>
-    <g fill="none" stroke="#8b93a5" stroke-width="1.4" color="#8b93a5" marker-end="url(#ar)">
-      <path d="M470 215 L430 215 L430 288 L420 288"/>
-    </g>
-
-    <g>
-      <rect x="30" y="360" width="390" height="50" rx="7" fill="#ffffff" stroke="#8b93a5"/>
-      <text x="225" y="381" text-anchor="middle" fill="#14171f">reconcile.py &rarr; decide.py</text>
-      <text x="225" y="399" text-anchor="middle" fill="#5b6472" font-size="10.5">weights, then weighted median vs consensus proxy</text>
-    </g>
-
-    <g>
-      <rect x="470" y="24" width="260" height="38" rx="7" fill="#ffffff" stroke="#8b93a5"/>
-      <text x="600" y="48" text-anchor="middle" fill="#14171f">calibration.py</text>
-    </g>
-    <g fill="none" stroke="#8b93a5" stroke-width="1.4" color="#8b93a5" marker-end="url(#ar)">
-      <path d="M470 43 L440 43 L440 288 L420 288"/>
-    </g>
-
-    <g>
-      <rect x="470" y="80" width="260" height="50" rx="7" fill="#ffffff" stroke="#8b93a5"/>
-      <text x="600" y="101" text-anchor="middle" fill="#14171f">backtest.py</text>
-      <text x="600" y="119" text-anchor="middle" fill="#5b6472" font-size="10.5">replay on known periods</text>
-    </g>
-
-    <g>
-      <rect x="470" y="274" width="260" height="52" rx="7" fill="#fdf3e3" stroke="#9a5b00" stroke-width="1.2"/>
-      <text x="600" y="295" text-anchor="middle" fill="#9a5b00" font-weight="600">validate.py</text>
-      <text x="600" y="313" text-anchor="middle" fill="#5b6472" font-size="10.5">scale &rarr; identities &rarr; adversarial critic</text>
-    </g>
-
-    <g>
-      <rect x="470" y="360" width="260" height="50" rx="7" fill="#e8f6ef" stroke="#0f6b45" stroke-width="1.2"/>
-      <text x="600" y="381" text-anchor="middle" fill="#0f6b45" font-weight="600">linkage.py &rarr; workbook.py</text>
-      <text x="600" y="399" text-anchor="middle" fill="#5b6472" font-size="10.5">derive EPS, then 4 &times; .xlsx</text>
-    </g>
-
-    <g>
-      <rect x="760" y="274" width="110" height="136" rx="7" fill="#ffffff" stroke="#8b93a5" stroke-dasharray="4 3"/>
-      <text x="815" y="330" text-anchor="middle" fill="#5b6472" font-size="10.5">report.py</text>
-      <text x="815" y="348" text-anchor="middle" fill="#5b6472" font-size="10.5">run log</text>
-      <text x="815" y="366" text-anchor="middle" fill="#5b6472" font-size="10.5">logs/llm/</text>
+<svg viewBox="0 0 820 150" role="img" aria-label="Scale showing error below the floor scores under 1.0 while error ten times the floor reaches the 5.0 cap.">
+  <g font-family="ui-monospace,Menlo,Consolas,monospace" font-size="12">
+    <rect x="40" y="46" width="152" height="30" fill="#e9f6f0" stroke="#0f6b45"/>
+    <rect x="192" y="46" width="304" height="30" fill="#edf3fd" stroke="#1f5fd0"/>
+    <rect x="496" y="46" width="284" height="30" fill="#fdf4e6" stroke="#8a5200"/>
+    <text x="116" y="66" text-anchor="middle" fill="#0f6b45" font-weight="700">score &lt; 1.0</text>
+    <text x="344" y="66" text-anchor="middle" fill="#1f5fd0" font-weight="700">1.0 – 3.0</text>
+    <text x="638" y="66" text-anchor="middle" fill="#8a5200" font-weight="700">capped at 5.0</text>
+    <line x1="40" y1="88" x2="780" y2="88" stroke="#8b93a5"/>
+    <g fill="#5a6373" font-size="11">
+      <text x="40" y="106">0</text>
+      <text x="192" y="106" text-anchor="middle">floor</text>
+      <text x="496" y="106" text-anchor="middle">5 × floor</text>
+      <text x="780" y="106" text-anchor="end">10 × floor</text>
+      <text x="40" y="34" font-size="11.5">absolute error →</text>
+      <text x="40" y="132" font-size="11.5" fill="#8a5200">the upside band is one floor wide; the downside runs ten</text>
     </g>
   </g>
 </svg>
-<figcaption>Each box is a module in <code>avws/</code>. Two extraction paths feed one ledger; three
-estimators feed one reconciler; nothing reaches a workbook without passing the gate.</figcaption>
+<figcaption>Why validation is a subsystem here rather than a final check.</figcaption>
 </figure>
 
-<h3>Two extraction paths, because they fail differently</h3>
-
-<p>Retrieval ranking and model attention are both probabilistic. A table row-label match is not. We run
-both and merge:</p>
-
-<ul>
-  <li><strong>Deterministic</strong> (<code>table_facts.py</code>) parses filing pipe-tables and matches row
-  labels. No model call, no tokens, identical every run.</li>
-  <li><strong>Model</strong> (<code>extract.py</code>) transcribes figures from retrieved prose — guidance
-  sentences a table match can never reach.</li>
-</ul>
-
-<p>This was not planned. The first end-to-end run extracted <strong>zero facts</strong> for ADI's adjusted
-gross margin, even though the 8-K contains
-<code>| Adjusted gross margin percentage | 73.0 % | 69.4 % |</code> as a clean row. We had written a table
-parser and never wired it in. Merging the two paths fixed it and is now a load-bearing design choice.</p>
-
-<h3>The ledger enforces analyst discipline as a type constraint</h3>
-
-<p>A <code>Fact</code> cannot be constructed without a <code>basis</code> from a closed vocabulary and a
-non-empty <code>source_quote</code>. Both raise <code>ValueError</code>. The reason is concrete: in the same
-quarter ADI reported <strong>GAAP diluted EPS of $2.40</strong> and <strong>adjusted diluted EPS of
-$3.09</strong> — a 29% gap. Five of our twelve metrics are adjusted or pre-exceptional, and Deere's is
-explicitly GAAP. A system that conflates them is confidently wrong.</p>
-
-<p>Model-returned facts are additionally checked for fabrication mechanically: the quote must appear in
-the text we supplied, after whitespace normalisation. Quotes that do not match are dropped and counted
-in the run log.</p>
-
-<h3>Beyond the anchor: post-guidance signals</h3>
-
-<p>Guidance anchoring is table stakes. Every team holding the same 8-K will do it, and a forecast equal
-to consensus scores exactly 1.0 — par. The edge has to come from what moves you <em>off</em> the anchor
-with evidence.</p>
-
-<p>The frozen corpus contains an asset most uses of it ignore: <strong>documents published after the
-guidance was issued</strong>. ADI guided Q3 on 20 May 2026 and the corpus holds a conference transcript
-from <strong>2 June</strong>. Deere's Q2 call was 21 May with an investor presentation on 26 May. Hays'
-Q4 update was 10 July with filings through 3 August. That window is strictly newer information than the
-anchor, and it is where management discusses bookings, backlog, channel inventory, pricing and
-end-market demand — leading indicators of the very quarter we are forecasting.</p>
-
-<p><code>signals.py</code> reads that window and returns a <strong>bounded tilt</strong>, not a competing
-forecast:</p>
-
-<pre><code>guidance midpoint 3900 x (1 + measured historical residual)
-                       x (1 + post-guidance signal tilt)   # capped at +/-2.5%</code></pre>
-
-<p>Caps are deliberately tight — 2.5% on revenue, 6% on EPS (which carries operating leverage), 1.0
-percentage point on margins — because the scoring function punishes a large miss ten times harder than
-it rewards a small win. Signals are mean-aggregated rather than summed, so ten weak observations cannot
-outvote the cap by sheer count, and every signal's quote is verified against the source text exactly as
-facts are.</p>
-
-<div class="callout good">
-  <p><strong>It declines to invent signals.</strong> On ADI it read a single pricing observation at
-  strength 0.30 and produced a <strong>+0.75%</strong> tilt. On Deere it returned <strong>zero</strong>
-  signals and said so: <em>"No genuine post-guidance leading indicators for FY2026Q3 were found in the
-  supplied documents."</em> An estimator that always finds something is not measuring anything.</p>
+<div class="callout">
+  <p><strong>The floor decouples us from Wall Street when consensus is good.</strong> If consensus
+  is near-perfect the denominator does not collapse toward zero — it is pinned at the floor. An
+  absolute error inside that floor scores under 1.0 <em>regardless</em> of how accurate consensus
+  was. The objective is absolute precision, not contrarianism.</p>
 </div>
 
-<p>Where a metric has no guidance at all — Home Depot's and Deere's quarters are not separately guided —
-the tilt is applied to the seasonal trend instead, since it is then the only forward-looking input
-available.</p>
-
-<h3>The LLM sets named assumptions; Python does the arithmetic</h3>
-
-<p>The build-up estimator registers a <em>composition</em> per metric — named components and a formula.
-The model's only job is to source each component from the ledger and say which fact it used. It is
-explicitly instructed that a missing component is recoverable and a fabricated one is not.</p>
-
-<p>Nine of the twelve metrics have a registered composition. Two of the remaining three —
-ADI revenue and adjusted EPS — are directly guided by the company and need none.</p>
-
-<pre><code># the year is closed; only the second half needs estimating
-"HAS:Net fees":
-    h1_fy26_net_fees + h2_fy25_net_fees * (1 + h2_fy26_actual_growth/100)
-
-"HAS:Pre-exceptional operating profit":
-    h1_fy26_operating_profit + h2_fy25_operating_profit * (1 + h2_fy26_growth/100)
-
-# a real earnings bridge, reported in pence
-"HAS:Pre-exceptional basic EPS":
-    (operating_profit - net_finance) * (1 - tax_rate/100)
-        / weighted_average_basic_shares * 100
-
-# if the reaffirmed full-year guide holds and Q1 is known, the rest is arithmetic
-"HD:Comparable sales, total company":
-    (4 * fy26_guided_comp_growth - q1_fy26_actual_comp) / 3
-
-"HD:Adjusted diluted EPS":
-    fy25_adjusted_eps * (1 + guided_growth/100) * q2_share_of_annual/100
-
-"HD:Net sales":
-    prior_year_net_sales * (1 + (comp_growth + non_comp_contribution)/100)
-
-# Deere guides full-year net income, not quarterly EPS
-"DE:Diluted EPS (GAAP)":
-    fy26_guided_net_income * q3_share_of_annual/100 / diluted_shares
-
-"DE:Production &amp; Precision Ag operating profit":
-    segment_net_sales * segment_operating_margin/100
-
-# ADI guides operating margin but not gross margin; add back the opex ratio
-"ADI:Adjusted gross margin":
-    guided_adj_operating_margin + recent_adj_opex_ratio</code></pre>
-
-<p>The Home Depot comparable-sales composition is the clearest example of using a company's own
-commitment as a constraint. Home Depot reaffirmed full-year comparable-sales guidance and has reported
-Q1. If the full year is to land where management says it will, the remaining three quarters must
-average <code>(4G &minus; Q1) / 3</code>. That is not a prediction about the world; it is arithmetic on
-a statement the company has publicly committed to.</p>
-
-<p>"The model said 3958" is unreviewable. "H1 actual 464.6 plus H2 prior-year 507.8 grown at &minus;4.0%
-= 952.1" can be checked line by line by someone who has never seen the code.</p>
-
-<h2>4. Three things a real analyst does that a weighted average does not</h2>
-
-<h3>EPS is derived, not estimated</h3>
-
-<p>The structural weakness of producing twelve numbers independently and checking them
-afterwards is that consistency is <em>checked</em> rather than <em>structural</em>. A sell-side analyst
-does not estimate EPS. They build one linked model — revenue, gross margin, operating expenses,
-operating profit, net finance, tax, share count — and EPS falls out of it.</p>
-
-<p>Our system demonstrated exactly why that matters. It produced Hays pre-exceptional basic EPS of
-<strong>36.6 pence</strong> alongside pre-exceptional operating profit of <strong>£44.5m</strong>. With
-roughly 1,600m shares in issue those cannot both be true; £44.5m supports about 1.3 pence. Independent
-estimation permits the contradiction. A linked model forbids it.</p>
-
-<pre><code>(45.43 operating profit &minus; 13.40 net finance) x (1 &minus; 25% tax)
-    / 1,590.2m basic shares x 100 = 1.31 pence</code></pre>
-
-<p><code>linkage.py</code> extracts the drivers once per company with the same quote verification used
-everywhere else, derives the metric, and reports <em>both</em> the derived and independent values with the
-divergence, so the disagreement is visible rather than silently resolved.</p>
-
-<h3>Guidance bias is measured, not assumed</h3>
-
-<p>Companies are systematically biased against their own outlook — ADI's Q2 release says its quarter came
-in "above the high end of our outlook". That bias is measurable, but measuring it needs a sample. The
-guidance anchor was previously calibrated on whatever pairs happened to surface while extracting the
-target metric: zero to two observations, which is noise wearing the costume of a calibration.</p>
-
-<p><code>calibration.py</code> goes looking for guidance-and-outcome pairs across the corpus. Both quotes
-must verify; a gap above 60% is treated as a mis-paired basis rather than a guidance miss. Below three
-pairs it returns zero and <em>says so</em> rather than pretending to a calibration it does not have. On
-Hays pre-exceptional operating profit it measured a <strong>+0.51% bias across 3 pairs with a 100% beat
-rate</strong>.</p>
-
-<h3>The submitted number optimises the score, not the average</h3>
+<div class="callout warn">
+  <p><strong>The downside is ten times the upside band.</strong> Eleven metrics at a strong 0.6
+  plus a single capped 5.0 averages 0.97 — par with consensus. One unit error erases a day of good
+  analysis, which is why unit handling is a module with its own test suite.</p>
+</div>
 
 <div class="callout">
-  <p>The metric score is linear in absolute error inside the cap. Expected absolute error is minimised
-  by the <strong>median</strong> of the predictive distribution, not its mean — and the 5.0 cap makes the
-  loss more robust still, pushing further toward the median.</p>
-  <p>This is not academic. Our candidates disagreed by <strong>111%</strong> on ADI adjusted EPS. The
-  weighted mean would have landed in an empty region between two clusters that no estimator considers
-  plausible; the weighted median landed on <strong>$3.30</strong> — exactly the company's guidance.</p>
+  <p><strong>A missing forecast scores 5.0.</strong> No chain may terminate in <code>None</code>.
+  The seasonal estimator exists largely to guarantee every metric has a number, and the workbook
+  writer refuses to emit an incomplete file rather than writing a blank cell.</p>
 </div>
+</section>
 
-<p><code>decide.py</code> also builds an explicit <strong>consensus proxy</strong>. We are scored against
-a consensus mean we cannot see, but for a guided metric consensus clusters near the guidance midpoint,
-because that is the strongest public signal every analyst also holds. Making the proxy explicit turns an
-accidental deviation into a stated decision, and any deviation above 5% is flagged in the run log.</p>
+<section>
+<span class="note-no">Note 2</span>
+<h2>Four companies, four different problems</h2>
 
-<h2>5. The validation gate</h2>
-
-<p>Three stages, in order, each logged whether or not it finds anything — a log that records only
-successes cannot evidence that the gate ran.</p>
-
-<ol>
-  <li><strong>Scale bands.</strong> Every metric carries a plausible range in its own reporting unit.
-  These do double duty: they reject stray cells (a bare column header year is not a Deere segment
-  profit) and they <em>repair</em> scale errors. ADI's 10-Q reports revenue in thousands
-  (<code>3,623,465</code>) where the workbook requires millions — a silent 1000&times; error worth the
-  capped 5.0.</li>
-  <li><strong>Cross-metric identities.</strong> Implied gross profit cannot exceed revenue; a segment's
-  operating profit cannot exceed the group total; Hays' operating profit cannot exceed its net fees,
-  since profit is fees less costs. Tolerances are deliberately wide — these catch order-of-magnitude
-  and basis errors, not rounding.</li>
-  <li><strong>Adversarial critic.</strong> One model call that sees only the number, its derivation and
-  the identity results, instructed to argue the number is <em>wrong</em> and to default to finding a
-  problem. An objection counts only if it names a specific figure, unit, period or basis that could be
-  checked; vague unease is discarded.</li>
-</ol>
-
-<div class="callout good">
-  <p><strong>The critic earned its place on its first run</strong>, catching three real defects rather
-  than producing plausible noise:</p>
-  <p class="quote">"The proposed 4,018.2 USDm is above management's FY2026 Q3 guidance range of
-  3,800–4,000 USDm. It overshoots the top end by 18.2 USDm."</p>
-  <p class="quote">"You blended incompatible units. The guidance is $3.30 (USD/share), but you averaged
-  it with a seasonal_trend of &minus;0.119167 that appears to be a percentage."</p>
-  <p class="quote">"The 0% is explicitly a placeholder, not a derived adjusted gross margin. ADI's
-  adjusted gross margin is typically well above 50%."</p>
-  <p>All three traced to the same root cause, described in section 6.</p>
-</div>
-
-<p>When the gate cannot resolve a concern it emits the best available estimate with a loud warning. It
-never blanks a value, because a blank scores 5.0 — the same as being wrong by ten times the floor.</p>
-
-<h2>6. Backtest</h2>
-
-<p>We cannot measure the thing we are graded on, because the Wall Street benchmark is not visible to us.
-We <em>can</em> measure the statistic the scoring function is built from: how often our absolute error
-lands inside the denominator floor. Below the floor, a metric scores under 1.0 whatever consensus did.</p>
-
-<p><code>python -m avws.backtest</code> replays the identical estimator chain over historical periods
-whose answers sit in the corpus, passing only facts whose period precedes the target, plus guidance
-issued for the target period.</p>
-
-<div class="panel" id="backtest-results">
-  <p><strong>Results are inserted here from the measured run before submission.</strong> Any figure in
-  this section is copied from <code>.cache/backtest.json</code>; nothing in it is estimated.</p>
-</div>
-
-<p><strong>Known leakage.</strong> Facts are filtered by their own reporting period, not by the
-publication date of the document containing them. Guidance for the target is published before the
-target closes, and a prior period's actual is published before the target reports, so the ordering is
-sound in the ordinary case. The residual leak is restatements: an earlier period revised in a later
-filing carries the later filing's knowledge. We did not have time to filter on publication date, and
-we would rather state that than present the number as cleaner than it is.</p>
-
-<h2>7. What we got wrong</h2>
-
-<p>Recorded as they happened, in <code>docs/build-log.md</code>, rather than reconstructed at the end.</p>
-
-<h3><span class="tag fix">fixed</span>The seasonal estimator forecast from the wrong anchor</h3>
-<p>It extrapolated from the <em>latest</em> quarter instead of the <em>same quarter one year earlier</em>,
-so it carried a Q2 level into a Q3 slot and forecast ADI Q3 revenue at <strong>$4,964m against company
-guidance of $3,900m</strong>. Both of the critic's first two objections trace to this. These businesses
-are strongly seasonal — that is the entire premise of the estimator, and it had been inverted.</p>
-
-<h3><span class="tag fix">fixed</span>A parser written and never connected</h3>
-<p><code>tables.py</code> was built, tested against real filings, and then not called from extraction.
-It cost ADI's adjusted gross margin every fact it should have had. Tests passing on a module says
-nothing about whether the module is reachable.</p>
-
-<h3><span class="tag fix">fixed</span>Substring matching turned a cost line into revenue</h3>
-<p>Row matching used "contains", so a search for <code>Revenue</code> matched
-<code>Cost of revenues</code> and recorded a cost as a revenue fact. Wrong facts are worse than missing
-ones because they look authoritative. Matching is now anchored to the start of the label.</p>
-
-<h3><span class="tag fix">fixed</span>Period labels compared as raw strings</h3>
-<p><code>"FY2026Q3"[:4]</code> is <code>"FY20"</code>, not a year. This crashed the first end-to-end run.
-The crash was the good outcome — the same bug in a comparison would have silently mis-aligned
-year-on-year growth. Parsing now goes through <code>periods.py</code>, which has its own tests.</p>
-
-<h3><span class="tag fix">fixed</span>The venue network intercepts TLS</h3>
-<p>Dependency installs and API calls both failed with certificate errors. One discriminating test —
-<code>curl</code> reaching the API with <code>ssl_verify_result=0</code> — showed the network was not
-blocking anything; it presents a private CA that only the OS trust store carries.
-<code>truststore.inject_into_ssl()</code> is called at import in <code>config.py</code>. We rejected
-disabling verification, which would have worked and would have switched off certificate checking for
-every request carrying our API key.</p>
-
-<h2>8. Known weaknesses</h2>
-
-<ul>
-  <li><span class="tag weak">thin</span><strong>Guidance residuals are calibrated on few
-  observations.</strong> Where fewer than three paired guidance-and-outcome periods exist, the residual
-  is set to zero and the estimate reports that in its own derivation string rather than implying a
-  calibration that does not exist.</li>
-  <li><span class="tag weak">gap</span><strong>One metric has neither guidance nor a composition.</strong>
-  Deere's worldwide net sales and revenues rests on the seasonal path alone. Nine of twelve metrics have
-  a registered build-up and two more (ADI revenue and adjusted EPS) are directly guided, so this is the
-  single weakest number in the set and we would say so before a judge asked.</li>
-  <li><span class="tag weak">thin</span><strong>Signal tilts are read from management language.</strong>
-  Converting qualitative commentary into a numeric strength is the softest inference in the system.
-  It is capped tightly for exactly that reason, and it declines to fire when it finds nothing — Deere
-  returned zero signals rather than manufacturing one.</li>
-  <li><span class="tag weak">gap</span><strong>Hays net fees is not reachable by table matching.</strong>
-  Its divisional statement puts the label on a header row with values on the rows beneath, which our
-  row matcher does not follow. That metric depends on the model path and the build-up.</li>
-  <li><span class="tag weak">noise</span><strong>Table harvesting still admits some mis-attributed
-  periods.</strong> Multi-year series rows are rejected outright, but a comparative column can still be
-  assigned to the wrong period in unusual layouts.</li>
-  <li><span class="tag weak">scope</span><strong>BM25 misses paraphrase.</strong> A metric described in
-  unusual wording may not be retrieved. Mitigated by filtering to the right document rather than by
-  better ranking.</li>
-  <li><span class="tag weak">scope</span><strong>The critic can err in both directions.</strong> It may
-  accept a bad number or object to a good one, which is why a concrete objection is recorded and
-  bounded rather than allowed to drive unlimited re-derivation.</li>
-  <li><span class="tag weak">blind</span><strong>Consensus is not observable to us.</strong> We cannot
-  check our numbers against the benchmark we are scored against, which is precisely why the backtest
-  targets the floor band instead.</li>
-</ul>
-
-<h2>9. Deliberate non-choices</h2>
-
-<p>Things we considered and rejected, with reasons, since "we did not have time" and "we decided not to"
-are different claims.</p>
+<p>The most useful thing we found was in the corpus, not in a model. These four companies sit in
+completely different information states, and one uniform prompt across all four discards that.</p>
 
 <div class="scroll">
 <table>
-  <thead><tr><th>Rejected</th><th>Why</th></tr></thead>
+  <thead><tr><th>Company</th><th>Information state</th><th>Method it earns</th></tr></thead>
   <tbody>
-    <tr><td>Vector embeddings over the corpus</td>
-        <td>Financial retrieval here is literal — "adjusted gross margin", "net fees",
-        "Production &amp; Precision Ag" are exact strings in the filings. Lexical matching finds them,
-        costs no tokens, and is byte-for-byte reproducible between runs.</td></tr>
-    <tr><td>Live web retrieval</td>
-        <td>The frozen corpus contains the decisive documents, and a local-only run has no network
-        dependency at 17:15 on a venue network we had already watched break TLS.</td></tr>
-    <tr><td>Multi-agent debate as the architecture</td>
-        <td>Numbers would still be asserted rather than derived, and backtesting would cost N&times; the
-        tokens. We kept its one good idea — an adversarial challenger — and put it in the gate.</td></tr>
-    <tr><td>Clamping forecasts into the guidance range</td>
-        <td>Companies do beat the top end; ADI said so in the same release we read guidance from.
-        We fixed the estimator that caused the overshoot instead of capping the symptom.</td></tr>
+    <tr><td><strong>Hays</strong><br>FY2026</td>
+        <td>The fiscal year <strong>ended 30 June 2026</strong>. The 10 July trading update
+        discloses Q4 net-fee growth by division. The period is closed and partly disclosed.</td>
+        <td>Reconstruction</td></tr>
+    <tr><td><strong>Analog Devices</strong><br>FY2026 Q3</td>
+        <td>The Q2 8-K guides the quarter explicitly: revenue $3.9bn ±$100m, adjusted operating
+        margin 49.0% ±100bps, adjusted EPS $3.30 ±$0.15.</td>
+        <td>Guidance anchor</td></tr>
+    <tr><td><strong>Home Depot</strong><br>FY2026 Q2</td>
+        <td>Full-year guidance reaffirmed at Q1; the quarter itself is not separately guided.</td>
+        <td>Implied-guide arithmetic</td></tr>
+    <tr><td><strong>Deere</strong><br>FY2026 Q3</td>
+        <td>Full-year outlook only, with segment-level reporting available.</td>
+        <td>Phasing and build-up</td></tr>
   </tbody>
 </table>
 </div>
 
-<h2>10. Reproducing the run</h2>
+<div class="callout warn">
+  <p><strong>A trap we found and defended against.</strong> Hays' headline "Group net fees decreased
+  by 5%" is a <em>like-for-like</em> figure, excluding divested operations. The metric we submit is
+  <em>actual reported</em> net fees, which includes them. The divisional table makes the gap
+  concrete: ANZ was <strong>+7% actual but −2% like-for-like</strong>. A system that scrapes the
+  headline and applies it to prior-year fees produces a confidently wrong number. Our
+  component-sourcing prompt names the distinction and marks a component unavailable rather than
+  substituting the wrong basis.</p>
+</div>
+</section>
+
+<section>
+<span class="note-no">Note 3</span>
+<h2>How the system is put together</h2>
+
+<figure>
+<svg viewBox="0 0 880 520" role="img" aria-label="Pipeline: corpus feeds three extraction paths into an evidence ledger; four estimators feed a reconciler and decision layer; a validation gate precedes linked derivation and workbook output.">
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#8b93a5"/>
+    </marker>
+  </defs>
+  <g fill="none" stroke="#8b93a5" stroke-width="1.3" marker-end="url(#a)">
+    <path d="M170 58 L170 88"/>
+    <path d="M90 138 L90 176"/>
+    <path d="M250 138 L250 176"/>
+    <path d="M410 138 L410 176"/>
+    <path d="M250 224 L250 262"/>
+    <path d="M250 320 L250 358"/>
+    <path d="M250 406 L250 444"/>
+    <path d="M620 106 L620 262"/>
+    <path d="M620 320 L620 358"/>
+    <path d="M470 470 L556 470"/>
+  </g>
+
+  <g font-family="ui-monospace,Menlo,Consolas,monospace" font-size="12.5">
+    <rect x="40" y="24" width="260" height="34" rx="6" fill="#edf3fd" stroke="#1f5fd0" stroke-width="1.2"/>
+    <text x="170" y="46" text-anchor="middle" fill="#1f5fd0" font-weight="700">corpus.py · 1,139 documents</text>
+
+    <g fill="#ffffff" stroke="#8b93a5">
+      <rect x="24" y="88" width="132" height="50" rx="6"/>
+      <rect x="184" y="88" width="132" height="50" rx="6"/>
+      <rect x="344" y="88" width="132" height="50" rx="6"/>
+    </g>
+    <g text-anchor="middle" fill="#101828">
+      <text x="90" y="110">table_facts</text><text x="90" y="128" font-size="10.5" fill="#5a6373">row matching</text>
+      <text x="250" y="110">extract</text><text x="250" y="128" font-size="10.5" fill="#5a6373">quote-verified</text>
+      <text x="410" y="110">series</text><text x="410" y="128" font-size="10.5" fill="#5a6373">history, focused</text>
+    </g>
+
+    <rect x="24" y="176" width="452" height="48" rx="6" fill="#edf3fd" stroke="#1f5fd0" stroke-width="1.2"/>
+    <text x="250" y="197" text-anchor="middle" fill="#1f5fd0" font-weight="700">ledger.jsonl — facts only, never forecasts</text>
+    <text x="250" y="215" text-anchor="middle" fill="#5a6373" font-size="10.5">value · unit · basis · period · source_doc · source_quote</text>
+
+    <rect x="24" y="262" width="452" height="58" rx="6" fill="#ffffff" stroke="#8b93a5"/>
+    <text x="250" y="284" text-anchor="middle" fill="#101828">estimators/</text>
+    <text x="250" y="303" text-anchor="middle" fill="#5a6373" font-size="10.5">guidance · build_up · seasonal · signals (capped tilt)</text>
+
+    <rect x="24" y="358" width="452" height="48" rx="6" fill="#ffffff" stroke="#8b93a5"/>
+    <text x="250" y="379" text-anchor="middle" fill="#101828">reconcile → decide</text>
+    <text x="250" y="397" text-anchor="middle" fill="#5a6373" font-size="10.5">weights, then weighted median vs consensus proxy</text>
+
+    <rect x="24" y="444" width="446" height="52" rx="6" fill="#fdf4e6" stroke="#8a5200" stroke-width="1.2"/>
+    <text x="247" y="466" text-anchor="middle" fill="#8a5200" font-weight="700">validate.py</text>
+    <text x="247" y="484" text-anchor="middle" fill="#5a6373" font-size="10.5">scale bands → identities → adversarial critic</text>
+
+    <rect x="510" y="72" width="220" height="34" rx="6" fill="#ffffff" stroke="#8b93a5"/>
+    <text x="620" y="94" text-anchor="middle" fill="#101828">calibration.py</text>
+
+    <rect x="510" y="262" width="220" height="58" rx="6" fill="#ffffff" stroke="#8b93a5"/>
+    <text x="620" y="284" text-anchor="middle" fill="#101828">backtest.py</text>
+    <text x="620" y="303" text-anchor="middle" fill="#5a6373" font-size="10.5">floor-band hit rate</text>
+
+    <rect x="510" y="358" width="332" height="48" rx="6" fill="#ffffff" stroke="#8b93a5" stroke-dasharray="4 3"/>
+    <text x="676" y="379" text-anchor="middle" fill="#5a6373">report.py · run log · logs/llm/</text>
+    <text x="676" y="397" text-anchor="middle" fill="#5a6373" font-size="10.5">evidence report per company; every model call archived</text>
+
+    <rect x="556" y="444" width="286" height="52" rx="6" fill="#e9f6f0" stroke="#0f6b45" stroke-width="1.2"/>
+    <text x="699" y="466" text-anchor="middle" fill="#0f6b45" font-weight="700">linkage.py → workbook.py</text>
+    <text x="699" y="484" text-anchor="middle" fill="#5a6373" font-size="10.5">derive EPS, then 4 × .xlsx</text>
+  </g>
+</svg>
+<figcaption>Every box is a module in <code>avws/</code>. Three extraction paths feed one ledger;
+four estimators feed one decision; nothing reaches a workbook without passing the gate.</figcaption>
+</figure>
+
+<h3>Orchestration and reproducibility</h3>
+<p>One command, no human input: <code>python -m avws.run --all</code>. The four companies run
+concurrently, and each company's three metrics run concurrently up to the cross-metric identity
+checks, which need all three at once. Ledger and log writes are locked. A full run takes about six
+minutes, leaving genuine retry room inside the 45-minute final window — a sequential version took
+ten and left none.</p>
+
+<p>Reproducibility is deliberate. Retrieval is lexical and therefore byte-identical between runs.
+Model calls run at temperature 0 and every one is archived with its prompt, schema and response.
+The historical series is cached with the prompt inside the cache key, so editing a prompt
+invalidates the entry rather than silently serving stale output; <code>--fresh</code> bypasses the
+cache entirely, which is how the submitted run was produced.</p>
+</section>
+
+<section>
+<span class="note-no">Note 4</span>
+<h2>Where the information comes from, and how we check it</h2>
+
+<p>The supplied corpus of 1,139 filings, call transcripts and slide decks, frozen 14 August 2026.
+No live web retrieval: the decisive documents are all in the corpus, and a local-only run has no
+network dependency at 17:15 on a venue network we had already watched intercept TLS.</p>
+
+<h3>Three extraction paths, because they fail differently</h3>
+<ul>
+  <li><strong>Deterministic row matching</strong> parses filing pipe-tables and matches row labels.
+  No model call, no tokens, identical every run. Right for finding build-up components.</li>
+  <li><strong>Model transcription</strong> reads retrieved prose — guidance sentences a table match
+  can never reach.</li>
+  <li><strong>Focused series extraction</strong> asks one question directly: this exact metric, on
+  this exact basis, for the last N comparable periods.</li>
+</ul>
+
+<p>The third exists because the first two were not enough. Reconstructing a time series from
+row-label matches kept trading one class of junk for another — labels are ambiguous, columns are
+ambiguous — and produced Hays EPS at 36 pence against a true level near 1.3. Asking directly, with
+comparability enforced in code rather than requested in a prompt, fixed it.</p>
+
+<h3>Citations are a type constraint, not a convention</h3>
+<p>A <code>Fact</code> cannot be constructed without a <code>basis</code> from a closed vocabulary
+and a non-empty <code>source_quote</code>. Both raise. The reason is concrete: in the same quarter
+ADI reported <strong>GAAP diluted EPS of $2.40</strong> and <strong>adjusted diluted EPS of
+$3.09</strong> — a 29% gap. Five of our twelve metrics are adjusted or pre-exceptional; Deere's is
+explicitly GAAP.</p>
+
+<p>Fabrication is caught mechanically rather than trusted away: a returned quote must appear as a
+substring of the text we supplied, after whitespace normalisation. Quotes that do not match are
+dropped and counted in the run log.</p>
+
+<h3>Currency and trustworthiness</h3>
+<p>Every fact passes one normalisation gate carrying a plausible band in the metric's own unit. The
+band rejects stray cells — a bare column-header year is not a Deere segment profit — and it
+<em>repairs scale</em>: ADI's 10-Q reports revenue in thousands (<code>3,623,465</code>) where the
+workbook requires millions. Money metrics rescale; percentages never do, because "repairing" −40%
+into −0.04% invents a number rather than correcting one.</p>
+</section>
+
+<section>
+<span class="note-no">Note 5</span>
+<h2>How research becomes a number</h2>
+
+<p>Four estimator families produce candidates. The model's role is confined to reading and to
+setting <em>named</em> assumptions; every arithmetic step is Python, and every step is printed.</p>
+
+<h3>Guidance anchor, with measured bias</h3>
+<p>Where a company guides the period, that is the strongest input available. But companies are
+systematically biased against their own outlook — ADI's Q2 release says its quarter came in "above
+the high end of our outlook" — so the anchor carries a residual measured from paired guidance and
+outcomes across the corpus. Both quotes must verify, and a gap above 60% is treated as a mis-paired
+basis rather than a guidance miss. Below three pairs it reports zero and <strong>says so</strong>
+rather than implying a calibration it does not have.</p>
+
+<h3>Beyond the anchor: post-guidance signals</h3>
+<p>Anchoring alone is table stakes — every team holding the same 8-K will do it, and a forecast
+equal to consensus scores exactly 1.0. The corpus contains an asset most uses of it ignore:
+<strong>documents published after the guidance was issued</strong>. ADI guided Q3 on 20 May and the
+corpus holds a conference transcript from 2 June; Deere's Q2 call was 21 May with an investor deck
+on 26 May. That window is strictly newer information, and it is where management discusses
+bookings, backlog, channel inventory and pricing.</p>
+
+<p>Those signals become a <strong>bounded tilt</strong> — 2.5% on revenue, 6% on EPS, 1.0pp on
+margins — mean-aggregated so ten weak observations cannot outvote the cap by count. On ADI it read
+a single pricing signal and tilted +0.75%. On Deere it returned <strong>zero</strong> and said so.
+An estimator that always finds something is not measuring anything.</p>
+
+<h3>Build-up identities</h3>
+<p>Nine of twelve metrics have a registered composition — named components and a formula. The model
+sources each component from the ledger and says which fact it used; it is told explicitly that a
+missing component is recoverable and a fabricated one is not.</p>
+
+<div class="trace">
+  <div class="trace-head">
+    <span class="trace-label">HD · comparable sales, total company</span>
+    <span class="trace-value">1.13</span><span class="trace-unit">%</span>
+  </div>
+  <div class="trace-body">
+    (4 <span class="op">×</span> FY guidance midpoint 1.00% <span class="op">−</span> Q1 actual 0.60%) <span class="op">÷</span> 3 remaining quarters <span class="op">=</span> 1.13%
+  </div>
+  <div class="trace-src">Home Depot reaffirmed full-year comparable-sales guidance and has reported
+  Q1. If the year is to land where management says it will, the remaining three quarters must
+  average what the arithmetic requires. Not a prediction about the world — a constraint the company
+  has publicly committed to.</div>
+</div>
+
+<div class="trace">
+  <div class="trace-head">
+    <span class="trace-label">HAS · pre-exceptional basic EPS</span>
+    <span class="trace-value">1.29</span><span class="trace-unit">pence</span>
+  </div>
+  <div class="trace-body">
+    (45.09 operating profit <span class="op">−</span> 13.40 net finance) <span class="op">×</span> (1 <span class="op">−</span> 25% tax) <span class="op">÷</span> 1,590.2m basic shares <span class="op">×</span> 100 <span class="op">=</span> 1.29p
+  </div>
+  <div class="trace-src">Not estimated — derived. See Note 6.</div>
+</div>
+</section>
+
+<section>
+<span class="note-no">Note 6</span>
+<h2>Three things a weighted average does not do</h2>
+
+<h3>EPS is derived, not estimated</h3>
+<p>Producing twelve numbers independently and checking them afterwards makes consistency
+<em>checked</em> rather than <em>structural</em>. A sell-side analyst does not estimate EPS; they
+build one linked model and EPS falls out of it.</p>
+
+<p>Our system demonstrated why that matters. It produced Hays pre-exceptional basic EPS of
+<strong>36.6 pence</strong> alongside pre-exceptional operating profit of <strong>£44.5m</strong>.
+With roughly 1,600m shares those cannot both be true. Independent estimation permits the
+contradiction; a linked model forbids it. <code>linkage.py</code> extracts the drivers once per
+company — share count, effective tax rate, net finance charge, all quote-verified — derives the
+metric, and reports <em>both</em> values with the divergence so the disagreement stays visible.</p>
+
+<h3>The submitted number optimises the score, not the average</h3>
+<div class="callout">
+  <p>The metric score is linear in absolute error inside the cap, so expected absolute error is
+  minimised at the <strong>median</strong> of the predictive distribution, not its mean — and the
+  cap makes the loss more robust still. Our candidates disagreed by <strong>111%</strong> on ADI
+  adjusted EPS: the mean would have landed in an empty region between two clusters no estimator
+  considers plausible; the median landed on <strong>$3.30</strong>, the company's own guidance.</p>
+</div>
+
+<h3>We estimate where the crowd is</h3>
+<p>We are scored against a consensus mean we cannot see. For a guided metric, consensus clusters
+near the guidance midpoint, because that is the strongest public signal every analyst also holds.
+Making that proxy explicit turns an accidental deviation into a stated decision; any deviation above
+5% is flagged in the run log.</p>
+</section>
+
+<section>
+<span class="note-no">Note 7</span>
+<h2>Validation, conflicts and failure handling</h2>
+
+<p>Three stages, in order, each logged whether or not it finds anything. A log that records only
+successes cannot evidence that the gate ran.</p>
+
+<ol>
+  <li><strong>Scale bands</strong> against the metric's plausible range, which also repair
+  thousands-versus-millions errors and reject percentages arriving as decimal fractions.</li>
+  <li><strong>Cross-metric identities.</strong> Implied gross profit cannot exceed revenue; a
+  segment's operating profit cannot exceed the group total; Hays' operating profit cannot exceed its
+  net fees, because profit is fees less costs. Tolerances are deliberately wide — these catch
+  order-of-magnitude and basis errors, not rounding.</li>
+  <li><strong>Adversarial critic.</strong> One model call seeing only the number, its derivation and
+  the identity results, instructed to argue the number is <em>wrong</em> and to default to finding a
+  problem. An objection counts only if it names a specific figure, unit, period or basis that could
+  be checked; vague unease is discarded.</li>
+</ol>
+
+<div class="callout good">
+  <p><strong>The critic has found more real defects than our test suite.</strong> Verbatim:</p>
+  <p class="quote">"That figure is 40 bps (≈−0.40%), not −40%, and it refers to the FX impact
+  component, not the total comparable sales. Using −40 instead of −0.40 drives your average to
+  −25.09% by a two-orders-of-magnitude unit error."</p>
+  <p class="quote">"You mixed periods in the growth input: the −64.9% figure is an H1 2026
+  year-on-year change, not a full-year one."</p>
+  <p>Both were real, and neither was caught by a unit test.</p>
+</div>
+
+<p><strong>Conflicts.</strong> Where the same period appears twice with different values — a press
+release rounds "$3.62 billion" where the statement table gives 3,623 — the more precise reading
+wins. Where two estimators disagree by more than 10% the disagreement is recorded as a warning on
+the estimate and surfaced in the evidence report rather than averaged away silently.</p>
+
+<p><strong>Failures.</strong> One company failing cannot lose the other three: each runs in its own
+task and a crash is logged with its traceback rather than converted into an empty result. A failed
+critic call degrades to "unreviewed" and says so. When the gate cannot resolve a concern it emits
+the best available estimate with a loud warning — never a blank, because a blank scores 5.0, the
+same as being wrong by ten times the floor.</p>
+</section>
+
+<section>
+<span class="note-no">Note 8</span>
+<h2>Tools we built</h2>
+
+<div class="scroll">
+<table>
+  <thead><tr><th>Tool</th><th>What it does</th><th>Why it earned its place</th></tr></thead>
+  <tbody>
+    <tr><td><code>avws.corpus</code></td>
+        <td>CLI search with exact metadata filters and BM25 ranking</td>
+        <td>How we found the Hays "top of the consensus range" statement and the like-for-like trap</td></tr>
+    <tr><td><code>tables.py</code></td>
+        <td>Pipe-table parser with label-anchored row matching</td>
+        <td>Turns "search returned a chunk" into "here is the revenue row"</td></tr>
+    <tr><td><code>units.py</code></td>
+        <td>Currency, parenthesised negatives, bps, thousands separators</td>
+        <td>Absent and malformed both resolve to <code>None</code>, never <code>0.0</code></td></tr>
+    <tr><td><code>periods.py</code></td>
+        <td>Fiscal-period parsing and comparability</td>
+        <td>Written after <code>"FY2026Q3"[:4] == "FY20"</code> crashed the first run</td></tr>
+    <tr><td><code>avws.backtest</code></td>
+        <td>Replays the chain over known periods, reporting floor-band hit rate</td>
+        <td>The only way to measure anything without the benchmark</td></tr>
+    <tr><td><code>report.py</code></td>
+        <td>Per-company evidence report: value, working, every quote, gate findings</td>
+        <td>The artifact to open when asked where a number came from</td></tr>
+  </tbody>
+</table>
+</div>
+</section>
+
+<section>
+<span class="note-no">Note 9</span>
+<h2>Backtest</h2>
+
+<p>We cannot measure what we are graded on, because the Wall Street benchmark is not visible to us.
+We can measure the statistic the scoring function is built from: how often our absolute error lands
+inside the denominator floor. Below the floor, a metric scores under 1.0 whatever consensus did.</p>
+
+<p><code>python -m avws.backtest</code> replays the estimator chain over historical periods whose
+answers sit in the corpus, passing only facts whose period precedes the target plus guidance issued
+for it. These are the measured results, copied from <code>.cache/backtest.json</code>.</p>
+
+<div class="scroll">
+<table>
+  <thead><tr><th>Metric</th><th>n</th><th>MAE</th><th>Median error</th><th>Floor-band hit</th></tr></thead>
+  <tbody>
+    <tr><td>HD Adjusted diluted EPS</td><td>1</td><td>0.02</td><td>0.02</td><td>100%</td></tr>
+    <tr><td>ADI Adjusted gross margin</td><td>2</td><td>1.85</td><td>1.85</td><td>0%</td></tr>
+    <tr><td>HAS Pre-exceptional basic EPS</td><td>3</td><td>3.23</td><td>1.94</td><td>0%</td></tr>
+    <tr><td>HAS Pre-exceptional operating profit</td><td>4</td><td>109.7</td><td>144.3</td><td>0%</td></tr>
+    <tr><td>DE Worldwide net sales and revenues</td><td>2</td><td>1,860</td><td>1,860</td><td>0%</td></tr>
+    <tr><td>DE Diluted EPS (GAAP)</td><td>3</td><td>5.25</td><td>4.85</td><td>0%</td></tr>
+    <tr><td>DE Production &amp; Precision Ag operating profit</td><td>2</td><td>1,520</td><td>1,520</td><td>0%</td></tr>
+    <tr><td colspan="4"><strong>Mean floor-band hit rate</strong></td><td><strong>14%</strong></td></tr>
+  </tbody>
+</table>
+</div>
+
+<div class="callout warn">
+  <p><strong>We do not claim this measures the system we are submitting, and it would be
+  dishonest to present it that way.</strong> It measures the <em>seasonal fallback</em> on sparse
+  extracted history — the weakest path we have. For a historical period there is no guidance fact
+  in the ledger and no sourced build-up components, so the harness never exercises the guidance
+  anchor or the build-up compositions, which between them produce most of the twelve submitted
+  numbers. Read it as evidence about our worst case, not our expected case.</p>
+</div>
+
+<div class="callout warn">
+  <p><strong>The first version of this harness measured nothing at all.</strong> It drew its target
+  values from the whole ledger, including opportunistically row-matched facts, so it scored
+  forecasts against unreliable targets and reported MAE of 31,275 on a metric near 45,000 while the
+  median error was 1,406 — the signature of a few mis-attributed periods rather than a real error
+  distribution. Targets are now restricted to the focused series extraction. A probe that cannot
+  separate a good forecast from a bad one is not evidence, and we would rather publish a poor
+  measured number than a flattering meaningless one.</p>
+</div>
+
+<div class="callout warn">
+  <p><strong>Known leakage.</strong> Facts are filtered by their own reporting period, not by the
+  publication date of the document containing them. Guidance for the target is published before the
+  target closes and a prior period's actual before the target reports, so the ordering is sound in
+  the ordinary case. The residual leak is restatements: an earlier period revised in a later filing
+  carries the later filing's knowledge.</p>
+</div>
+</section>
+
+<section>
+<span class="note-no">Note 10</span>
+<h2>What we got wrong</h2>
+
+<p>Recorded in <code>docs/build-log.md</code> as they happened rather than reconstructed at the end.
+Every one of these shipped into a run before it was caught.</p>
+
+<h3><span class="tag fixed">fixed</span>The seasonal estimator forecast from the wrong anchor</h3>
+<p>It extrapolated from the <em>latest</em> quarter rather than the <em>same quarter a year
+earlier</em>, carrying a Q2 level into a Q3 slot and forecasting ADI Q3 revenue at
+<strong>$4,964m against guidance of $3,900m</strong>. Seasonality is the entire premise of that
+estimator, and it had been inverted.</p>
+
+<h3><span class="tag fixed">fixed</span>A parser written and never connected</h3>
+<p><code>tables.py</code> was built, tested against real filings, and then not called from
+extraction. ADI's adjusted gross margin extracted zero facts despite sitting in the 8-K as a clean
+table row. Tests passing on a module say nothing about whether the module is reachable.</p>
+
+<h3><span class="tag fixed">fixed</span>The guard ate its own inputs</h3>
+<p>One plausibility band was doing two jobs. Sized for Hays <em>group</em> net fees near 972 GBPm,
+it rejected the <em>divisional</em> components the build-up needs — 308.9, 192.2, 116.2 — discarding
+8 of 10 extracted facts. Components need a wider band than the figure they compose.</p>
+
+<h3><span class="tag fixed">fixed</span>Bands guarded one extraction path but not the other</h3>
+<p>A filing line reading "FX negatively impacted comparable sales by approximately 40 basis points"
+entered the ledger as <strong>−40 percentage points</strong> and dragged Home Depot's comparable
+sales to −25%. The defence existed and half the door was open.</p>
+
+<h3><span class="tag fixed">fixed</span>Period types pooled together</h3>
+<p>The estimator mixed full years with quarters and paired non-adjacent years, so a year-to-quarter
+ratio was used as a growth rate. Deere's segment operating profit came out at 441 against a true
+level in the low thousands.</p>
+
+<h3><span class="tag fixed">fixed</span>A median of two values that was not a median</h3>
+<p>Our weighted-median walk returns the first candidate crossing cumulative 0.5 — which with two
+candidates is simply the heavier one. It discarded exactly the disagreement the decision layer
+exists to handle. The median of two values is their midpoint.</p>
+
+<h3><span class="tag fixed">reverted</span>Model tiering, measured and rejected</h3>
+<p>We hypothesised that extraction is transcription and would run correctly on a smaller model.
+Measured: 40% faster and materially less accurate. Deciding whether "£45.6m" is a half year or a
+full year, or whether a figure is the quarter or the year-to-date cumulative, is exactly the
+judgement that makes a series right. Hays half-years were labelled as full years and ADI revenue
+came out at $71bn against $3.9bn of guidance. The switch is kept so the experiment stays
+reproducible rather than merely asserted.</p>
+</section>
+
+<section>
+<span class="note-no">Note 11</span>
+<h2>Known weaknesses</h2>
+
+<ul>
+  <li><span class="tag open">weak</span><strong>Deere's worldwide net sales is our weakest
+  number.</strong> No company guidance for the quarter and the thinnest composition of the twelve.
+  We would say so before a judge asked.</li>
+  <li><span class="tag open">thin</span><strong>Calibration samples are small.</strong> Most metrics
+  yielded fewer than three verified guidance-and-outcome pairs, so their residual is zero by rule.
+  Only Hays operating profit reached a measured bias — +0.51% across 3 pairs, 100% beat rate.</li>
+  <li><span class="tag open">thin</span><strong>Signal tilts read management language.</strong>
+  Turning qualitative commentary into a numeric strength is the softest inference in the system,
+  which is why it is capped tightly and declines to fire when it finds nothing.</li>
+  <li><span class="tag open">gap</span><strong>No three-statement linkage beyond EPS.</strong> A
+  real model derives every line from shared drivers. We derive one metric and check the rest.</li>
+  <li><span class="tag open">gap</span><strong>No consensus distribution.</strong> We proxy the mean
+  but model neither its dispersion nor analyst revision breadth, both of which a fund would weigh
+  heavily.</li>
+  <li><span class="tag open">scope</span><strong>BM25 misses paraphrase.</strong> Mitigated by
+  filtering to the right document rather than by better ranking.</li>
+</ul>
+
+<h3>Where the system stops being general</h3>
+<p>Roughly 80% of the code is company-agnostic: corpus, tables, units, periods, ledger, signals,
+guidance, seasonal, reconcile, decide, workbook, and a registry that reads
+<code>companies.json</code> — so new companies and metrics need no code at all. Adding a fifth
+company needs about four small config entries: a row-label alias, a plausible band, an optional
+composition formula, and optional retrieval hints. The clearest next improvement is deriving bands
+from extracted history instead of declaring them.</p>
+</section>
+
+<section>
+<span class="note-no">Note 12</span>
+<h2>Deliberate non-choices and their trade-offs</h2>
+
+<p>"We did not have time" and "we decided not to" are different claims. Each row below is a
+trade-off we took knowingly, with what it cost us.</p>
+
+<div class="scroll">
+<table>
+  <thead><tr><th>Rejected</th><th>Reasoning</th></tr></thead>
+  <tbody>
+    <tr><td>Vector embeddings</td>
+        <td>Financial retrieval here is literal — "adjusted gross margin", "net fees", "Production
+        &amp; Precision Ag" are exact strings in the filings. BM25 finds them, costs no tokens, and
+        is byte-identical between runs.</td></tr>
+    <tr><td>Live web retrieval</td>
+        <td>The decisive documents are in the corpus, and a local-only run has no network dependency
+        at 17:15 on a network we had watched break TLS.</td></tr>
+    <tr><td>Multi-agent debate as the architecture</td>
+        <td>Numbers would still be asserted rather than derived, and backtesting would cost N× the
+        tokens. We kept its one good idea — an adversarial challenger — and put it in the gate.</td></tr>
+    <tr><td>Clamping forecasts into the guidance range</td>
+        <td>Companies beat the top end; ADI said so in the release we read guidance from. We fixed
+        the estimator causing the overshoot rather than capping the symptom.</td></tr>
+    <tr><td>Mermaid for the diagram</td>
+        <td>It needs JavaScript, and the judging preview runs no scripts. Hand-authored inline SVG
+        renders anywhere.</td></tr>
+  </tbody>
+</table>
+</div>
+</section>
+
+<section>
+<span class="note-no">Note 13</span>
+<h2>Reproducing the run</h2>
 
 <pre><code>python -m venv .venv
 .venv/bin/pip install -e .
 npm install
 
-# one command, no human input, all four companies
-python -m avws.run --all
+python -m avws.run --all --fresh    # one command, no human input
+npm run check:forecasts             # official structural check</code></pre>
 
-# structural check required before upload
-npm run check:forecasts</code></pre>
+<p>Outputs: four workbooks in <code>submission/</code>, a timestamped clear-run log in
+<code>logs/</code>, an evidence report per company in <code>research/</code>, every model call in
+<code>logs/llm/</code>, and the full fact ledger at <code>.cache/ledger.jsonl</code>.</p>
 
-<p>Outputs: four workbooks in <code>submission/</code>, a timestamped log in <code>logs/</code>, one
-evidence report per company in <code>research/</code>, every model call in <code>logs/llm/</code>, and
-the full fact ledger in <code>.cache/ledger.jsonl</code>.</p>
-
-<p>Supporting tools:</p>
 <pre><code>python -m avws.corpus --query "net fees by division" --ticker HAS -k 5
 python -m avws.backtest
-python -m pytest tests -q</code></pre>
+python -m pytest tests -q           # 88 tests</code></pre>
+</section>
 
 <footer>
-  <p>JustAsh &middot; Agents vs Wall Street, AI Tinkerers London, 16 August 2026. Forecasts are not
-  investment advice. The historical document corpus is not redistributed in our repository; see
-  <code>THIRD_PARTY_NOTICES.md</code> in the official starter.</p>
+  <p>JustAsh · Agents vs Wall Street, AI Tinkerers London, 16 August 2026. Forecasts are not
+  investment advice. The historical document corpus is not redistributed in our repository; it
+  carries no licence to republish, per <code>THIRD_PARTY_NOTICES.md</code> in the official
+  starter.</p>
 </footer>
 
 </div>
 </body>
 </html>
-
-
