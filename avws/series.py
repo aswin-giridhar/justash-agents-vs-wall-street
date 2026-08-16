@@ -22,12 +22,20 @@ quarter of other years, and a full-year target only full years.
 
 from __future__ import annotations
 
+import hashlib
+import json
+from dataclasses import asdict
+from pathlib import Path
+
 from avws import periods
+from avws.config import CACHE_DIR, TRANSCRIPTION_MODEL
 from avws.corpus import build_index, search
 from avws.ledger import Fact
 from avws.llm import complete
 from avws.registry import Metric
 from avws.table_facts import BANDS
+
+SERIES_CACHE = CACHE_DIR / "series"
 
 SERIES_SYSTEM = """You build the historical time series of ONE specific financial metric.
 
@@ -109,8 +117,26 @@ def _normalise_ws(text: str) -> str:
     return " ".join(text.split()).lower()
 
 
-def fetch(metric: Metric, k: int = 10) -> tuple[list[Fact], dict]:
-    """Return high-confidence series facts for the metric, plus stats."""
+def _cache_path(metric: Metric) -> Path:
+    digest = hashlib.sha256(
+        (metric.key + metric.period + SERIES_SYSTEM).encode()
+    ).hexdigest()[:12]
+    return SERIES_CACHE / f"{metric.ticker}-{digest}.json"
+
+
+def fetch(metric: Metric, k: int = 10, use_cache: bool = True) -> tuple[list[Fact], dict]:
+    """Return high-confidence series facts for the metric, plus stats.
+
+    Results are cached because a company's reported history cannot change between
+    runs. The cache key includes the prompt, so editing the prompt invalidates it
+    rather than silently serving stale output.
+    """
+    cache_file = _cache_path(metric)
+    if use_cache and cache_file.exists():
+        payload = json.loads(cache_file.read_text(encoding="utf-8"))
+        facts = [Fact(**row) for row in payload["facts"]]
+        return facts, {**payload["stats"], "cached": True}
+
     build_index()
     target = periods.parse(metric.period)
 
@@ -158,7 +184,8 @@ def fetch(metric: Metric, k: int = 10) -> tuple[list[Fact], dict]:
         f"Return the reported historical values of this metric.\n\n{body}"
     )
 
-    payload = complete(SERIES_SYSTEM, user, SERIES_SCHEMA, schema_name="series")
+    payload = complete(SERIES_SYSTEM, user, SERIES_SCHEMA, schema_name="series",
+                       model=TRANSCRIPTION_MODEL)
     raw = payload.get("series", [])
 
     haystack = _normalise_ws(body)
@@ -199,6 +226,12 @@ def fetch(metric: Metric, k: int = 10) -> tuple[list[Fact], dict]:
             best[fact.period] = fact
     ordered = sorted(best.values(), key=lambda f: periods.sort_key(f.period))
 
-    return ordered, {
-        "chunks": len(chunks), "returned": len(raw), "kept": len(ordered),
-    }
+    stats = {"chunks": len(chunks), "returned": len(raw), "kept": len(ordered),
+             "cached": False}
+
+    SERIES_CACHE.mkdir(parents=True, exist_ok=True)
+    cache_file.write_text(
+        json.dumps({"stats": stats, "facts": [asdict(f) for f in ordered]}, indent=1),
+        encoding="utf-8",
+    )
+    return ordered, stats

@@ -32,6 +32,7 @@ from avws.workbook import write_workbook
 
 _log_handle = None
 _log_lock = threading.Lock()
+_USE_SERIES_CACHE = True
 
 
 def log(message: str) -> None:
@@ -58,11 +59,11 @@ def estimate_metric(metric: Metric) -> tuple[object, list, list]:
     # A dedicated series extraction for the metric's own history. Opportunistic
     # harvesting finds components well and time series badly; this asks the question
     # directly instead of reconstructing it from row matches.
-    series_facts, series_stats = series.fetch(metric)
+    series_facts, series_stats = series.fetch(metric, use_cache=_USE_SERIES_CACHE)
     ledger.append_all(series_facts)
     facts = facts + series_facts
     log(f"  [{metric.key}] series: returned={series_stats['returned']} "
-        f"kept={series_stats['kept']} -> "
+        f"kept={series_stats['kept']} cached={series_stats.get('cached', False)} -> "
         + (", ".join(f"{f.period}={f.value:g}" for f in series_facts[-6:])
            or "none; falling back to harvested facts"))
 
@@ -117,11 +118,16 @@ def run_company(ticker: str) -> dict:
     log(f"[{ticker}] {metrics[0].company} - {metrics[0].period}")
 
     estimates, facts_by_metric, candidates_by_metric = {}, {}, {}
-    for metric in metrics:
-        blended, facts, candidates = estimate_metric(metric)
-        estimates[metric.label] = blended
-        facts_by_metric[metric.key] = facts
-        candidates_by_metric[metric.label] = candidates
+    # The three metrics of a company are independent until the identity checks,
+    # which need all three at once, so they run concurrently up to that barrier.
+    with ThreadPoolExecutor(max_workers=len(metrics)) as pool:
+        futures = {pool.submit(estimate_metric, m): m for m in metrics}
+        for future in as_completed(futures):
+            metric = futures[future]
+            blended, facts, candidates = future.result()
+            estimates[metric.label] = blended
+            facts_by_metric[metric.key] = facts
+            candidates_by_metric[metric.label] = candidates
 
     values = {label: est.value for label, est in estimates.items()}
     identity_issues = validate.check_identities(ticker, values, facts_by_metric)
@@ -166,23 +172,30 @@ def run_company(ticker: str) -> dict:
 
 
 def main(argv: list[str] | None = None) -> int:
-    global _log_handle
+    global _log_handle, _USE_SERIES_CACHE
     parser = argparse.ArgumentParser(description="Produce OpenStocks forecast workbooks.")
     parser.add_argument("--all", action="store_true", help="run all four companies")
     parser.add_argument("--ticker", choices=tickers(), help="run one company")
     parser.add_argument("--sequential", action="store_true",
                         help="disable concurrency; useful when reading the log live")
+    parser.add_argument("--fresh", action="store_true",
+                        help="ignore the cached historical series and re-extract it")
     args = parser.parse_args(argv)
 
     if not args.all and not args.ticker:
         parser.error("pass --all or --ticker")
 
+    _USE_SERIES_CACHE = not args.fresh
     ensure_dirs()
     stamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
     _log_handle = (LOG_DIR / f"run-{stamp}.log").open("w", encoding="utf-8")
 
     targets = tickers() if args.all else [args.ticker]
+    from avws.config import REASONING_MODEL, TRANSCRIPTION_MODEL
+
     log(f"AVWS run start; companies={targets}")
+    log(f"models: transcription={TRANSCRIPTION_MODEL} reasoning={REASONING_MODEL}; "
+        f"series_cache={'off (--fresh)' if args.fresh else 'on'}")
     log("building corpus index")
     docs = build_index()
     log(f"corpus indexed: {len(docs)} documents")

@@ -77,21 +77,33 @@ def _ordered_actuals(facts: list[Fact], target, metric: Metric | None = None) ->
 
 
 def _recent_yoy_growth(actuals: list[Fact]) -> tuple[float | None, list[str]]:
-    """Median year-on-year growth across every prior-year pair we can form."""
+    """Year-on-year growth from CONSECUTIVE pairs only, most recent weighted.
+
+    Extracted series have gaps - Deere's segment operating profit had FY2020Q3,
+    FY2021Q3, FY2024Q3 and FY2025Q3 with two years missing. A ratio between 2021
+    and 2024 is not an annual growth rate, and averaging it with real ones produced
+    forecasts that were wrong by a factor of two.
+
+    Only genuine adjacent-year pairs count. The median of the three most recent is
+    used rather than the whole history, because a five-year-old growth rate says
+    little about the coming quarter.
+    """
     by_period = {str(periods.parse(f.period)): f for f in actuals
                  if periods.parse(f.period)}
-    growths: list[float] = []
-    detail: list[str] = []
+    pairs: list[tuple[int, float, str]] = []
     for key, fact in by_period.items():
         period = periods.parse(key)
         prior = by_period.get(str(period.prior_year()))
         if prior and prior.value:
             growth = (fact.value - prior.value) / abs(prior.value)
-            growths.append(growth)
-            detail.append(f"{prior.period}->{fact.period} {growth:+.1%}")
-    if not growths:
-        return None, detail
-    return statistics.median(growths), detail
+            pairs.append((period.year, growth,
+                          f"{prior.period}->{fact.period} {growth:+.1%}"))
+    if not pairs:
+        return None, []
+    pairs.sort(key=lambda p: -p[0])
+    recent = pairs[:3]
+    return (statistics.median(g for _y, g, _d in recent),
+            [d for _y, _g, d in recent])
 
 
 def estimate(metric: Metric, facts: list[Fact]) -> Estimate:
@@ -148,29 +160,44 @@ def estimate(metric: Metric, facts: list[Fact]) -> Estimate:
     )
     growth, growth_detail = _recent_yoy_growth(actuals)
 
+    # Fall back to the most recent same-period figure we do have, and compound the
+    # growth across the actual gap. Carrying a two-year-old figure forward flat put
+    # Deere's FY2024Q3 EPS of 6.29 into a FY2026Q3 slot untouched.
+    latest = actuals[-1]
+    latest_period = periods.parse(latest.period)
+    gap = (target.year - latest_period.year) if (target and latest_period) else 1
+
     if anchor and growth is not None:
         value = anchor.value * (1 + growth)
         derivation = (
             f"prior-year same period {anchor.period} ({anchor.value:g}) x "
-            f"(1 + median YoY growth {growth:+.2%}) = {value:.4g}\n"
-            f"  growth observations: {', '.join(growth_detail)}"
+            f"(1 + YoY growth {growth:+.2%}) = {value:.4g}\n"
+            f"  growth from consecutive pairs: {', '.join(growth_detail)}"
         )
         confidence = 0.4
     elif anchor:
         value = anchor.value
         derivation = (
             f"prior-year same period {anchor.period} ({anchor.value:g}) carried "
-            f"forward flat; no year-on-year growth pair available = {value:.4g}"
+            f"forward flat; no consecutive year-on-year pair available = {value:.4g}"
+        )
+        confidence = 0.25
+    elif growth is not None and gap >= 1:
+        value = latest.value * (1 + growth) ** gap
+        derivation = (
+            f"no {metric.period} prior-year figure; most recent comparable "
+            f"{latest.period} ({latest.value:g}) compounded over {gap} year(s) at "
+            f"{growth:+.2%} = {value:.4g}\n"
+            f"  growth from consecutive pairs: {', '.join(growth_detail)}"
         )
         confidence = 0.25
     else:
-        latest = actuals[-1]
         value = latest.value
         derivation = (
-            f"no prior-year figure for {metric.period}; carried latest actual "
+            f"no prior-year figure and no growth pair for {metric.period}; carried "
             f"{latest.period} ({latest.value:g}) forward unchanged = {value:.4g}"
         )
-        confidence = 0.15
+        confidence = 0.12
 
     warnings = []
     if confidence <= 0.25:

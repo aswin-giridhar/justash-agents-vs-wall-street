@@ -15,6 +15,7 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 
+from avws.config import TRANSCRIPTION_MODEL
 from avws.corpus import Doc, build_index, search
 from avws.ledger import Fact
 from avws.llm import complete
@@ -201,7 +202,8 @@ def extract_facts(metric: Metric, max_chunks: int = 18) -> tuple[list[Fact], dic
         f"{corpus_text}"
     )
 
-    payload = complete(EXTRACTION_SYSTEM, user, FACT_SCHEMA, schema_name="facts")
+    payload = complete(EXTRACTION_SYSTEM, user, FACT_SCHEMA, schema_name="facts",
+                       model=TRANSCRIPTION_MODEL)
     raw = payload.get("facts", [])
 
     haystack = _normalise(corpus_text)

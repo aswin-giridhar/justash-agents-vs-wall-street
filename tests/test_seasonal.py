@@ -56,6 +56,35 @@ def test_full_year_target_uses_only_full_year_actuals():
     assert 780 < est.value < 1_000, est.derivation
 
 
+def test_growth_ignores_non_consecutive_pairs():
+    """DE segment profit had FY2020Q3, FY2021Q3, FY2024Q3, FY2025Q3 - two years
+    missing. A 2021->2024 ratio is not an annual growth rate."""
+    metric = get_metric("DE:Production & Precision Ag operating profit")  # FY2026Q3
+    facts = [
+        _fact("FY2020Q3", 605.0),
+        _fact("FY2021Q3", 906.0),    # consecutive with 2020: +49.8%
+        _fact("FY2024Q3", 1162.0),   # NOT consecutive with 2021
+        _fact("FY2025Q3", 580.0),    # consecutive with 2024: -50.1%
+    ]
+    est = seasonal.estimate(metric, facts)
+    # Anchored on FY2025Q3 = 580; growth is the median of the two real pairs.
+    assert 200 < est.value < 1_000, est.derivation
+    assert "consecutive" in est.derivation
+
+
+def test_compounds_across_a_gap_instead_of_carrying_a_stale_value_forward():
+    """Carrying FY2024Q3 forward flat put a two-year-old figure into FY2026Q3."""
+    metric = get_metric("DE:Diluted EPS (GAAP)")  # FY2026Q3
+    facts = [
+        _fact("FY2022Q3", 5.00, "DE:Diluted EPS (GAAP)"),
+        _fact("FY2023Q3", 6.00, "DE:Diluted EPS (GAAP)"),
+        _fact("FY2024Q3", 6.29, "DE:Diluted EPS (GAAP)"),  # no FY2025Q3
+    ]
+    est = seasonal.estimate(metric, facts)
+    assert est.value != 6.29, "stale value carried forward unchanged"
+    assert "compounded over 2 year" in est.derivation, est.derivation
+
+
 def test_returns_a_placeholder_rather_than_nothing_when_no_comparable_history():
     metric = get_metric("DE:Production & Precision Ag operating profit")
     est = seasonal.estimate(metric, [_fact("FY2025Q1", 300.0)])

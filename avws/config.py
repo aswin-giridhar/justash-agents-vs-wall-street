@@ -32,6 +32,17 @@ LEDGER_PATH = CACHE_DIR / "ledger.jsonl"
 
 MODEL = os.environ.get("AVWS_MODEL", "gpt-5")
 
+# Model tiering. Extraction and series building are transcription tasks against a
+# strict schema: copy a figure, copy its quote, label its basis. They do not need a
+# reasoning model, and the quote-verification step catches errors mechanically
+# rather than relying on model judgement.
+#
+# The critic and component sourcing DO reason - the critic has to notice that
+# "40 basis points" is not -40 percentage points, and component sourcing has to
+# distinguish like-for-like growth from actual growth. Those keep the larger model.
+TRANSCRIPTION_MODEL = os.environ.get("AVWS_TRANSCRIPTION_MODEL", "gpt-5-mini")
+REASONING_MODEL = os.environ.get("AVWS_REASONING_MODEL", MODEL)
+
 # Competition denominator floors, from JUDGING.md. Used by the backtest harness to
 # report floor-band hit rate - the statistic that maps onto the scoring function.
 PERCENTAGE_FLOOR_PP = 0.5
