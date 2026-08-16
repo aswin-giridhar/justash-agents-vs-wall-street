@@ -21,7 +21,7 @@ import traceback
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone
 
-from avws import ledger, reconcile, signals, validate
+from avws import ledger, reconcile, series, signals, validate
 from avws.config import LOG_DIR, ROOT, ensure_dirs
 from avws.corpus import build_index
 from avws.estimators import buildup, guidance, seasonal
@@ -54,6 +54,17 @@ def estimate_metric(metric: Metric) -> tuple[object, list, list]:
         f"llm_kept={stats['kept']} rejected_unverifiable_quotes={stats['rejected_quotes']} "
         f"rejected_out_of_band={stats.get('rejected_out_of_band', 0)} "
         f"total_facts={len(facts)}")
+
+    # A dedicated series extraction for the metric's own history. Opportunistic
+    # harvesting finds components well and time series badly; this asks the question
+    # directly instead of reconstructing it from row matches.
+    series_facts, series_stats = series.fetch(metric)
+    ledger.append_all(series_facts)
+    facts = facts + series_facts
+    log(f"  [{metric.key}] series: returned={series_stats['returned']} "
+        f"kept={series_stats['kept']} -> "
+        + (", ".join(f"{f.period}={f.value:g}" for f in series_facts[-6:])
+           or "none; falling back to harvested facts"))
 
     candidates = []
 

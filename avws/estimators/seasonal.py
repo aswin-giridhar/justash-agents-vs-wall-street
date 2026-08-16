@@ -41,6 +41,15 @@ def _ordered_actuals(facts: list[Fact], target, metric: Metric | None = None) ->
 
     band = BANDS.get(metric.key) if metric is not None else None
 
+    # A focused series extraction, when one succeeded, supersedes opportunistically
+    # harvested facts entirely. Those are gathered by row-label matching, which is
+    # right for finding a build-up's components and wrong for the metric's own time
+    # series - ambiguous labels and columns put Hays EPS at 36 pence against a true
+    # level near 1.5. Mixing the two sources would reintroduce exactly that noise.
+    series = [f for f in facts if f.label == "historical series"]
+    if series:
+        facts = series
+
     deduped: dict[str, Fact] = {}
     for fact in facts:
         if fact.basis not in ("reported", "adjusted"):
