@@ -418,6 +418,32 @@ def apply(
     # the margin forecast was too low - trading strong evidence for weak. So where
     # the company guides the metric directly, that guidance outranks our derivation
     # and the chain becomes a consistency CHECK rather than a substitution.
+    # Plausibility outranks provenance. Guidance normally beats our own derivation,
+    # but not when the guided estimate is outside the metric's plausible band and the
+    # derived one is inside it: a spurious guidance fact left Hays EPS at 38.4 pence
+    # against a derived 1.33, a thirty-fold error on a metric whose band is 0.1-30.
+    # Prefer a value that can be true over one that cannot.
+    from avws.table_facts import BANDS as _B
+
+    _band = _B.get(f"{ticker}:{label}")
+    _independent_impossible = bool(
+        _band and not (_band[0] <= abs(derivation.independent_value) <= _band[1])
+    )
+    _derived_plausible = bool(
+        _band and _band[0] <= abs(derivation.derived_value) <= _band[1]
+    )
+    if _independent_impossible and _derived_plausible:
+        corrected = dict(values)
+        corrected[label] = derivation.derived_value
+        notes.append(
+            f"OVERRIDE {label}: the independent estimate "
+            f"{derivation.independent_value:.4g} is outside the plausible band "
+            f"{_band} while the derived {derivation.derived_value:.4g} is inside it, "
+            f"so the derivation is submitted even though the metric is guided. "
+            f"Chain: {derivation.arithmetic}"
+        )
+        return corrected, [derivation], notes
+
     if guided_labels and label in guided_labels:
         notes.append(
             f"{label} is guided by the company, so the linked derivation is reported "

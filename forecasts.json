@@ -1,46 +1,48 @@
 {
-  "generated_at": "2026-08-16T16:06:51.014424+00:00",
+  "generated_at": "2026-08-16T16:34:05.045087+00:00",
   "companies": [
     {
-      "ticker": "DE",
-      "period": "FY2026Q3",
+      "ticker": "HAS",
+      "period": "FY2026",
       "values": {
-        "Worldwide net sales and revenues": 10614.814388415025,
-        "Diluted EPS (GAAP)": 4.573882177041127,
-        "Production & Precision Ag operating profit": 506.6487816674016
+        "Pre-exceptional basic EPS": 1.3145490185038344,
+        "Net fees": 849.103591954023,
+        "Pre-exceptional operating profit": 45.60948920223108
       },
       "derivations": {
-        "Worldwide net sales and revenues": "prior-year same period FY2025Q3 (12018) x (1 + YoY growth -11.68%) = 1.061e+04\n  growth from consecutive pairs: FY2024Q3->FY2025Q3 -8.6% (weight 0.62), FY2023Q3->FY2024Q3 -16.8% (weight 0.37)\n  post-guidance signal: none found; anchor left unadjusted\n  DECISION [seasonal_trend]: single candidate; submitted as produced\n  stated consensus: no stated consensus found\n  no consensus proxy available for this metric",
-        "Diluted EPS (GAAP)": "weighted blend: build_up 4.40311 x weight 0.928 + seasonal_trend 6.75971 x weight 0.072 = 4.57388\n  DECISION [weighted_mean_of_two]: only two candidates (4.40311 and 6.75971, disagreeing by 42.2%); a weighted median is undefined for two values, so submitted their weighted midpoint 4.57388\n  stated consensus: no stated consensus found\n  no consensus proxy available for this metric",
-        "Production & Precision Ag operating profit": "prior-year same period FY2025Q3 (580) x (1 + YoY growth -12.65%) = 506.6\n  growth from consecutive pairs: FY2024Q3->FY2025Q3 -50.1% (weight 0.62), FY2020Q3->FY2021Q3 +49.8% (weight 0.37)\n  post-guidance signal: none found; anchor left unadjusted\n  DECISION [seasonal_trend]: single candidate; submitted as produced\n  stated consensus: no stated consensus found\n  no consensus proxy available for this metric"
+        "Pre-exceptional basic EPS": "weighted blend: guidance_anchor+signal 39.596 x weight 0.969 + seasonal_trend 0.579401 x weight 0.031 = 38.3862\n  DECISION [weighted_mean_of_two]: only two candidates (39.596 and 0.579401, disagreeing by 194.2%); a weighted median is undefined for two values, so submitted their weighted midpoint 38.3862\n  stated consensus: no stated consensus found\n  consensus proxy 41.5; we submit 38.3862, a deviation of -7.50%\n  DERIVED FROM THE P&L: (45.61 operating profit - 13.4 net finance) x (1 - 35.1% tax) / 1590.2m basic shares x 100 = 1.315 pence\n  independent estimate was 38.39 (97% divergence); the derived value is submitted because it is forced consistent with operating profit, share count and tax",
+        "Net fees": "prior-year same period FY2025 (972.4) x (1 + YoY growth -12.68%) = 849.1\n  growth from consecutive pairs: FY2024->FY2025 -12.7% (weight 1.00)\n  post-guidance signal: none found; anchor left unadjusted\n  DECISION [seasonal_trend]: single candidate; submitted as produced\n  stated consensus: no stated consensus found\n  no consensus proxy available for this metric",
+        "Pre-exceptional operating profit": "weighted blend: guidance_anchor+signal 46.2453 x weight 0.969 + seasonal_trend 25.742 x weight 0.031 = 45.6095\n  DECISION [weighted_mean_of_two]: only two candidates (46.2453 and 25.742, disagreeing by 57.0%); a weighted median is undefined for two values, so submitted their weighted midpoint 45.6095\n  stated consensus: range 37-46 (midpoint 43.5, dispersion 10.3%)\n  consensus proxy 43.5; we submit 45.6095, a deviation of +4.85%\n  consensus dispersion 10.3% of the midpoint - wider dispersion means a larger Wall Street error and therefore a larger denominator, so this metric is easier to win than a tightly-clustered one"
       },
       "methods": {
-        "Worldwide net sales and revenues": "seasonal_trend",
-        "Diluted EPS (GAAP)": "reconciled",
-        "Production & Precision Ag operating profit": "seasonal_trend"
+        "Pre-exceptional basic EPS": "reconciled+derived",
+        "Net fees": "seasonal_trend",
+        "Pre-exceptional operating profit": "reconciled"
       },
       "warnings": {
-        "Worldwide net sales and revenues": [
-          "critic raised a concrete objection: Wrong basis: the YoY inputs you used are not for the same metric you\u2019re forecasting. You cite FY2024Q3\u2192FY2025Q3 growth of \u22128.6%, but Deere\u2019s own disclosure for the target metric (\u201cworldwide net sales and revenues\u201d) says Q3 FY2025 decreased 9% to $12.018 billion. Using \u22128.6% suggests you pulled a different series (likely Equipment Operations net sales) to drive the roll-forward, so the FY2026Q3 figure is computed on a mismatched basis."
+        "Pre-exceptional basic EPS": [
+          "guidance residual not calibrated (0 paired observations)",
+          "estimators disagree by 101.6% of the blended value",
+          "deviating -7.5% from the consensus proxy",
+          "critic raised a concrete objection: Wrong period/basis: the submitted 1.31455 GBp is derived from FY2025 inputs (operating profit \u00a345.61m, net finance \u00a313.4m, ETR 35.1%, 1,590.2m shares) and exactly reproduces the reported FY2025 pre-exceptional basic EPS of 1.31p, not an FY2026 forecast. For FY2026 you should apply FY2026 assumptions (including guided ETR c.38%) rather than carry forward FY2025 P&L/tax."
         ],
-        "Diluted EPS (GAAP)": [
-          "seasonal fallback had no prior-year anchor; treat as weak evidence",
-          "estimators disagree by 51.5% of the blended value",
-          "critic raised a concrete objection: Your stated calculation doesn\u2019t equal the submitted value. Using your own inputs: 0.928 \u00d7 4.40311 + 0.072 \u00d7 6.75971 = 4.572785 (USD/share), not 4.57388. The proposed EPS is overstated by ~0.00109 per share versus the described weighting."
-        ],
-        "Production & Precision Ag operating profit": [
-          "critic raised a concrete objection: Your anchor blends in a +49.8% \u201cFY2020Q3\u2192FY2021Q3\u201d move for Production & Precision Ag, but Deere did not report that segment in FY2020; the PPA/Small Ag & Turf segmentation was introduced in FY2021. Unless you\u2019re explicitly using Deere\u2019s official recast quarterly schedules, the FY2020Q3 figure is not like\u2011for\u2011like with FY2021Q3. That contaminates the -12.65% YoY you apply and the resulting 506.6 USDm forecast for FY2026Q3."
+        "Net fees": [],
+        "Pre-exceptional operating profit": [
+          "guidance residual not calibrated (2 paired observations)",
+          "estimators disagree by 45.0% of the blended value",
+          "critic raised a concrete objection: You\u2019ve anchored the forecast to the \u00a345.2m \u201cmarket consensus\u201d figure that Hays cites for H1 FY26 (six months to 31 Dec 2025) pre-exceptional operating profit, not the full FY2026 year. Using that half\u2011year consensus (and a second input that also looks half\u2011year at \u00a325.742m) to submit a full\u2011year FY2026 number means the period basis is wrong\u2014the submitted 45.6095 GBPm is effectively a half\u2011year figure for a full\u2011year metric."
         ]
       },
       "findings": {
-        "Worldwide net sales and revenues": [
-          "critic: Wrong basis: the YoY inputs you used are not for the same metric you\u2019re forecasting. You cite FY2024Q3\u2192FY2025Q3 growth of \u22128.6%, but Deere\u2019s own disclosure for the target metric (\u201cworldwide net sales and revenues\u201d) says Q3 FY2025 decreased 9% to $12.018 billion. Using \u22128.6% suggests you pulled a different series (likely Equipment Operations net sales) to drive the roll-forward, so the FY2026Q3 figure is computed on a mismatched basis."
+        "Net fees": [
+          "critic: no concrete objection found"
         ],
-        "Diluted EPS (GAAP)": [
-          "critic: Your stated calculation doesn\u2019t equal the submitted value. Using your own inputs: 0.928 \u00d7 4.40311 + 0.072 \u00d7 6.75971 = 4.572785 (USD/share), not 4.57388. The proposed EPS is overstated by ~0.00109 per share versus the described weighting."
+        "Pre-exceptional basic EPS": [
+          "guidance: 1.31455 is 96.5% away from the guided midpoint 38 with no explicit range to justify it",
+          "critic: Wrong period/basis: the submitted 1.31455 GBp is derived from FY2025 inputs (operating profit \u00a345.61m, net finance \u00a313.4m, ETR 35.1%, 1,590.2m shares) and exactly reproduces the reported FY2025 pre-exceptional basic EPS of 1.31p, not an FY2026 forecast. For FY2026 you should apply FY2026 assumptions (including guided ETR c.38%) rather than carry forward FY2025 P&L/tax."
         ],
-        "Production & Precision Ag operating profit": [
-          "critic: Your anchor blends in a +49.8% \u201cFY2020Q3\u2192FY2021Q3\u201d move for Production & Precision Ag, but Deere did not report that segment in FY2020; the PPA/Small Ag & Turf segmentation was introduced in FY2021. Unless you\u2019re explicitly using Deere\u2019s official recast quarterly schedules, the FY2020Q3 figure is not like\u2011for\u2011like with FY2021Q3. That contaminates the -12.65% YoY you apply and the resulting 506.6 USDm forecast for FY2026Q3."
+        "Pre-exceptional operating profit": [
+          "critic: You\u2019ve anchored the forecast to the \u00a345.2m \u201cmarket consensus\u201d figure that Hays cites for H1 FY26 (six months to 31 Dec 2025) pre-exceptional operating profit, not the full FY2026 year. Using that half\u2011year consensus (and a second input that also looks half\u2011year at \u00a325.742m) to submit a full\u2011year FY2026 number means the period basis is wrong\u2014the submitted 45.6095 GBPm is effectively a half\u2011year figure for a full\u2011year metric."
         ]
       },
       "identity_issues": []
