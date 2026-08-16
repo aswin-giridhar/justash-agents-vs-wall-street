@@ -48,6 +48,7 @@ def estimate_metric(metric: Metric) -> tuple[object, list, list]:
     log(f"  [{metric.key}] tables={stats.get('from_tables', 0)} "
         f"chunks={stats['chunks']} llm_returned={stats['returned']} "
         f"llm_kept={stats['kept']} rejected_unverifiable_quotes={stats['rejected_quotes']} "
+        f"rejected_out_of_band={stats.get('rejected_out_of_band', 0)} "
         f"total_facts={len(facts)}")
 
     candidates = []

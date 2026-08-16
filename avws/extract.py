@@ -207,13 +207,39 @@ def extract_facts(metric: Metric, max_chunks: int = 18) -> tuple[list[Fact], dic
     haystack = _normalise(corpus_text)
     doc_by_path = {doc.path: doc for doc, _c, _i in chunks}
 
+    from avws.table_facts import normalise as normalise_value
+
     kept: list[Fact] = []
     rejected = 0
+    out_of_band = 0
     for item in raw:
         quote = (item.get("source_quote") or "").strip()
         if not quote or _normalise(quote) not in haystack:
             rejected += 1
             continue
+
+        try:
+            value = float(item["value"])
+        except (KeyError, TypeError, ValueError):
+            rejected += 1
+            continue
+
+        # Basis points are a unit that looks like a number 100x too large. Home
+        # Depot writes "foreign exchange rates negatively impacted total company
+        # comparable sales by approximately 40 basis points"; transcribed as-is
+        # that becomes -40 percentage points instead of -0.4.
+        lowered = quote.lower()
+        if metric.is_percentage and ("basis point" in lowered or "bps" in lowered):
+            value = value / 100.0
+
+        # Same plausibility bands the deterministic path uses. Applying them only
+        # there left the model path unguarded, which is how -40% comparable sales
+        # reached the ledger.
+        checked = normalise_value(metric, value)
+        if checked is None:
+            out_of_band += 1
+            continue
+        value = checked[0]
         ref = item.get("doc_ref", "")
         doc = doc_by_path.get(ref) or next(
             (d for p, d in doc_by_path.items() if ref and ref in p), None
@@ -224,7 +250,7 @@ def extract_facts(metric: Metric, max_chunks: int = 18) -> tuple[list[Fact], dic
                     metric_key=metric.key,
                     company=metric.company,
                     period=item.get("period") or metric.period,
-                    value=float(item["value"]),
+                    value=value,
                     unit=item.get("unit") or metric.units,
                     basis=item["basis"],
                     source_doc=doc.path if doc else (ref or "unknown"),
@@ -242,5 +268,6 @@ def extract_facts(metric: Metric, max_chunks: int = 18) -> tuple[list[Fact], dic
         "returned": len(raw),
         "kept": len(kept),
         "rejected_quotes": rejected,
+        "rejected_out_of_band": out_of_band,
         "from_tables": len(deterministic),
     }

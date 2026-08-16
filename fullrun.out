@@ -1,0 +1,34 @@
+2026-08-16T10:56:07Z  AVWS run start; companies=['HD', 'ADI', 'HAS', 'DE']
+2026-08-16T10:56:07Z  building corpus index
+2026-08-16T10:56:07Z  corpus indexed: 1139 documents
+2026-08-16T10:56:07Z  evidence ledger reset
+2026-08-16T10:56:07Z  [HD] Home Depot - FY2026Q2
+2026-08-16T10:56:07Z    [HD:Net sales] extracting evidence
+2026-08-16T10:56:52Z    [HD:Net sales] tables=34 chunks=18 llm_returned=2 llm_kept=2 rejected_unverifiable_quotes=0 total_facts=36
+2026-08-16T10:56:52Z    [HD:Net sales] guidance_anchor -> no guidance fact, skipped
+2026-08-16T10:57:15Z    [HD:Net sales] build_up -> unavailable: ["build-up unavailable, missing components: ['expected_comp_sales_growth', 'non_comp_contribution']"]
+2026-08-16T10:57:15Z    [HD:Net sales] seasonal_trend -> 46052.5
+2026-08-16T10:57:15Z    [HD:Net sales] reconciled -> 46052.5 via seasonal_trend
+2026-08-16T10:57:15Z    [HD:Adjusted diluted EPS] extracting evidence
+2026-08-16T10:58:17Z    [HD:Adjusted diluted EPS] tables=3 chunks=18 llm_returned=2 llm_kept=2 rejected_unverifiable_quotes=0 total_facts=5
+2026-08-16T10:58:17Z    [HD:Adjusted diluted EPS] guidance_anchor -> no guidance fact, skipped
+2026-08-16T10:58:17Z    [HD:Adjusted diluted EPS] build_up -> no composition registered
+2026-08-16T10:58:17Z    [HD:Adjusted diluted EPS] seasonal_trend -> 4.59956
+2026-08-16T10:58:17Z    [HD:Adjusted diluted EPS] reconciled -> 4.59956 via seasonal_trend
+2026-08-16T10:58:17Z    [HD:Comparable sales, total company] extracting evidence
+2026-08-16T10:59:34Z    [HD:Comparable sales, total company] tables=22 chunks=18 llm_returned=8 llm_kept=8 rejected_unverifiable_quotes=0 total_facts=30
+2026-08-16T10:59:34Z    [HD:Comparable sales, total company] guidance_anchor -> no guidance fact, skipped
+2026-08-16T10:59:34Z    [HD:Comparable sales, total company] build_up -> no composition registered
+2026-08-16T10:59:34Z    [HD:Comparable sales, total company] seasonal_trend -> -25.0875
+2026-08-16T10:59:34Z    [HD:Comparable sales, total company] reconciled -> -25.0875 via seasonal_trend
+2026-08-16T10:59:34Z    [HD] IDENTITY identity: comparable sales -25.0875% is implausible for a mature retailer absent an exceptional event
+2026-08-16T11:00:46Z    [HD:Net sales] GATE identity: comparable sales -25.0875% is implausible for a mature retailer absent an exceptional event
+2026-08-16T11:00:46Z    [HD:Net sales] GATE critic: The growth input “FY2023->FY2024 +24.1%” is wrong for Home Depot’s net sales; the company did not post anything close to +24% annual sales growth in that period (reported results were roughly flat to down low single digits). Including this erroneous +24.1% inflates your median YoY growth to 1.71%; dropping it brings the median to about 0.6%, implying FY2026Q2 ≈ 45,548 USDm rather than 46,052.5 USDm. The forecast is therefore biased upward by a mis-stated prior-year growth figure.
+2026-08-16T11:01:36Z    [HD:Adjusted diluted EPS] GATE identity: comparable sales -25.0875% is implausible for a mature retailer absent an exceptional event
+2026-08-16T11:01:36Z    [HD:Adjusted diluted EPS] GATE critic: Wrong basis: you start from an adjusted diluted EPS figure for FY2025Q2 ($4.68) but one of the two YoY growth inputs you apply (FY2025Q1→FY2026Q1: −3.7%) is based on reported diluted EPS (GAAP), not adjusted. Applying a GAAP growth rate to an adjusted EPS base yields a mismatched-basis estimate for FY2026Q2. This can be checked by comparing HD’s FY2026 Q1 release (YoY change is for GAAP diluted EPS) against the FY2025 Q2 figure you cite as “adjusted.”
+2026-08-16T11:02:04Z    [HD:Comparable sales, total company] GATE identity: comparable sales -25.0875% is implausible for a mature retailer absent an exceptional event
+2026-08-16T11:02:04Z    [HD:Comparable sales, total company] GATE critic: You treated the FY2025Q2 input as −40% comparable sales based on the line “foreign exchange rates negatively impacted total company comparable sales by approximately 40 basis points.” That figure is 40 bps (≈−0.40%), not −40%, and it refers to the FX impact component, not the total comparable sales. Using −40 instead of −0.40 drives your average to −25.09% by a two-orders-of-magnitude unit error on a non-comparable measure.
+2026-08-16T11:02:04Z  [HD] wrote submission\HD-FY2026Q2.xlsx
+2026-08-16T11:02:04Z  [HD] wrote research\HD.md
+2026-08-16T11:02:04Z  [ADI] Analog Devices - FY2026Q3
+2026-08-16T11:02:04Z    [ADI:Revenue] extracting evidence

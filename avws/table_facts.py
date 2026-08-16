@@ -120,7 +120,13 @@ def normalise(metric: Metric, value: float) -> tuple[float, str] | None:
     if _looks_like_a_year(value):
         return None
 
-    for factor in _RESCALE:
+    # Rescaling is only meaningful for money metrics, where filings genuinely
+    # report in units, thousands or millions. A percentage is already in its unit:
+    # "repairing" a -40% reading into -0.04% would invent a number rather than
+    # correct one. Percentages are accepted or rejected, never rescaled.
+    factors = (1.0,) if metric.is_percentage else _RESCALE
+
+    for factor in factors:
         scaled = value * factor
         if low <= abs(scaled) <= high or (low <= scaled <= high):
             note = "" if factor == 1.0 else f"rescaled by {factor:g} into {metric.units}"
