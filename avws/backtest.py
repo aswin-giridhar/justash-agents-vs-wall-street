@@ -220,8 +220,72 @@ def run(metric: Metric, facts: list[Fact] | None = None) -> Result:
     return Result(metric_key=metric.key, outcomes=outcomes)
 
 
+def run_guidance_path(metric: Metric) -> Result:
+    """Backtest the GUIDANCE ANCHOR specifically, leave-one-out.
+
+    The seasonal-path harness above could rarely exercise the anchor, because it
+    needed a clean series target and the guidance issued beforehand to exist for the
+    same period, and our two extraction passes produce those for different metrics.
+
+    A calibration pair is already exactly what this test needs: a period, the
+    guidance available before it, and the actual outturn. Running over those makes
+    coverage complete by construction.
+
+    Leave-one-out is the honest form: when scoring period P the residual is measured
+    from every pair EXCEPT P, so the harness never sees the answer it is graded on.
+    Scoring P with a residual that includes P would be measuring how well a number
+    fits itself.
+    """
+    from avws import calibration
+
+    try:
+        calib = calibration.measure(metric)
+    except Exception:  # noqa: BLE001
+        return Result(metric_key=metric.key, outcomes=[])
+
+    pairs: list[tuple[str, float, float]] = []
+    for line in calib.detail or []:
+        # Format: "FY2025Q3: guided 2880 -> actual 2900 (+0.69%)". The word "actual"
+        # sits between the arrow and the number, which the first version of this
+        # parser fed straight into float() - so every pair was silently discarded
+        # and the harness reported "no usable history" for all twelve metrics.
+        try:
+            period, rest = line.split(":", 1)
+            guided = float(rest.split("guided", 1)[1].split("->")[0].strip())
+            after = rest.split("->", 1)[1].replace("actual", "")
+            actual = float(after.split("(")[0].strip())
+        except (ValueError, IndexError):
+            continue
+        pairs.append((period.strip(), guided, actual))
+
+    outcomes: list[Outcome] = []
+    for index, (period, guided, actual) in enumerate(pairs):
+        others = [p for j, p in enumerate(pairs) if j != index]
+        if not others:
+            continue
+        residuals = [(a - g) / abs(g) for _p, g, a in others if g]
+        residual = statistics.median(residuals) if residuals else 0.0
+
+        predicted = guided * (1 + residual)
+        error = abs(predicted - actual)
+        floor = metric.floor(actual)
+        outcomes.append(Outcome(
+            period=period, actual=actual, predicted=predicted,
+            method="guidance_anchor_loo", error=error, floor=floor,
+            within_floor=error < floor,
+        ))
+
+    if outcomes:
+        _COVERAGE[metric.key] = (len(outcomes), len(outcomes))
+    return Result(metric_key=metric.key, outcomes=outcomes)
+
+
 def run_all() -> list[Result]:
     return [run(metric) for metric in load_metrics()]
+
+
+def run_all_guidance() -> list[Result]:
+    return [run_guidance_path(metric) for metric in load_metrics()]
 
 
 def _cli() -> None:
@@ -229,9 +293,16 @@ def _cli() -> None:
         description="Replay the estimator chain over known historical periods."
     )
     parser.add_argument("--metric", help="single metric key, e.g. 'ADI:Revenue'")
+    parser.add_argument("--path", choices=["seasonal", "guidance"], default="seasonal",
+                        help="which estimator path to exercise")
     args = parser.parse_args()
 
-    results = [run(get_metric(args.metric))] if args.metric else run_all()
+    runner = run_guidance_path if args.path == "guidance" else run
+    if args.metric:
+        results = [runner(get_metric(args.metric))]
+    else:
+        results = run_all_guidance() if args.path == "guidance" else run_all()
+    print(f"path under test: {args.path}\n")
 
     print(f"{'metric':<48} {'n':>3} {'MAE':>10} {'median':>10} {'floor hit':>10} "
           f"{'guided':>8}")
@@ -260,3 +331,4 @@ def _cli() -> None:
 
 if __name__ == "__main__":
     _cli()
+

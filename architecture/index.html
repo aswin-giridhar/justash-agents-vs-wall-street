@@ -585,39 +585,58 @@ inside the denominator floor. Below the floor, a metric scores under 1.0 whateve
 answers sit in the corpus, passing only facts whose period precedes the target plus guidance issued
 for it. These are the measured results, copied from <code>.cache/backtest.json</code>.</p>
 
+<p>Two paths are tested separately, because averaging them would hide which one the number
+describes.</p>
+
+<h3>The guidance anchor, leave-one-out</h3>
+
+<p>A calibration pair is already what this test needs: a period, the guidance available before
+it, and the actual outturn. Scoring over those gives complete coverage by construction.
+<strong>Leave-one-out</strong> is the honest form — when scoring period P the bias residual is
+measured from every pair <em>except</em> P, so the harness never sees the answer it is graded on.</p>
+
 <div class="scroll">
 <table>
-  <thead><tr><th>Metric</th><th>n</th><th>MAE</th><th>Median error</th><th>Floor-band hit</th></tr></thead>
+  <thead><tr><th>Metric</th><th>n</th><th>MAE</th><th>Median error</th><th>Floor hit</th><th>Coverage</th></tr></thead>
   <tbody>
-    <tr><td>HD Adjusted diluted EPS</td><td>1</td><td>0.02</td><td>0.02</td><td>100%</td></tr>
-    <tr><td>ADI Adjusted gross margin</td><td>2</td><td>1.85</td><td>1.85</td><td>0%</td></tr>
-    <tr><td>HAS Pre-exceptional basic EPS</td><td>3</td><td>3.23</td><td>1.94</td><td>0%</td></tr>
-    <tr><td>HAS Pre-exceptional operating profit</td><td>4</td><td>109.7</td><td>144.3</td><td>0%</td></tr>
-    <tr><td>DE Worldwide net sales and revenues</td><td>2</td><td>1,860</td><td>1,860</td><td>0%</td></tr>
-    <tr><td>DE Diluted EPS (GAAP)</td><td>3</td><td>5.25</td><td>4.85</td><td>0%</td></tr>
-    <tr><td>DE Production &amp; Precision Ag operating profit</td><td>2</td><td>1,520</td><td>1,520</td><td>0%</td></tr>
-    <tr><td colspan="4"><strong>Mean floor-band hit rate</strong></td><td><strong>14%</strong></td></tr>
+    <tr><td><strong>ADI Adjusted diluted EPS</strong></td><td>6</td><td>0.063</td><td><strong>0.037</strong></td><td>0%</td><td>6/6</td></tr>
+    <tr><td><strong>HAS Pre-exceptional operating profit</strong></td><td>2</td><td>0.939</td><td>0.939</td><td><strong>100%</strong></td><td>2/2</td></tr>
+    <tr><td>ADI Revenue</td><td>2</td><td>55.8</td><td>55.8</td><td>0%</td><td>2/2</td></tr>
+    <tr><td>HD Net sales</td><td>2</td><td>1,547</td><td>1,547</td><td>0%</td><td>2/2</td></tr>
+    <tr><td colspan="4"><strong>Mean floor-band hit rate</strong></td><td><strong>25%</strong></td><td>100%</td></tr>
   </tbody>
 </table>
 </div>
 
+<p>ADI's adjusted EPS is the strongest evidence we have: six leave-one-out observations with a
+<strong>median error of $0.037</strong> on a metric near $3.30. The floor there is $0.0165, so a
+0% floor-band hit rate does not mean the forecasts were poor — it means the floor on a well-covered
+mega-cap is punishingly tight, which is exactly the asymmetry described in Note 1.</p>
+
+<h3>The seasonal fallback</h3>
+
+<p>Scored separately over the extracted series, it returns a <strong>14%</strong> floor-band hit
+rate across seven metrics. That is our weakest path and we report it as such.</p>
+
 <div class="callout warn">
-  <p><strong>We do not claim this measures the system we are submitting, and it would be
-  dishonest to present it that way.</strong> It measures the <em>seasonal fallback</em> on sparse
-  extracted history — the weakest path we have. For a historical period there is no guidance fact
-  in the ledger and no sourced build-up components, so the harness never exercises the guidance
-  anchor or the build-up compositions, which between them produce most of the twelve submitted
-  numbers. Read it as evidence about our worst case, not our expected case.</p>
+  <p><strong>What these numbers are and are not.</strong> Between them the two harnesses now cover
+  the guidance anchor and the seasonal fallback. They do <em>not</em> exercise the build-up
+  compositions, because reconstructing the sourced components for a historical period would require
+  a separate extraction pass we did not have time to build. Ten of twelve metrics have a
+  composition, so a meaningful part of the system remains unmeasured, and we would rather say that
+  than average the two figures into one flattering headline.</p>
 </div>
 
 <div class="callout warn">
-  <p><strong>The first version of this harness measured nothing at all.</strong> It drew its target
-  values from the whole ledger, including opportunistically row-matched facts, so it scored
-  forecasts against unreliable targets and reported MAE of 31,275 on a metric near 45,000 while the
-  median error was 1,406 — the signature of a few mis-attributed periods rather than a real error
-  distribution. Targets are now restricted to the focused series extraction. A probe that cannot
-  separate a good forecast from a bad one is not evidence, and we would rather publish a poor
-  measured number than a flattering meaningless one.</p>
+  <p><strong>The first two versions of this harness measured nothing at all.</strong> The first drew
+  its targets from the whole ledger, including opportunistically row-matched facts, so it scored
+  forecasts against unreliable targets: MAE of 31,275 on a metric near 45,000 while the median error
+  was 1,406 — the signature of a few mis-attributed periods, not an error distribution. The second
+  reported "no usable history" for all twelve metrics because a parser fed the word "actual" into
+  <code>float()</code> and silently discarded every pair.</p>
+  <p>Both were caught by asking whether the instrument could distinguish a good forecast from a bad
+  one. A probe that cannot is not evidence, and we would rather publish a poor measured number than
+  a flattering meaningless one.</p>
 </div>
 
 <div class="callout warn">

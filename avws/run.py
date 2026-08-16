@@ -22,8 +22,8 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone
 
 from avws import (
-    calibration, consensus, decide, ledger, linkage, reconcile, series, signals,
-    validate,
+    calibration, consensus, decide, ledger, linkage, reconcile, revision, series,
+    signals, validate,
 )
 from avws.config import LOG_DIR, ROOT, ensure_dirs
 from avws.corpus import build_index
@@ -92,8 +92,15 @@ def estimate_metric(metric: Metric) -> tuple[object, list, list]:
         residual_pct=calib.residual if calib.measured else None,
         calibration_pairs=calib.pairs, calibration_detail=calib.detail,
     )
+    # Revision breadth: how expectations for this period have MOVED, from restated
+    # consensus and the company's own guidance path. Vendors sell this; we recover a
+    # usable version from the filings.
+    rev = revision.measure(metric, use_cache=_USE_SERIES_CACHE)
+    log(f"  [{metric.key}] revision: {rev.describe()}")
+
     if anchor:
         anchor = signals.apply(anchor, metric, tilt)
+        anchor = revision.apply(anchor, metric, rev)
         candidates.append(anchor)
         log(f"  [{metric.key}] guidance_anchor -> {anchor.value:.6g} "
             f"(method {anchor.method}, confidence {anchor.confidence:.2f})")
