@@ -104,14 +104,21 @@ def measure(metric: Metric, use_cache: bool = True) -> Calibration:
 
     build_index()
     chunks, seen = [], set()
+    # Deliberately NOT restricted to filings, and reaching back further. Most
+    # metrics previously yielded fewer than three verified pairs, which is noise
+    # wearing the costume of a calibration. Guidance is issued in press releases but
+    # discussed - and compared with the outturn - on earnings calls, so excluding
+    # transcripts threw away half the available evidence.
     for query in (
         f"outlook for the next quarter we are forecasting {metric.label}",
         f"we expect {metric.label} guidance range midpoint",
         f"{metric.label} came in above below our outlook guidance",
         f"{metric.label} results compared with our prior outlook",
+        f"{metric.label} above the high end of our outlook exceeded guidance",
+        f"versus the guidance we gave last quarter {metric.label} delivered",
     ):
         for doc, _s, chunk in search(query, ticker=metric.ticker,
-                                     doc_type="FILING", since="2021-01-01", k=8):
+                                     since="2019-01-01", k=10):
             key = f"{doc.path}:{hash(chunk)}"
             if key in seen:
                 continue
@@ -121,7 +128,7 @@ def measure(metric: Metric, use_cache: bool = True) -> Calibration:
 
     result = Calibration(metric.key, 0.0, 0, [], 0.0, 0.0)
     if chunks:
-        body = "\n\n".join(chunks[:30])
+        body = "\n\n".join(chunks[:36])
         haystack = " ".join(body.split()).lower()
         payload = complete(
             PAIR_SYSTEM,

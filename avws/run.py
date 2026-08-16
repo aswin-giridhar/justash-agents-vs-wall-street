@@ -22,7 +22,8 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone
 
 from avws import (
-    calibration, decide, ledger, linkage, reconcile, series, signals, validate,
+    calibration, consensus, decide, ledger, linkage, reconcile, series, signals,
+    validate,
 )
 from avws.config import LOG_DIR, ROOT, ensure_dirs
 from avws.corpus import build_index
@@ -128,7 +129,9 @@ def estimate_metric(metric: Metric) -> tuple[object, list, list]:
     # Decision layer: pick the value that minimises expected score rather than the
     # value that is "right on average", and record where consensus probably sits.
     weights = reconcile.weights_for(candidates)
-    decision = decide.choose(metric, candidates, weights, facts)
+    stated = consensus.find(metric, use_cache=_USE_SERIES_CACHE)
+    log(f"  [{metric.key}] consensus: {stated.describe()}")
+    decision = decide.choose(metric, candidates, weights, facts, stated=stated)
     blended.value = decision.value
     blended.derivation += f"\n  DECISION [{decision.method}]: {decision.describe()}"
     if decision.consensus_proxy is not None and abs(decision.deviation_pct) > 0.05:

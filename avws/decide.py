@@ -43,26 +43,49 @@ class Decision:
     candidates: list[tuple[str, float, float]]  # method, value, weight
     spread_pct: float
     floor: float | None
+    consensus_dispersion: float | None = None
+    consensus_note: str = ""
 
     def describe(self) -> str:
         lines = [self.rationale]
+        if self.consensus_note:
+            lines.append(f"stated consensus: {self.consensus_note}")
         if self.consensus_proxy is not None:
             lines.append(
                 f"consensus proxy {self.consensus_proxy:.6g}; we submit "
                 f"{self.value:.6g}, a deviation of {self.deviation_pct:+.2%}"
             )
+            if self.consensus_dispersion is not None:
+                lines.append(
+                    f"consensus dispersion {self.consensus_dispersion:.1%} of the "
+                    f"midpoint - wider dispersion means a larger Wall Street error "
+                    f"and therefore a larger denominator, so this metric is easier "
+                    f"to win than a tightly-clustered one"
+                )
         else:
             lines.append("no consensus proxy available for this metric")
         return "\n  ".join(lines)
 
 
-def consensus_proxy(metric: Metric, facts: list[Fact]) -> float | None:
+def consensus_proxy(
+    metric: Metric, facts: list[Fact], stated: "Consensus | None" = None
+) -> float | None:
     """Best available stand-in for where the analyst mean sits.
 
-    Company guidance for the exact period is the strongest public anchor every
-    analyst shares, so consensus clusters near its midpoint. Without guidance we
-    have no defensible proxy and say so rather than inventing one.
+    Preference order, best evidence first:
+
+    1. A consensus figure the company **states outright**. That is not a proxy at
+       all - it is the number, quoted by the party managing expectations against it.
+    2. Company guidance for the exact period, whose midpoint consensus clusters
+       around because it is the strongest public signal every analyst shares.
+
+    Without either we have no defensible proxy and say so rather than inventing one.
     """
+    if stated is not None and stated.found:
+        midpoint = stated.midpoint
+        if midpoint is not None:
+            return midpoint
+
     mids = [f.value for f in facts
             if f.basis == "guidance_mid" and f.period == metric.period]
     if mids:
@@ -82,6 +105,7 @@ def choose(
     candidates: list[Estimate],
     weights: dict[str, float],
     facts: list[Fact],
+    stated: "Consensus | None" = None,
 ) -> Decision:
     """Pick the submitted value from the weighted candidate distribution."""
     usable = [e for e in candidates if e.confidence > 0.0]
@@ -139,7 +163,24 @@ def choose(
             f"{weighted_mean:.6g} (median {median:.6g} is materially the same)"
         )
 
-    proxy = consensus_proxy(metric, facts)
+    proxy = consensus_proxy(metric, facts, stated)
+
+    # Where the company has published the consensus range AND said where in it it
+    # expects to land, that statement is better evidence about the outturn than any
+    # estimator we have: it comes from the party that already knows. It is blended
+    # rather than substituted, because a company can be wrong about itself.
+    if stated is not None and stated.found and stated.position not in ("unstated",):
+        target = stated.implied_target()
+        if target is not None and chosen:
+            blended_with_company = 0.5 * chosen + 0.5 * target
+            why += (
+                f". The company states the consensus {stated.describe()}, implying "
+                f"{target:.6g}; submitted the midpoint of that and our own "
+                f"{chosen:.6g}, giving {blended_with_company:.6g}"
+            )
+            chosen = blended_with_company
+            method += "+stated_consensus"
+
     deviation = ((chosen - proxy) / abs(proxy)) if proxy else None
     floor = metric.floor(chosen) if chosen else None
 
@@ -148,4 +189,6 @@ def choose(
         deviation_pct=deviation,
         candidates=[(e.method, e.value, weights.get(e.method, 0.0)) for e in usable],
         spread_pct=spread, floor=floor,
+        consensus_dispersion=stated.dispersion if stated else None,
+        consensus_note=stated.describe() if stated else "",
     )

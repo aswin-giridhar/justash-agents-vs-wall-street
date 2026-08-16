@@ -1,160 +1,161 @@
-2026-08-16T13:20:08Z  AVWS run start; companies=['HD', 'ADI', 'HAS', 'DE']
-2026-08-16T13:20:08Z  models: transcription=gpt-5 reasoning=gpt-5; series_cache=off (--fresh)
-2026-08-16T13:20:08Z  building corpus index
-2026-08-16T13:20:08Z  corpus indexed: 1139 documents
-2026-08-16T13:20:08Z  evidence ledger reset
-2026-08-16T13:20:08Z  running 4 companies concurrently
-2026-08-16T13:20:08Z  [HD] Home Depot - FY2026Q2
-2026-08-16T13:20:08Z  [ADI] Analog Devices - FY2026Q3
-2026-08-16T13:20:08Z  [HAS] Hays plc - FY2026
-2026-08-16T13:20:08Z    [HD:Net sales] extracting evidence
-2026-08-16T13:20:08Z    [HD:Adjusted diluted EPS] extracting evidence
-2026-08-16T13:20:08Z  [DE] Deere & Company - FY2026Q3
-2026-08-16T13:20:08Z    [HAS:Net fees] extracting evidence
-2026-08-16T13:20:08Z    [ADI:Revenue] extracting evidence
-2026-08-16T13:20:08Z    [HD:Comparable sales, total company] extracting evidence
-2026-08-16T13:20:08Z    [DE:Worldwide net sales and revenues] extracting evidence
-2026-08-16T13:20:08Z    [HAS:Pre-exceptional basic EPS] extracting evidence
-2026-08-16T13:20:08Z    [ADI:Adjusted diluted EPS] extracting evidence
-2026-08-16T13:20:08Z    [DE:Diluted EPS (GAAP)] extracting evidence
-2026-08-16T13:20:08Z    [HAS:Pre-exceptional operating profit] extracting evidence
-2026-08-16T13:20:08Z    [ADI:Adjusted gross margin] extracting evidence
-2026-08-16T13:20:08Z    [DE:Production & Precision Ag operating profit] extracting evidence
-2026-08-16T13:21:21Z    [HD:Adjusted diluted EPS] tables=6 chunks=18 llm_returned=2 llm_kept=2 rejected_unverifiable_quotes=0 rejected_out_of_band=0 total_facts=8
-2026-08-16T13:21:35Z    [HAS:Net fees] tables=0 chunks=18 llm_returned=3 llm_kept=3 rejected_unverifiable_quotes=0 rejected_out_of_band=0 total_facts=3
-2026-08-16T13:21:39Z    [DE:Worldwide net sales and revenues] tables=15 chunks=18 llm_returned=2 llm_kept=2 rejected_unverifiable_quotes=0 rejected_out_of_band=0 total_facts=17
-2026-08-16T13:21:40Z    [HD:Comparable sales, total company] tables=22 chunks=18 llm_returned=3 llm_kept=2 rejected_unverifiable_quotes=0 rejected_out_of_band=1 total_facts=24
-2026-08-16T13:21:43Z    [HAS:Pre-exceptional basic EPS] tables=0 chunks=18 llm_returned=3 llm_kept=3 rejected_unverifiable_quotes=0 rejected_out_of_band=0 total_facts=3
-2026-08-16T13:21:47Z    [HD:Adjusted diluted EPS] series: returned=3 kept=3 cached=False -> FY2023Q2=4.68, FY2024Q2=4.67, FY2025Q2=4.68
-2026-08-16T13:21:48Z    [HD:Net sales] tables=40 chunks=18 llm_returned=4 llm_kept=3 rejected_unverifiable_quotes=0 rejected_out_of_band=1 total_facts=43
-2026-08-16T13:21:52Z    [ADI:Revenue] tables=45 chunks=18 llm_returned=5 llm_kept=5 rejected_unverifiable_quotes=0 rejected_out_of_band=0 total_facts=50
-2026-08-16T13:21:54Z    [HAS:Net fees] series: returned=0 kept=0 cached=False -> none; falling back to harvested facts
-2026-08-16T13:22:01Z    [DE:Worldwide net sales and revenues] series: returned=4 kept=4 cached=False -> FY2021Q3=11527, FY2023Q3=15801, FY2024Q3=13152, FY2025Q3=12018
-2026-08-16T13:22:03Z    [ADI:Revenue] series: returned=0 kept=0 cached=False -> none; falling back to harvested facts
-2026-08-16T13:22:05Z    [HD:Comparable sales, total company] series: returned=2 kept=2 cached=False -> FY2024Q2=-3.3, FY2025Q2=1
-2026-08-16T13:22:06Z    [HD:Adjusted diluted EPS] signal tilt +0.0000 (cap 0.060) from 0 verified signals
-2026-08-16T13:22:09Z    [ADI:Adjusted gross margin] tables=20 chunks=18 llm_returned=12 llm_kept=2 rejected_unverifiable_quotes=0 rejected_out_of_band=10 total_facts=22
-2026-08-16T13:22:18Z    [HD:Comparable sales, total company] signal tilt +0.0000 (cap 1.000) from 0 verified signals
-2026-08-16T13:22:19Z    [DE:Worldwide net sales and revenues] signal tilt +0.0000 (cap 0.025) from 0 verified signals
-2026-08-16T13:22:21Z    [HAS:Pre-exceptional basic EPS] series: returned=5 kept=5 cached=False -> FY2020=5.28, FY2021=3.67, FY2023=8.59, FY2024=4.03, FY2025=1.31
-2026-08-16T13:22:22Z    [HD:Net sales] series: returned=2 kept=2 cached=False -> FY2024Q2=43200, FY2025Q2=45300
-2026-08-16T13:22:24Z    [DE:Diluted EPS (GAAP)] tables=14 chunks=18 llm_returned=30 llm_kept=29 rejected_unverifiable_quotes=1 rejected_out_of_band=0 total_facts=43
-2026-08-16T13:22:26Z    [HAS:Net fees] signal tilt +0.0000 (cap 0.025) from 0 verified signals
-2026-08-16T13:22:30Z    [HD:Adjusted diluted EPS] calibration: guidance bias not measured: only 1 verified guidance/actual pairs (need 3); residual set to zero
-2026-08-16T13:22:30Z    [HD:Adjusted diluted EPS] guidance_anchor -> no guidance fact, skipped
-2026-08-16T13:22:30Z    [ADI:Adjusted diluted EPS] tables=17 chunks=16 llm_returned=9 llm_kept=9 rejected_unverifiable_quotes=0 rejected_out_of_band=0 total_facts=26
-2026-08-16T13:22:31Z    [DE:Production & Precision Ag operating profit] tables=18 chunks=18 llm_returned=34 llm_kept=22 rejected_unverifiable_quotes=12 rejected_out_of_band=0 total_facts=40
-2026-08-16T13:22:34Z    [ADI:Revenue] signal tilt +0.0075 (cap 0.025) from 1 verified signals
-2026-08-16T13:22:34Z        signal above 0.30: Potential near‑term price increases would raise ASPs and lift Q3 revenue versus the guided midpoint if volumes
-2026-08-16T13:22:36Z    [HD:Comparable sales, total company] calibration: guidance bias not measured: only 0 verified guidance/actual pairs (need 3); residual set to zero
-2026-08-16T13:22:36Z    [ADI:Adjusted gross margin] series: returned=4 kept=4 cached=False -> FY2020Q3=69.9, FY2021Q3=71.6, FY2022Q3=74.1, FY2023Q3=72.2
-2026-08-16T13:22:36Z    [HD:Comparable sales, total company] guidance_anchor -> no guidance fact, skipped
-2026-08-16T13:22:36Z    [DE:Worldwide net sales and revenues] calibration: guidance bias not measured: only 0 verified guidance/actual pairs (need 3); residual set to zero
-2026-08-16T13:22:36Z    [DE:Worldwide net sales and revenues] guidance_anchor -> no guidance fact, skipped
-2026-08-16T13:22:37Z    [HD:Net sales] signal tilt +0.0000 (cap 0.025) from 0 verified signals
-2026-08-16T13:22:42Z    [HAS:Pre-exceptional operating profit] tables=0 chunks=18 llm_returned=8 llm_kept=8 rejected_unverifiable_quotes=0 rejected_out_of_band=0 total_facts=8
-2026-08-16T13:22:45Z    [HD:Comparable sales, total company] build_up -> 1.13333
-2026-08-16T13:22:45Z    [HD:Comparable sales, total company] seasonal_trend -> -0.075 (method seasonal_trend)
-2026-08-16T13:22:45Z    [HD:Comparable sales, total company] decision -> 1.0142 via weighted_mean_of_two (spread 228.3%, consensus proxy n/a)
-2026-08-16T13:22:52Z    [DE:Worldwide net sales and revenues] build_up -> unavailable: ["build-up unavailable, missing components: ['fy26_guided_net_sales_change']"]
-2026-08-16T13:22:52Z    [DE:Worldwide net sales and revenues] seasonal_trend -> 10614.8 (method seasonal_trend)
-2026-08-16T13:22:52Z    [DE:Worldwide net sales and revenues] decision -> 10614.8 via seasonal_trend (spread 0.0%, consensus proxy n/a)
-2026-08-16T13:22:53Z    [ADI:Adjusted diluted EPS] series: returned=2 kept=2 cached=False -> FY2021Q3=1.72, FY2022Q3=2.52
-2026-08-16T13:22:54Z    [HAS:Net fees] calibration: guidance bias not measured: only 0 verified guidance/actual pairs (need 3); residual set to zero
-2026-08-16T13:22:54Z    [HAS:Net fees] guidance_anchor -> no guidance fact, skipped
-2026-08-16T13:22:54Z    [DE:Diluted EPS (GAAP)] series: returned=5 kept=5 cached=False -> FY2020Q3=2.57, FY2021Q3=5.32, FY2022Q3=6.16, FY2023Q3=10.2, FY2024Q3=6.29
-2026-08-16T13:23:00Z    [ADI:Revenue] calibration: guidance bias not measured: only 1 verified guidance/actual pairs (need 3); residual set to zero
-2026-08-16T13:23:00Z    [ADI:Revenue] guidance_anchor -> 3929.25 (method guidance_anchor+signal, confidence 0.75)
-2026-08-16T13:23:00Z    [ADI:Revenue] build_up -> no composition registered
-2026-08-16T13:23:00Z    [ADI:Revenue] seasonal_trend -> 3112.9 (method seasonal_trend)
-2026-08-16T13:23:00Z    [ADI:Revenue] decision -> 3903.94 via weighted_mean_of_two (spread 23.2%, consensus proxy 3900.0)
-2026-08-16T13:23:01Z    [HAS:Pre-exceptional basic EPS] signal tilt +0.0525 (cap 0.060) from 2 verified signals
-2026-08-16T13:23:01Z        signal above 0.90: Explicitly positioning full-year profit at the top of consensus signals upside versus the midpoint, and higher
-2026-08-16T13:23:01Z        signal above 0.85: Management states results will be ahead of consensus, reinforcing an above-midpoint outcome for FY26 and imply
-2026-08-16T13:23:03Z    [HD:Adjusted diluted EPS] build_up -> unavailable: ["build-up unavailable, missing components: ['fy26_guided_adjusted_eps_growth']"]
-2026-08-16T13:23:03Z    [HD:Adjusted diluted EPS] seasonal_trend -> 4.68251 (method seasonal_trend)
-2026-08-16T13:23:03Z    [HD:Adjusted diluted EPS] decision -> 4.68251 via seasonal_trend (spread 0.0%, consensus proxy n/a)
-2026-08-16T13:23:10Z    [HAS:Net fees] build_up -> unavailable: ["build-up unavailable, missing components: ['h1_fy26_net_fees', 'h2_fy25_net_fees', 'h2_fy26_actual_growth']"]
-2026-08-16T13:23:10Z    [HAS:Net fees] seasonal_trend -> 844.357 (method seasonal_trend)
-2026-08-16T13:23:10Z    [HAS:Net fees] decision -> 844.357 via seasonal_trend (spread 0.0%, consensus proxy n/a)
-2026-08-16T13:23:11Z    [HAS:Pre-exceptional basic EPS] calibration: guidance bias not measured: only 0 verified guidance/actual pairs (need 3); residual set to zero
-2026-08-16T13:23:11Z    [HAS:Pre-exceptional basic EPS] guidance_anchor -> no guidance fact, skipped
-2026-08-16T13:23:11Z    [DE:Diluted EPS (GAAP)] signal tilt +0.0000 (cap 0.060) from 0 verified signals
-2026-08-16T13:23:18Z    [DE:Production & Precision Ag operating profit] series: returned=4 kept=4 cached=False -> FY2020Q3=605, FY2021Q3=906, FY2024Q3=1162, FY2025Q3=580
-2026-08-16T13:23:24Z    [HAS:Pre-exceptional basic EPS] build_up -> unavailable: ["build-up unavailable, missing components: ['fy26_effective_tax_rate', 'fy26_net_finance_charge', 'fy26_operating_profit', 'weighted_average_basic_shares']"]
-2026-08-16T13:23:24Z    [HAS:Pre-exceptional basic EPS] seasonal_trend -> 0.60982 (method seasonal_trend+signal)
-2026-08-16T13:23:24Z    [HAS:Pre-exceptional basic EPS] decision -> 0.60982 via seasonal_trend+signal (spread 0.0%, consensus proxy n/a)
-2026-08-16T13:23:25Z    [HAS:Pre-exceptional operating profit] series: returned=6 kept=6 cached=False -> FY2020=135, FY2021=95.1, FY2022=210.1, FY2023=197, FY2024=105.1, FY2025=45.6
-2026-08-16T13:23:27Z    [ADI:Adjusted diluted EPS] signal tilt +0.0000 (cap 0.060) from 0 verified signals
-2026-08-16T13:23:29Z    [DE:Diluted EPS (GAAP)] calibration: guidance bias not measured: only 0 verified guidance/actual pairs (need 3); residual set to zero
-2026-08-16T13:23:29Z    [DE:Diluted EPS (GAAP)] guidance_anchor -> no guidance fact, skipped
-2026-08-16T13:23:31Z    [DE:Production & Precision Ag operating profit] signal tilt +0.0000 (cap 0.025) from 0 verified signals
-2026-08-16T13:23:34Z    [HD:Net sales] calibration: guidance bias not measured: only 1 verified guidance/actual pairs (need 3); residual set to zero
-2026-08-16T13:23:34Z    [HD:Net sales] guidance_anchor -> no guidance fact, skipped
-2026-08-16T13:23:39Z    [ADI:Adjusted gross margin] signal tilt -0.0167 (cap 1.000) from 3 verified signals
-2026-08-16T13:23:39Z        signal below 0.70: A one-time 50 bps pricing uplift that helped earlier margins will not be present in the target quarter, creati
-2026-08-16T13:23:39Z        signal above 0.35: Discussion of potential incremental price increases during the quarter suggests additional pricing tailwind th
-2026-08-16T13:23:39Z        signal above 0.30: Sustained bookings strength and record data center orders point to a favorable mix toward higher-margin busine
-2026-08-16T13:23:50Z    [HD:Net sales] build_up -> unavailable: ["build-up unavailable, missing components: ['expected_comp_sales_growth', 'non_comp_contribution']"]
-2026-08-16T13:23:50Z    [HD:Net sales] seasonal_trend -> 47502.1 (method seasonal_trend)
-2026-08-16T13:23:50Z    [HD:Net sales] decision -> 47502.1 via seasonal_trend (spread 0.0%, consensus proxy n/a)
-2026-08-16T13:23:50Z    [HD] LINKAGE no linked derivation registered for this company
-2026-08-16T13:23:50Z    [HD] identity checks: no violations
-2026-08-16T13:23:53Z    [DE:Production & Precision Ag operating profit] calibration: guidance bias not measured: only 0 verified guidance/actual pairs (need 3); residual set to zero
-2026-08-16T13:23:53Z    [DE:Production & Precision Ag operating profit] guidance_anchor -> no guidance fact, skipped
-2026-08-16T13:23:54Z    [ADI:Adjusted diluted EPS] calibration: guidance bias not measured: only 0 verified guidance/actual pairs (need 3); residual set to zero
-2026-08-16T13:23:54Z    [ADI:Adjusted diluted EPS] guidance_anchor -> 3.3 (method guidance_anchor, confidence 0.70)
-2026-08-16T13:23:54Z    [ADI:Adjusted diluted EPS] build_up -> no composition registered
-2026-08-16T13:23:54Z    [ADI:Adjusted diluted EPS] seasonal_trend -> 11.6115 (method seasonal_trend)
-2026-08-16T13:23:54Z    [ADI:Adjusted diluted EPS] decision -> 3.47437 via weighted_mean_of_two (spread 111.5%, consensus proxy 3.3)
-2026-08-16T13:23:54Z    [ADI:Adjusted gross margin] calibration: guidance bias not measured: only 0 verified guidance/actual pairs (need 3); residual set to zero
-2026-08-16T13:23:54Z    [ADI:Adjusted gross margin] guidance_anchor -> no guidance fact, skipped
-2026-08-16T13:24:04Z    [HAS:Pre-exceptional operating profit] signal tilt +0.0175 (cap 0.025) from 2 verified signals
-2026-08-16T13:24:04Z        signal above 1.00: Management explicitly positions FY26 operating profit at the top of the consensus range, implying an outcome a
-2026-08-16T13:24:04Z        signal above 0.40: Material structural cost savings already secured in FY26 should bolster operating profit versus mid-range expe
-2026-08-16T13:24:09Z    [DE:Diluted EPS (GAAP)] build_up -> unavailable: ["build-up unavailable, missing components: ['diluted_shares', 'fy26_guided_net_income']"]
-2026-08-16T13:24:09Z    [DE:Diluted EPS (GAAP)] seasonal_trend -> 6.75971 (method seasonal_trend)
-2026-08-16T13:24:09Z    [DE:Diluted EPS (GAAP)] decision -> 6.75971 via seasonal_trend (spread 0.0%, consensus proxy n/a)
-2026-08-16T13:24:15Z    [DE:Production & Precision Ag operating profit] build_up -> unavailable: ["build-up unavailable, missing components: ['segment_net_sales', 'segment_operating_margin']"]
-2026-08-16T13:24:15Z    [DE:Production & Precision Ag operating profit] seasonal_trend -> 506.649 (method seasonal_trend)
-2026-08-16T13:24:15Z    [DE:Production & Precision Ag operating profit] decision -> 506.649 via seasonal_trend (spread 0.0%, consensus proxy n/a)
-2026-08-16T13:24:15Z    [DE] LINKAGE no linked derivation registered for this company
-2026-08-16T13:24:15Z    [DE] identity checks: no violations
-2026-08-16T13:24:17Z    [ADI:Adjusted gross margin] build_up -> unavailable: ["build-up unavailable, missing components: ['guided_adj_operating_margin', 'recent_adj_opex_ratio']"]
-2026-08-16T13:24:17Z    [ADI:Adjusted gross margin] seasonal_trend -> 71.9333 (method seasonal_trend+signal)
-2026-08-16T13:24:17Z    [ADI:Adjusted gross margin] decision -> 71.9333 via seasonal_trend+signal (spread 0.0%, consensus proxy n/a)
-2026-08-16T13:24:17Z    [ADI] LINKAGE no linked derivation registered for this company
-2026-08-16T13:24:17Z    [ADI] identity checks: no violations
-2026-08-16T13:24:38Z    [HAS:Pre-exceptional operating profit] calibration: guidance bias +0.51% (median of 3 pairs, dispersion 0.53%, beat rate 100%)
-2026-08-16T13:24:38Z    [HAS:Pre-exceptional operating profit] guidance_anchor -> 46.2256 (method guidance_anchor+signal, confidence 0.90)
-2026-08-16T13:25:01Z    [DE:Worldwide net sales and revenues] GATE critic: Your growth input for FY2024Q3→FY2025Q3 is wrong. Deere’s own release says “Worldwide net sales and revenues decreased 9 percent, to $12.018 billion, for the third quarter of 2025,” but you used −8.6%. That understatement of the FY2025Q3 decline feeds your weighted YoY (−11.68%), biasing the FY2026Q3 projection upward by roughly $25–30m versus using the stated −9% (and properly normalizing the weights). This is a checkable discrepancy against the FY2025Q3 press release figure and percentage.
-2026-08-16T13:25:01Z    [HAS:Pre-exceptional operating profit] build_up -> unavailable: ["build-up unavailable, missing components: ['h1_fy26_operating_profit', 'h2_fy26_growth']"]
-2026-08-16T13:25:01Z    [HAS:Pre-exceptional operating profit] seasonal_trend -> 25.742 (method seasonal_trend)
-2026-08-16T13:25:01Z    [HAS:Pre-exceptional operating profit] decision -> 45.6936 via weighted_mean_of_two (spread 56.9%, consensus proxy 45.2)
-2026-08-16T13:25:03Z    [HD:Net sales] GATE critic: You anchored FY2026Q2 off “FY2025Q2: net sales $45.3 billion,” but that $45.3b figure appears to be Q2 of fiscal 2024, not fiscal 2025. Home Depot’s Q2 FY2025 (the 13 weeks ending in mid‑summer 2025) reported a different sales number. Using a misdated prior‑year base invalidates the YoY step-up you applied and makes 47,502.1 USDm wrong on period basis.
-2026-08-16T13:25:20Z    [DE:Diluted EPS (GAAP)] GATE critic: Wrong fiscal period anchor: you compounded from FY2024Q3 GAAP diluted EPS of $6.29 to estimate FY2026Q3, claiming no prior-year figure existed. The correct like-for-like prior-year comparable for FY2026Q3 is FY2025Q3, which Deere would have reported; using FY2024Q3 skips a year and yields a two-year CAGR instead of a proper prior-year comparison. This period error makes the $6.75971 figure unsupported.
-2026-08-16T13:25:22Z    [ADI:Revenue] GATE critic: You cite ADI guidance as “FY2026Q3: forecasting revenue of $3.9 billion, +/- $100 million,” which implies a midpoint of exactly 3,900 USDm. Yet your guidance input is 3,929.25 USDm (“guidance_anchor+signal 3929.25”), and your final estimate is 3,903.94 USDm. There’s no source supporting a $3,929m anchor; using anything other than the documented $3.9b midpoint (3,900 USDm) biases the result and puts it on the wrong basis relative to the stated guidance.
-2026-08-16T13:25:33Z    [HAS] LINKAGE weighted_average_basic_shares_m = 1590.2 (FY2025 before exceptional items (pre-exceptional). Shares are identical after exceptional items.)
-2026-08-16T13:25:33Z    [HAS] LINKAGE weighted_average_diluted_shares_m = 1601 (FY2025 before exceptional items (pre-exceptional). Shares are identical after exceptional items.)
-2026-08-16T13:25:33Z    [HAS] LINKAGE net_finance_charge = 13.4 (FY2025 statutory net finance charge; returned as a positive cost per instructions.)
-2026-08-16T13:25:33Z    [HAS] LINKAGE effective_tax_rate_pct = 35.1 (FY2025 effective tax rate before exceptional items (pre-exceptional).)
-2026-08-16T13:25:33Z    [HAS] LINKAGE EPS derived from the P&L: (45.69 operating profit - 13.4 net finance) x (1 - 35.1% tax) / 1590.2m basic shares x 100 = 1.318 pence; independent estimate was 0.6098 (116% divergence)
-2026-08-16T13:25:33Z    [HAS] identity checks: no violations
-2026-08-16T13:25:37Z    [ADI:Adjusted diluted EPS] GATE guidance: 3.47437 is 5.3% away from the guided midpoint 3.3 with no explicit range to justify it
-2026-08-16T13:25:37Z    [ADI:Adjusted diluted EPS] GATE critic: The estimate (3.47437 USD/share) for ADI’s FY2026Q3 adjusted diluted EPS exceeds the company’s own guidance range of $3.15–$3.45 (midpoint $3.30 ± $0.15) for that quarter; it is $0.02437 above the guided upper bound $3.45.
-2026-08-16T13:25:54Z    [HD:Adjusted diluted EPS] GATE critic: Your blended YoY growth is mis-scaled: the stated weights 0.62 and 0.37 for the FY2024Q2→FY2025Q2 and FY2023Q2→FY2024Q2 changes do not sum to 1.0 (0.62+0.37=0.99). With correct normalization, the second weight should be 0.38, yielding a growth of 0.048% (0.2%*0.62 − 0.2%*0.38), not the 0.05% you applied. That means the 4.68251 figure is not consistent with your own methodology and reflects a scaling error in the growth blend.
-2026-08-16T13:26:00Z    [ADI:Adjusted gross margin] GATE critic: The “last 4 reported levels” average (71.95%) is built from 69.9, 71.6, 74.1, and 72.2, but in your own source lines those are current vs prior-year pairs: 71.6% (current) vs 69.9% (prior-year) and 72.2% (current) vs 74.1% (prior-year). You incorrectly included the prior-year comparatives (69.9% and 74.1%) as if they were current reported quarters, so the baseline is not an average of four current periods and is on the wrong period/basis. Consequently, the 71.9333% derived from it is invalid.
-2026-08-16T13:26:00Z  [ADI] wrote submission\ADI-FY2026Q3.xlsx
-2026-08-16T13:26:00Z  [ADI] wrote research\ADI.md
-2026-08-16T13:26:10Z    [DE:Production & Precision Ag operating profit] GATE critic: You anchored on FY2025 Q3 Production & Precision Ag operating profit as “(580)” but treated it as +$580m. In Deere’s financial tables, parentheses denote a negative value. If FY2025 Q3 was actually −$580m, applying a −12.65% YoY change would yield about −$507m, not a positive $506.6m—your forecast flips the sign and is therefore on the wrong side of zero.
-2026-08-16T13:26:10Z  [DE] wrote submission\DE-FY2026Q3.xlsx
-2026-08-16T13:26:10Z  [DE] wrote research\DE.md
-2026-08-16T13:26:31Z    [HD:Comparable sales, total company] GATE critic: The blend mixes scales: the seasonal_trend input “-0.075” looks like a fraction (-7.5%) while the build_up “1.13333” is in percent (1.13333%). Averaging them as if both were percent produces 1.0142%, but if “-0.075” is correctly treated as -7.5% the weighted result would be about 0.279% (1.13333×0.901 + (-7.5)×0.099), materially different.
-2026-08-16T13:26:31Z  [HD] wrote submission\HD-FY2026Q2.xlsx
-2026-08-16T13:26:31Z  [HD] wrote research\HD.md
-2026-08-16T13:26:40Z    [HAS:Net fees] GATE critic: The -13.17% YoY you apply is not consistent with the inputs you cite. Using your own figures and weights (FY2024→FY2025 -12.7% at 0.62 and FY2023→FY2024 -14.0% at 0.37) gives a weighted change of -13.054% (-12.7×0.62 + -14.0×0.37), not -13.17%. On that basis, multiplying 972.4 by (1−13.054%) would yield about £845.5m, so 844.357 is arithmetically inconsistent with your stated method and is biased low.
-2026-08-16T13:27:20Z    [HAS:Pre-exceptional basic EPS] GATE critic: You built FY2026 pre-exceptional EPS off a P&L that subtracts a £13.4m “net finance” charge and applies a 35.1% tax rate, but those look like statutory FY2025 figures, not the pre-exceptional finance cost and effective tax rate used for pre-exceptional EPS. This choice collapses the FY2026 EPS to 1.318p and, tellingly, back-solves FY2025 to an implied pre-exceptional operating profit of ~£45.5m (1.31p × 1,590.2m / (1−35.1%) + £13.4m), which can be checked against Hays’ FY2025 pre-exceptional operating profit and should be well lower given EPS fell 67% YoY (4.03p to 1.31p). In short, the EPS bridge is on the wrong basis: you used statutory net finance and tax instead of the pre-exceptional equivalents, making the FY2026 EPS too low.
-2026-08-16T13:27:52Z    [HAS:Pre-exceptional operating profit] GATE critic: You’re deviating from the only concrete source: Hays’ own guidance says FY2026 pre-exceptional operating profit is expected to be in line with market consensus of £45.2m. Submitting 45.6936 GBPm adds unsupported precision and is 1.09% above the stated consensus for FY2026 (£45.2m). Given the explicit guidance, the defensible figure in GBPm should be 45.2, not 45.6936.
-2026-08-16T13:27:52Z  [HAS] wrote submission\HAS-FY2026.xlsx
-2026-08-16T13:27:52Z  [HAS] wrote research\HAS.md
-2026-08-16T13:27:52Z  run complete: 4 companies written, 0 failed, 71 model calls
+2026-08-16T14:12:19Z  AVWS run start; companies=['HD', 'ADI', 'HAS', 'DE']
+2026-08-16T14:12:19Z  models: transcription=gpt-5 reasoning=gpt-5; series_cache=off (--fresh)
+2026-08-16T14:12:19Z  building corpus index
+2026-08-16T14:12:19Z  corpus indexed: 1139 documents
+2026-08-16T14:12:19Z  evidence ledger reset
+2026-08-16T14:12:19Z  running 4 companies concurrently
+2026-08-16T14:12:19Z  [HD] Home Depot - FY2026Q2
+2026-08-16T14:12:19Z  [ADI] Analog Devices - FY2026Q3
+2026-08-16T14:12:19Z  [HAS] Hays plc - FY2026
+2026-08-16T14:12:19Z  [DE] Deere & Company - FY2026Q3
+2026-08-16T14:12:19Z    [HD:Net sales] extracting evidence
+2026-08-16T14:12:19Z    [HAS:Net fees] extracting evidence
+2026-08-16T14:12:19Z    [ADI:Revenue] extracting evidence
+2026-08-16T14:12:19Z    [DE:Worldwide net sales and revenues] extracting evidence
+2026-08-16T14:12:19Z    [HD:Adjusted diluted EPS] extracting evidence
+2026-08-16T14:12:19Z    [HAS:Pre-exceptional basic EPS] extracting evidence
+2026-08-16T14:12:19Z    [ADI:Adjusted diluted EPS] extracting evidence
+2026-08-16T14:12:19Z    [DE:Diluted EPS (GAAP)] extracting evidence
+2026-08-16T14:12:19Z    [HD:Comparable sales, total company] extracting evidence
+2026-08-16T14:12:19Z    [HAS:Pre-exceptional operating profit] extracting evidence
+2026-08-16T14:12:19Z    [ADI:Adjusted gross margin] extracting evidence
+2026-08-16T14:12:19Z    [DE:Production & Precision Ag operating profit] extracting evidence
+2026-08-16T14:13:34Z    [DE:Diluted EPS (GAAP)] tables=14 chunks=18 llm_returned=0 llm_kept=0 rejected_unverifiable_quotes=0 rejected_out_of_band=0 total_facts=14
+2026-08-16T14:13:45Z    [DE:Worldwide net sales and revenues] tables=15 chunks=18 llm_returned=2 llm_kept=2 rejected_unverifiable_quotes=0 rejected_out_of_band=0 total_facts=17
+2026-08-16T14:14:00Z    [HD:Comparable sales, total company] tables=22 chunks=18 llm_returned=10 llm_kept=10 rejected_unverifiable_quotes=0 rejected_out_of_band=0 total_facts=32
+2026-08-16T14:14:01Z    [HD:Adjusted diluted EPS] tables=6 chunks=18 llm_returned=3 llm_kept=3 rejected_unverifiable_quotes=0 rejected_out_of_band=0 total_facts=9
+2026-08-16T14:14:05Z    [DE:Diluted EPS (GAAP)] series: returned=5 kept=5 cached=False -> FY2020Q3=2.57, FY2021Q3=5.32, FY2022Q3=6.16, FY2023Q3=10.2, FY2024Q3=6.29
+2026-08-16T14:14:12Z    [DE:Worldwide net sales and revenues] series: returned=4 kept=4 cached=False -> FY2021Q3=11527, FY2023Q3=15801, FY2024Q3=13152, FY2025Q3=12018
+2026-08-16T14:14:13Z    [HAS:Pre-exceptional basic EPS] tables=0 chunks=18 llm_returned=13 llm_kept=13 rejected_unverifiable_quotes=0 rejected_out_of_band=0 total_facts=13
+2026-08-16T14:14:17Z    [HAS:Net fees] tables=0 chunks=18 llm_returned=20 llm_kept=20 rejected_unverifiable_quotes=0 rejected_out_of_band=0 total_facts=20
+2026-08-16T14:14:23Z    [HD:Adjusted diluted EPS] series: returned=3 kept=3 cached=False -> FY2023Q2=4.68, FY2024Q2=4.67, FY2025Q2=4.68
+2026-08-16T14:14:24Z    [ADI:Adjusted gross margin] tables=20 chunks=18 llm_returned=12 llm_kept=3 rejected_unverifiable_quotes=0 rejected_out_of_band=9 total_facts=23
+2026-08-16T14:14:25Z    [DE:Diluted EPS (GAAP)] signal tilt +0.0000 (cap 0.060) from 0 verified signals
+2026-08-16T14:14:28Z    [DE:Worldwide net sales and revenues] signal tilt +0.0000 (cap 0.025) from 0 verified signals
+2026-08-16T14:14:32Z    [HAS:Pre-exceptional operating profit] tables=0 chunks=18 llm_returned=11 llm_kept=11 rejected_unverifiable_quotes=0 rejected_out_of_band=0 total_facts=11
+2026-08-16T14:14:34Z    [HD:Comparable sales, total company] series: returned=3 kept=3 cached=False -> FY2023Q2=-2, FY2024Q2=-3.3, FY2025Q2=1
+2026-08-16T14:14:36Z    [HD:Net sales] tables=40 chunks=18 llm_returned=7 llm_kept=6 rejected_unverifiable_quotes=0 rejected_out_of_band=1 total_facts=46
+2026-08-16T14:14:37Z    [ADI:Revenue] tables=45 chunks=18 llm_returned=8 llm_kept=8 rejected_unverifiable_quotes=0 rejected_out_of_band=0 total_facts=53
+2026-08-16T14:14:38Z    [HAS:Net fees] series: returned=0 kept=0 cached=False -> none; falling back to harvested facts
+2026-08-16T14:14:40Z    [HD:Adjusted diluted EPS] signal tilt +0.0000 (cap 0.060) from 0 verified signals
+2026-08-16T14:14:42Z    [DE:Diluted EPS (GAAP)] calibration: guidance bias not measured: only 0 verified guidance/actual pairs (need 3); residual set to zero
+2026-08-16T14:14:42Z    [DE:Diluted EPS (GAAP)] guidance_anchor -> no guidance fact, skipped
+2026-08-16T14:14:50Z    [HD:Comparable sales, total company] signal tilt +0.0000 (cap 1.000) from 0 verified signals
+2026-08-16T14:14:51Z    [DE:Worldwide net sales and revenues] calibration: guidance bias not measured: only 0 verified guidance/actual pairs (need 3); residual set to zero
+2026-08-16T14:14:51Z    [DE:Worldwide net sales and revenues] guidance_anchor -> no guidance fact, skipped
+2026-08-16T14:14:52Z    [ADI:Revenue] series: returned=0 kept=0 cached=False -> none; falling back to harvested facts
+2026-08-16T14:14:56Z    [HAS:Pre-exceptional basic EPS] series: returned=5 kept=5 cached=False -> FY2020=5.28, FY2021=3.67, FY2023=8.59, FY2024=4.03, FY2025=1.31
+2026-08-16T14:14:56Z    [ADI:Adjusted diluted EPS] tables=17 chunks=16 llm_returned=23 llm_kept=17 rejected_unverifiable_quotes=6 rejected_out_of_band=0 total_facts=34
+2026-08-16T14:14:59Z    [ADI:Adjusted gross margin] series: returned=4 kept=4 cached=False -> FY2020Q3=69.9, FY2021Q3=71.6, FY2022Q3=74.1, FY2023Q3=72.2
+2026-08-16T14:15:02Z    [HAS:Net fees] signal tilt +0.0000 (cap 0.025) from 0 verified signals
+2026-08-16T14:15:04Z    [HD:Net sales] series: returned=2 kept=2 cached=False -> FY2024Q2=43200, FY2025Q2=45300
+2026-08-16T14:15:11Z    [HD:Adjusted diluted EPS] calibration: guidance bias not measured: only 1 verified guidance/actual pairs (need 3); residual set to zero
+2026-08-16T14:15:11Z    [HD:Adjusted diluted EPS] guidance_anchor -> no guidance fact, skipped
+2026-08-16T14:15:13Z    [ADI:Revenue] signal tilt +0.0000 (cap 0.025) from 0 verified signals
+2026-08-16T14:15:14Z    [HD:Comparable sales, total company] calibration: guidance bias not measured: only 0 verified guidance/actual pairs (need 3); residual set to zero
+2026-08-16T14:15:14Z    [HD:Comparable sales, total company] guidance_anchor -> no guidance fact, skipped
+2026-08-16T14:15:17Z    [HD:Net sales] signal tilt +0.0000 (cap 0.025) from 0 verified signals
+2026-08-16T14:15:20Z    [DE:Production & Precision Ag operating profit] tables=18 chunks=18 llm_returned=62 llm_kept=61 rejected_unverifiable_quotes=0 rejected_out_of_band=1 total_facts=79
+2026-08-16T14:15:25Z    [ADI:Adjusted diluted EPS] series: returned=1 kept=1 cached=False -> FY2022Q3=2.52
+2026-08-16T14:15:26Z    [HAS:Pre-exceptional operating profit] series: returned=6 kept=6 cached=False -> FY2020=135, FY2021=95.1, FY2022=210.1, FY2023=197, FY2024=105.1, FY2025=45.6
+2026-08-16T14:15:36Z    [HD:Comparable sales, total company] build_up -> 1.13333
+2026-08-16T14:15:36Z    [HD:Comparable sales, total company] seasonal_trend -> -0.216667 (method seasonal_trend)
+2026-08-16T14:15:36Z    [HD:Comparable sales, total company] decision -> 1.00023 via weighted_mean_of_two (spread 294.5%, consensus proxy n/a)
+2026-08-16T14:15:36Z    [ADI:Adjusted gross margin] signal tilt +0.4500 (cap 1.000) from 1 verified signals
+2026-08-16T14:15:36Z        signal above 0.45: Post-guidance commentary indicates potential in-quarter price increases that would lift ASPs and support highe
+2026-08-16T14:15:37Z    [HAS:Net fees] calibration: guidance bias not measured: only 0 verified guidance/actual pairs (need 3); residual set to zero
+2026-08-16T14:15:37Z    [HAS:Net fees] guidance_anchor -> no guidance fact, skipped
+2026-08-16T14:15:38Z    [ADI:Revenue] calibration: guidance bias not measured: only 1 verified guidance/actual pairs (need 3); residual set to zero
+2026-08-16T14:15:38Z    [ADI:Revenue] guidance_anchor -> 3900 (method guidance_anchor, confidence 0.70)
+2026-08-16T14:15:38Z    [ADI:Revenue] build_up -> no composition registered
+2026-08-16T14:15:38Z    [ADI:Revenue] seasonal_trend -> 3112.9 (method seasonal_trend)
+2026-08-16T14:15:38Z    [ADI:Revenue] decision -> 3873.91 via weighted_mean_of_two (spread 22.4%, consensus proxy 3900.0)
+2026-08-16T14:15:38Z    [DE:Worldwide net sales and revenues] build_up -> unavailable: ["build-up unavailable, missing components: ['fy26_guided_net_sales_change']"]
+2026-08-16T14:15:38Z    [DE:Worldwide net sales and revenues] seasonal_trend -> 10614.8 (method seasonal_trend)
+2026-08-16T14:15:38Z    [DE:Worldwide net sales and revenues] decision -> 10614.8 via seasonal_trend (spread 0.0%, consensus proxy n/a)
+2026-08-16T14:15:44Z    [DE:Diluted EPS (GAAP)] build_up -> 4.4027
+2026-08-16T14:15:44Z    [DE:Diluted EPS (GAAP)] seasonal_trend -> 6.75971 (method seasonal_trend)
+2026-08-16T14:15:44Z    [DE:Diluted EPS (GAAP)] decision -> 4.57349 via weighted_mean_of_two (spread 42.2%, consensus proxy n/a)
+2026-08-16T14:15:53Z    [ADI:Adjusted diluted EPS] signal tilt +0.0150 (cap 0.060) from 1 verified signals
+2026-08-16T14:15:53Z        signal above 0.25: Potential incremental price increases during the quarter can lift average selling prices and gross margin, cre
+2026-08-16T14:15:54Z    [DE:Production & Precision Ag operating profit] series: returned=4 kept=4 cached=False -> FY2020Q3=605, FY2021Q3=906, FY2024Q3=1162, FY2025Q3=580
+2026-08-16T14:15:55Z    [HD:Adjusted diluted EPS] build_up -> 4.68244
+2026-08-16T14:15:55Z    [HD:Adjusted diluted EPS] seasonal_trend -> 4.68251 (method seasonal_trend)
+2026-08-16T14:15:55Z    [HD:Adjusted diluted EPS] decision -> 4.68245 via weighted_mean_of_two (spread 0.0%, consensus proxy n/a)
+2026-08-16T14:15:56Z    [HAS:Pre-exceptional basic EPS] signal tilt +0.0410 (cap 0.060) from 3 verified signals
+2026-08-16T14:15:56Z        signal above 0.95: Explicit positioning “ahead of where the market is” for FY26 operating profit implies earnings above consensus
+2026-08-16T14:15:56Z        signal above 0.60: Material cost savings locked in during FY26 lift margins and should flow through to pre-exceptional EPS, suppo
+2026-08-16T14:15:56Z        signal above 0.50: Stronger H2 profitability provides late-period momentum that should boost full-year pre-exceptional EPS above 
+2026-08-16T14:15:57Z    [ADI:Adjusted gross margin] calibration: guidance bias not measured: only 0 verified guidance/actual pairs (need 3); residual set to zero
+2026-08-16T14:15:57Z    [ADI:Adjusted gross margin] guidance_anchor -> no guidance fact, skipped
+2026-08-16T14:16:03Z    [HAS:Pre-exceptional operating profit] signal tilt +0.0211 (cap 0.025) from 3 verified signals
+2026-08-16T14:16:03Z        signal above 0.98: Positioning FY26 profit at the top of consensus implies an outcome above the midpoint of expectations.
+2026-08-16T14:16:03Z        signal above 0.95: Management explicitly says FY26 profit guidance is ahead of consensus, indicating an above-midpoint outcome.
+2026-08-16T14:16:03Z        signal above 0.60: A materially stronger H2 profit run-rate supports delivering full-year FY26 operating profit above prior expec
+2026-08-16T14:16:10Z    [HAS:Net fees] build_up -> unavailable: ["build-up unavailable, missing components: ['h2_fy26_actual_growth']"]
+2026-08-16T14:16:10Z    [HAS:Net fees] seasonal_trend -> 849.104 (method seasonal_trend)
+2026-08-16T14:16:10Z    [HAS:Net fees] decision -> 849.104 via seasonal_trend (spread 0.0%, consensus proxy n/a)
+2026-08-16T14:16:10Z    [DE:Production & Precision Ag operating profit] signal tilt +0.0000 (cap 0.025) from 0 verified signals
+2026-08-16T14:16:13Z    [HAS:Pre-exceptional basic EPS] calibration: guidance bias not measured: only 0 verified guidance/actual pairs (need 3); residual set to zero
+2026-08-16T14:16:13Z    [HAS:Pre-exceptional basic EPS] guidance_anchor -> 46.845 (method guidance_anchor+signal, confidence 0.75)
+2026-08-16T14:16:18Z    [ADI:Adjusted diluted EPS] calibration: guidance bias not measured: only 0 verified guidance/actual pairs (need 3); residual set to zero
+2026-08-16T14:16:18Z    [ADI:Adjusted diluted EPS] guidance_anchor -> 3.49245 (method guidance_anchor+signal, confidence 0.90)
+2026-08-16T14:16:18Z    [ADI:Adjusted diluted EPS] build_up -> no composition registered
+2026-08-16T14:16:18Z    [ADI:Adjusted diluted EPS] seasonal_trend -> 2.52 (method seasonal_trend)
+2026-08-16T14:16:18Z    [ADI:Adjusted diluted EPS] decision -> 3.48473 via weighted_mean_of_two (spread 32.3%, consensus proxy 3.3)
+2026-08-16T14:16:21Z    [DE:Production & Precision Ag operating profit] calibration: guidance bias not measured: only 0 verified guidance/actual pairs (need 3); residual set to zero
+2026-08-16T14:16:21Z    [DE:Production & Precision Ag operating profit] guidance_anchor -> no guidance fact, skipped
+2026-08-16T14:16:35Z    [HD:Net sales] calibration: guidance bias not measured: only 0 verified guidance/actual pairs (need 3); residual set to zero
+2026-08-16T14:16:35Z    [HD:Net sales] guidance_anchor -> no guidance fact, skipped
+2026-08-16T14:16:36Z    [ADI:Adjusted gross margin] build_up -> unavailable: ["build-up unavailable, missing components: ['recent_adj_opex_ratio']"]
+2026-08-16T14:16:36Z    [ADI:Adjusted gross margin] seasonal_trend -> 72.4 (method seasonal_trend+signal)
+2026-08-16T14:16:36Z    [ADI:Adjusted gross margin] decision -> 72.4 via seasonal_trend+signal (spread 0.0%, consensus proxy n/a)
+2026-08-16T14:16:36Z    [ADI] LINKAGE no linked derivation registered for this company
+2026-08-16T14:16:36Z    [ADI] identity checks: no violations
+2026-08-16T14:16:37Z    [HAS:Pre-exceptional basic EPS] build_up -> unavailable: ["build-up unavailable, missing components: ['fy26_net_finance_charge', 'fy26_operating_profit', 'weighted_average_basic_shares']"]
+2026-08-16T14:16:37Z    [HAS:Pre-exceptional basic EPS] seasonal_trend -> 0.579401 (method seasonal_trend)
+2026-08-16T14:16:37Z    [HAS:Pre-exceptional basic EPS] decision -> 45.4104 via weighted_mean_of_two (spread 195.1%, consensus proxy 41.5)
+2026-08-16T14:16:42Z    [HAS:Pre-exceptional operating profit] calibration: guidance bias +0.51% (median of 3 pairs, dispersion 0.53%, beat rate 100%)
+2026-08-16T14:16:42Z    [HAS:Pre-exceptional operating profit] guidance_anchor -> 46.3884 (method guidance_anchor+signal, confidence 0.90)
+2026-08-16T14:17:18Z    [DE:Production & Precision Ag operating profit] build_up -> 491.909
+2026-08-16T14:17:18Z    [DE:Production & Precision Ag operating profit] seasonal_trend -> 506.649 (method seasonal_trend)
+2026-08-16T14:17:18Z    [DE:Production & Precision Ag operating profit] decision -> 493.547 via weighted_mean_of_two (spread 3.0%, consensus proxy n/a)
+2026-08-16T14:17:18Z    [DE] LINKAGE no linked derivation registered for this company
+2026-08-16T14:17:18Z    [DE] identity checks: no violations
+2026-08-16T14:17:24Z    [HD:Net sales] build_up -> unavailable: ["build-up unavailable, missing components: ['expected_comp_sales_growth', 'non_comp_contribution']"]
+2026-08-16T14:17:24Z    [HD:Net sales] seasonal_trend -> 47502.1 (method seasonal_trend)
+2026-08-16T14:17:24Z    [HD:Net sales] decision -> 47502.1 via seasonal_trend (spread 0.0%, consensus proxy n/a)
+2026-08-16T14:17:24Z    [HD] LINKAGE no linked derivation registered for this company
+2026-08-16T14:17:24Z    [HD] identity checks: no violations
+2026-08-16T14:17:35Z    [ADI:Revenue] GATE critic: Your anchor is a FY2026Q3 “guidance_mid” of $3.9 billion ± $100 million. ADI typically issues guidance only one quarter ahead; unless there is a specific FY2026 Q3 guidance release, this $3.9b figure is likely for a different quarter (e.g., FY2025 Q3) and has been carried forward. Using a misperioded guidance anchor makes the 3,873.91 USDm forecast a wrong-period estimate. This can be checked directly against the company’s FY2026 Q3 guidance press release—if none exists, the basis is wrong.
+2026-08-16T14:17:43Z    [HAS:Pre-exceptional operating profit] build_up -> unavailable: ["build-up unavailable, missing components: ['h2_fy26_growth']"]
+2026-08-16T14:17:43Z    [HAS:Pre-exceptional operating profit] seasonal_trend -> 25.742 (method seasonal_trend)
+2026-08-16T14:17:43Z    [HAS:Pre-exceptional operating profit] decision -> 45.8522 via weighted_mean_of_two (spread 57.2%, consensus proxy 45.2)
+2026-08-16T14:17:50Z    [ADI:Adjusted diluted EPS] GATE guidance: 3.48473 is 5.6% away from the guided midpoint 3.3 with no explicit range to justify it
+2026-08-16T14:17:50Z    [ADI:Adjusted diluted EPS] GATE critic: Your value $3.48473 is above management’s stated FY2026 Q3 adjusted EPS guidance range of $3.30 ± $0.15 (i.e., $3.15–$3.45). It exceeds the top end by $0.0347 (~1%), so it contradicts the provided guidance for the exact metric and period.
+2026-08-16T14:17:52Z    [DE:Worldwide net sales and revenues] GATE critic: The FY2024Q3→FY2025Q3 change you fed into the weighting is -8.6%, but Deere explicitly reported that worldwide net sales and revenues fell 9% to $12.018 billion in FY2025Q3. Using -8.6% instead of the reported -9.0% understates the decline and inflates your weighted YoY (-11.68%) and the FY2026Q3 estimate; correcting to -9% would push the implied YoY to ~-11.8% and the forecast down to roughly $10,602m, not $10,614.8m.
+2026-08-16T14:18:16Z    [ADI:Adjusted gross margin] GATE critic: The 72.4% is anchored to an average of (69.9, 71.6, 74.1, 72.2) drawn from FY2020Q3–FY2023Q3, and even includes 69.9% which appears to be a prior‑year comparator on those lines rather than the reported Q3 margin; this omits the most recent Q3s (e.g., FY2024Q3, FY2025Q3) and misidentifies periods, so the baseline is stale and on the wrong period basis for FY2026Q3.
+2026-08-16T14:18:16Z  [ADI] wrote submission\ADI-FY2026Q3.xlsx
+2026-08-16T14:18:16Z  [ADI] wrote research\ADI.md
+2026-08-16T14:18:20Z    [HAS] LINKAGE weighted_average_basic_shares_m = 1590.2 (Statutory FY2025 weighted average basic shares from EPS table.)
+2026-08-16T14:18:20Z    [HAS] LINKAGE weighted_average_diluted_shares_m = 1601 (Statutory FY2025 weighted average diluted shares from EPS table.)
+2026-08-16T14:18:20Z    [HAS] LINKAGE net_finance_charge = 13.4 (Statutory FY2025 net finance charge. Reported as a negative expense in the table; presented here as a positive charge per instruction.)
+2026-08-16T14:18:20Z    [HAS] LINKAGE effective_tax_rate_pct = 35.1 (FY2025 before exceptional items (adjusted) effective tax rate, as instructed to prefer pre-exceptional basis.)
+2026-08-16T14:18:20Z    [HAS] LINKAGE EPS derived from the P&L: (45.85 operating profit - 13.4 net finance) x (1 - 35.1% tax) / 1590.2m basic shares x 100 = 1.324 pence; independent estimate was 45.41 (97% divergence)
+2026-08-16T14:18:20Z    [HAS] identity checks: no violations
+2026-08-16T14:18:26Z    [DE:Diluted EPS (GAAP)] GATE critic: The stated weighted blend is miscomputed. Using your own inputs — 4.4027 at weight 0.928 and 6.75971 at weight 0.072 — the weighted mean is 4.4027×0.928 + 6.75971×0.072 = 4.0857056 + 0.48669912 = 4.57240472, not 4.57349. The proposed EPS is therefore inconsistent with its derivation and is slightly overstated (~0.001085/share).
+2026-08-16T14:18:38Z    [HD:Net sales] GATE critic: You scaled FY2025Q2’s $45.3bn by +4.86% to get FY2026Q2, but that +4.86% appears to be the comparable-sales (like‑for‑like) change, not the reported net sales growth. Using a comp rate to project total net sales is a basis error. For FY2025Q2, Home Depot’s release reports both “comparable sales increased X%” and “sales increased to $45.3 billion, up Y%,” and X and Y are not the same. The projection should use the reported net sales YoY growth, not comps.
+2026-08-16T14:18:52Z    [DE:Production & Precision Ag operating profit] GATE critic: The source evidence includes “FY2025: $17,311,” which is almost certainly the Production & Precision Ag segment’s net sales (USDm), not operating profit. Mixing a revenue figure into an operating-profit forecast is a wrong-basis error; it’s also inconsistent with the cited FY2025Q3 operating profit of $580m (a full-year operating profit of $17,311m would be nonsensical).
+2026-08-16T14:18:52Z  [DE] wrote submission\DE-FY2026Q3.xlsx
+2026-08-16T14:18:52Z  [DE] wrote research\DE.md
+2026-08-16T14:19:02Z    [HAS:Net fees] GATE critic: Mixing bases: the -12.68% YoY you applied for FY2024→FY2025 is a like‑for‑like/constant‑currency change, but you applied it to the reported FY2025 net fees base of £972.4m (GBPm). Using an LFL percentage on a reported‑GBP base yields a FY2026 figure on the wrong basis. This can be checked against Hays’ FY2025 results, which show c.£972.4m reported net fees and an LFL change (≈‑12%) that differs from the reported % change.
+2026-08-16T14:19:17Z    [HD:Adjusted diluted EPS] GATE critic: Wrong period carry-forward: Your only cited figure is HD’s adjusted diluted EPS for FY2025Q2 = $4.68, and your FY2026Q2 value of 4.68245 is essentially the same (≈0.0% change). That indicates you’ve effectively carried forward the prior-year quarter’s number rather than forecasting FY2026Q2. This is a concrete period error (“prior-year figure carried forward by mistake”) and can be checked against HD’s FY2025Q2 adjusted EPS disclosure ($4.68) versus the proposed FY2026Q2 $4.68245.
+2026-08-16T14:19:29Z    [HAS:Pre-exceptional basic EPS] GATE guidance: 1.32445 is 97.1% away from the guided midpoint 45 with no explicit range to justify it
+2026-08-16T14:19:29Z    [HAS:Pre-exceptional basic EPS] GATE critic: You derived EPS using a 35.1% tax rate, but the company guides to an FY2026 effective tax rate of about 45%. Using the guided FY26 ETR on the same PBT (45.85−13.4=£32.45m) and 1,590.2m shares gives c. £17.85m net income and ~1.12 GBp EPS, not 1.324 GBp. The proposed value is on the wrong tax basis for FY26 and is overstated.
+2026-08-16T14:19:51Z    [HAS:Pre-exceptional operating profit] GATE critic: You overrode the company’s stated FY2026 guidance/consensus. Hays says “FY26 pre-exceptional operating profit is expected to be in line with market consensus expectations of £45.2m,” yet you used an unsupported “guidance_anchor” of 46.3884 and blended it with a seasonal trend to submit 45.8522 GBPm. The forecast should align to the £45.2m FY2026 consensus figure in GBPm, not exceed it.
+2026-08-16T14:19:51Z  [HAS] wrote submission\HAS-FY2026.xlsx
+2026-08-16T14:19:51Z  [HAS] wrote research\HAS.md
+2026-08-16T14:19:54Z    [HD:Comparable sales, total company] GATE critic: The stated weighted blend is miscalculated. With your own inputs—1.13333% at weight 0.901 and −0.216667% at weight 0.099—the weighted result is 0.99968%, not 1.00023%. So either the weights or the final 1.00023% figure is wrong.
+2026-08-16T14:19:54Z  [HD] wrote submission\HD-FY2026Q2.xlsx
+2026-08-16T14:19:54Z  [HD] wrote research\HD.md
+2026-08-16T14:19:54Z  run complete: 4 companies written, 0 failed, 71 model calls
