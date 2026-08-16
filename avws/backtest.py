@@ -35,6 +35,11 @@ from avws.registry import Metric, get_metric, load_metrics
 # so the estimator has something to work from rather than being scored on a guess.
 MIN_PRIOR_OBSERVATIONS = 2
 
+# How many backtested periods each metric exercised the guidance anchor on, rather
+# than falling through to the seasonal path. Reporting this stops the headline hit
+# rate being read as a statement about the whole system when it describes one path.
+_COVERAGE: dict[str, tuple[int, int]] = {}
+
 
 @dataclass
 class Outcome:
@@ -114,10 +119,41 @@ def _actual_by_period(facts: list[Fact]) -> dict[str, float]:
     return out
 
 
+def _historical_guidance(metric: Metric) -> dict[str, float]:
+    """Guidance the company issued for past periods, from the calibration pairs.
+
+    Without this the harness could only ever exercise the seasonal fallback: for a
+    historical target there is no guidance fact in the ledger, so the guidance
+    anchor never fired and the reported hit rate described our weakest path rather
+    than the system. The calibration module already extracts verified
+    guidance-and-outcome pairs, so the guidance is available - it simply was not
+    being fed back in.
+    """
+    from avws import calibration
+
+    out: dict[str, float] = {}
+    try:
+        calib = calibration.measure(metric)
+    except Exception:  # noqa: BLE001 - the backtest must never take down a run
+        return out
+    for line in calib.detail:
+        # "FY2025Q3: guided 2880 -> actual 2880 (+0.00%)"
+        try:
+            period, rest = line.split(":", 1)
+            guided = float(rest.split("guided", 1)[1].split("->")[0].strip())
+        except (ValueError, IndexError):
+            continue
+        parsed = periods.parse(period)
+        if parsed is not None:
+            out[str(parsed)] = guided
+    return out
+
+
 def run(metric: Metric, facts: list[Fact] | None = None) -> Result:
     facts = facts if facts is not None else facts_for(metric.key)
     actuals = _actual_by_period(facts)
     ordered = sorted(actuals, key=periods.sort_key)
+    guided_by_period = _historical_guidance(metric)
 
     outcomes: list[Outcome] = []
     for index, target in enumerate(ordered):
@@ -145,6 +181,18 @@ def run(metric: Metric, facts: list[Fact] | None = None) -> Result:
             output_file=metric.output_file,
         )
 
+        # Reinstate the guidance the company actually issued for this period, so the
+        # anchor path is exercised rather than silently skipped.
+        guided = guided_by_period.get(str(target_period))
+        if guided is not None:
+            visible = visible + [Fact(
+                metric_key=metric.key, company=metric.company,
+                period=str(target_period), value=guided, unit=metric.units,
+                basis="guidance_mid", source_doc="calibration pair",
+                source_quote=f"guidance of {guided:g} issued for {target_period}",
+                confidence=0.85,
+            )]
+
         candidates = []
         anchor = guidance.estimate(metric.key, visible, str(target_period))
         if anchor:
@@ -165,6 +213,10 @@ def run(metric: Metric, facts: list[Fact] | None = None) -> Result:
             within_floor=error < floor,
         ))
 
+    if outcomes:
+        anchored = sum("guidance" in o.method for o in outcomes)
+        _COVERAGE[metric.key] = (anchored, len(outcomes))
+
     return Result(metric_key=metric.key, outcomes=outcomes)
 
 
@@ -181,14 +233,17 @@ def _cli() -> None:
 
     results = [run(get_metric(args.metric))] if args.metric else run_all()
 
-    print(f"{'metric':<48} {'n':>3} {'MAE':>10} {'median':>10} {'floor hit':>10}")
-    print("-" * 84)
+    print(f"{'metric':<48} {'n':>3} {'MAE':>10} {'median':>10} {'floor hit':>10} "
+          f"{'guided':>8}")
+    print("-" * 94)
     for result in results:
         if not result.n:
             print(f"{result.metric_key:<48} {'-':>3} {'no usable history':>32}")
             continue
+        anchored, total = _COVERAGE.get(result.metric_key, (0, result.n))
         print(f"{result.metric_key:<48} {result.n:>3} {result.mae:>10.3f} "
-              f"{result.median_error:>10.3f} {result.floor_hit_rate:>9.0%}")
+              f"{result.median_error:>10.3f} {result.floor_hit_rate:>9.0%} "
+              f"{anchored}/{total:>6}")
 
     scored = [r for r in results if r.n]
     if scored:
