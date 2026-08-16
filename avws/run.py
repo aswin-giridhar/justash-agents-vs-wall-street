@@ -192,11 +192,18 @@ def run_company(ticker: str) -> dict:
     # 36.6 pence. Where the chain is complete we derive rather than estimate.
     # Metrics the company guides directly. Guidance outranks our own derivation of
     # the same number, so for those the linked chain is a check, not a substitution.
+    # Any guidance fact for the metric counts, not only one whose period string
+    # matches exactly. The stricter test failed silently on ADI adjusted EPS - a
+    # metric guided at 3.30 +/- 0.15 - and let the linked chain substitute 3.04,
+    # below the guided floor. A safeguard that depends on an exact string match is
+    # a safeguard that fails quietly, which is the worst kind.
     guided_labels = {
         m.label for m in metrics
-        if any(f.basis.startswith("guidance") and f.period == m.period
+        if any(f.basis.startswith("guidance")
                for f in facts_by_metric.get(m.key, []))
     }
+    log(f"  [{ticker}] company-guided metrics (linkage checks, not substitutes): "
+        f"{sorted(guided_labels) or 'none'}")
     values, derivations, linkage_notes = linkage.apply(
         ticker, metrics[0].company, values, guided_labels=guided_labels,
         facts_by_metric=facts_by_metric,
