@@ -1,0 +1,18 @@
+node_modules/
+__pycache__/
+*.py[cod]
+research/
+.DS_Store
+.env
+.env.*
+!.env.example
+entry.json
+submission/*.xlsx
+
+# --- JustAsh additions ---
+# Third-party corpus: not licensed for redistribution (see THIRD_PARTY_NOTICES.md)
+challenge/offline-data/
+logs/llm/
+.venv/
+*.log
+!logs/README.md
