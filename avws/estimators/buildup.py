@@ -124,6 +124,132 @@ COMPOSITIONS: dict[str, Composition] = {
             f"{c['non_comp_contribution']:g}%) = {v:.4g} USDm"
         ),
     ),
+    "HD:Adjusted diluted EPS": Composition(
+        description=(
+            "Home Depot guides full-year adjusted diluted EPS growth rather than "
+            "quarterly EPS. The quarter is recovered by applying the quarter's "
+            "historical share of the annual figure, which is stable for a retailer "
+            "with a consistent seasonal pattern."
+        ),
+        components=(
+            Component("fy25_adjusted_diluted_eps", "Reported actual FY2025 full-year "
+                      "adjusted diluted EPS", "USD/share"),
+            Component("fy26_guided_adjusted_eps_growth", "Company guidance for FY2026 "
+                      "adjusted diluted EPS growth", "%"),
+            Component("q2_share_of_annual_adjusted_eps", "Q2's historical share of "
+                      "full-year adjusted diluted EPS, from prior years", "%"),
+        ),
+        formula=lambda c: (
+            c["fy25_adjusted_diluted_eps"]
+            * (1 + c["fy26_guided_adjusted_eps_growth"] / 100.0)
+            * c["q2_share_of_annual_adjusted_eps"] / 100.0
+        ),
+        render=lambda c, v: (
+            f"FY25 adjusted EPS {c['fy25_adjusted_diluted_eps']:g} x (1 + "
+            f"{c['fy26_guided_adjusted_eps_growth']:g}% guided growth) x Q2 share "
+            f"{c['q2_share_of_annual_adjusted_eps']:g}% = {v:.4g} USD/share"
+        ),
+    ),
+    "HAS:Pre-exceptional operating profit": Composition(
+        description=(
+            "Hays FY2026 is closed. H1 pre-exceptional operating profit is a reported "
+            "actual; only H2 needs estimating. On 10 July management stated it expects "
+            "FY26 pre-exceptional operating profit at the TOP of the consensus range, "
+            "following a return to strong year-on-year growth in the second half."
+        ),
+        components=(
+            Component("h1_fy26_operating_profit", "Reported actual pre-exceptional "
+                      "operating profit for H1 FY2026 (six months to 31 December "
+                      "2025)", "GBPm"),
+            Component("h2_fy25_operating_profit", "Reported actual pre-exceptional "
+                      "operating profit for H2 FY2025 (six months to 30 June 2025)",
+                      "GBPm"),
+            Component("h2_fy26_growth", "Year-on-year growth of pre-exceptional "
+                      "operating profit in H2 FY2026, implied by management's "
+                      "statement of a return to strong second-half growth and "
+                      "landing at the top of the consensus range", "%"),
+        ),
+        formula=lambda c: c["h1_fy26_operating_profit"]
+        + c["h2_fy25_operating_profit"] * (1 + c["h2_fy26_growth"] / 100.0),
+        render=lambda c, v: (
+            f"H1 FY26 actual {c['h1_fy26_operating_profit']:g} + H2 FY25 "
+            f"{c['h2_fy25_operating_profit']:g} x (1 + {c['h2_fy26_growth']:g}% H2 "
+            f"growth) = {v:.4g} GBPm"
+        ),
+    ),
+    "HAS:Pre-exceptional basic EPS": Composition(
+        description=(
+            "Standard earnings bridge: operating profit less net finance charges, "
+            "taxed at the effective rate, divided by weighted average basic shares. "
+            "Reported in pence."
+        ),
+        components=(
+            Component("fy26_operating_profit", "Expected FY2026 pre-exceptional "
+                      "operating profit", "GBPm"),
+            Component("fy26_net_finance_charge", "Expected FY2026 net finance charge "
+                      "as a positive number to be subtracted", "GBPm"),
+            Component("fy26_effective_tax_rate", "Expected FY2026 effective tax rate "
+                      "on pre-exceptional profit", "%"),
+            Component("weighted_average_basic_shares", "Weighted average number of "
+                      "basic shares outstanding", "millions"),
+        ),
+        formula=lambda c: (
+            (c["fy26_operating_profit"] - c["fy26_net_finance_charge"])
+            * (1 - c["fy26_effective_tax_rate"] / 100.0)
+            / c["weighted_average_basic_shares"]
+        ) * 100.0,
+        render=lambda c, v: (
+            f"({c['fy26_operating_profit']:g} operating profit - "
+            f"{c['fy26_net_finance_charge']:g} net finance) x "
+            f"(1 - {c['fy26_effective_tax_rate']:g}% tax) / "
+            f"{c['weighted_average_basic_shares']:g}m shares x 100 = {v:.4g} pence"
+        ),
+    ),
+    "HD:Comparable sales, total company": Composition(
+        description=(
+            "Home Depot reaffirmed full-year comparable sales guidance and has "
+            "reported Q1. If the full year is to land on guidance, the remaining "
+            "three quarters must average what the arithmetic requires - a constraint "
+            "the company itself has committed to."
+        ),
+        components=(
+            Component("fy26_guided_comp_sales_growth", "Company guidance for FY2026 "
+                      "total company comparable sales growth", "%"),
+            Component("q1_fy26_actual_comp_sales", "Reported actual Q1 FY2026 total "
+                      "company comparable sales growth", "%"),
+        ),
+        formula=lambda c: (
+            4 * c["fy26_guided_comp_sales_growth"] - c["q1_fy26_actual_comp_sales"]
+        ) / 3.0,
+        render=lambda c, v: (
+            f"(4 x FY guidance {c['fy26_guided_comp_sales_growth']:g}% - Q1 actual "
+            f"{c['q1_fy26_actual_comp_sales']:g}%) / 3 remaining quarters = {v:.4g}% "
+            f"required average for Q2-Q4"
+        ),
+    ),
+    "DE:Diluted EPS (GAAP)": Composition(
+        description=(
+            "Deere guides full-year net income rather than quarterly EPS. Quarterly "
+            "EPS is recovered by applying the quarter's historical share of annual "
+            "net income and dividing by diluted shares."
+        ),
+        components=(
+            Component("fy26_guided_net_income", "Company-guided FY2026 net income "
+                      "attributable to Deere & Company", "USDm"),
+            Component("q3_share_of_annual_net_income", "Q3's historical share of "
+                      "full-year net income, from prior years", "%"),
+            Component("diluted_shares", "Weighted average diluted shares outstanding",
+                      "millions"),
+        ),
+        formula=lambda c: (
+            c["fy26_guided_net_income"] * c["q3_share_of_annual_net_income"] / 100.0
+        ) / c["diluted_shares"],
+        render=lambda c, v: (
+            f"FY guided net income {c['fy26_guided_net_income']:g} x Q3 share "
+            f"{c['q3_share_of_annual_net_income']:g}% / {c['diluted_shares']:g}m "
+            f"diluted shares = {v:.4g} USD/share"
+        ),
+    ),
     "DE:Production & Precision Ag operating profit": Composition(
         description=(
             "Deere reports segment results, so the segment's operating profit is "

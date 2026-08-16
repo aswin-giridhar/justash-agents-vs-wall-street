@@ -194,7 +194,8 @@ Hays net fees, with the reason stated, rather than hiding the preference inside 
     <path d="M120 148 L120 190"/>
     <path d="M330 148 L330 190"/>
     <path d="M225 240 L225 274"/>
-    <path d="M600 130 L600 274"/>
+    <path d="M600 130 L600 186"/>
+    <path d="M600 244 L600 274"/>
     <path d="M225 326 L225 360"/>
     <path d="M600 326 L600 360"/>
     <path d="M420 396 L470 396"/>
@@ -227,6 +228,15 @@ Hays net fees, with the reason stated, rather than hiding the preference inside 
       <rect x="30" y="274" width="390" height="52" rx="7" fill="#ffffff" stroke="#8b93a5"/>
       <text x="225" y="295" text-anchor="middle" fill="#14171f">estimators/</text>
       <text x="225" y="313" text-anchor="middle" fill="#5b6472" font-size="10.5">guidance &middot; build_up &middot; seasonal</text>
+    </g>
+
+    <g>
+      <rect x="470" y="190" width="260" height="50" rx="7" fill="#eaf1fd" stroke="#1f5fd0" stroke-width="1.2"/>
+      <text x="600" y="211" text-anchor="middle" fill="#1f5fd0" font-weight="600">signals.py</text>
+      <text x="600" y="229" text-anchor="middle" fill="#5b6472" font-size="10.5">post-guidance tilt, capped</text>
+    </g>
+    <g fill="none" stroke="#8b93a5" stroke-width="1.4" color="#8b93a5" marker-end="url(#ar)">
+      <path d="M470 215 L430 215 L430 288 L420 288"/>
     </g>
 
     <g>
@@ -293,6 +303,42 @@ explicitly GAAP. A system that conflates them is confidently wrong.</p>
 <p>Model-returned facts are additionally checked for fabrication mechanically: the quote must appear in
 the text we supplied, after whitespace normalisation. Quotes that do not match are dropped and counted
 in the run log.</p>
+
+<h3>Beyond the anchor: post-guidance signals</h3>
+
+<p>Guidance anchoring is table stakes. Every team holding the same 8-K will do it, and a forecast equal
+to consensus scores exactly 1.0 — par. The edge has to come from what moves you <em>off</em> the anchor
+with evidence.</p>
+
+<p>The frozen corpus contains an asset most uses of it ignore: <strong>documents published after the
+guidance was issued</strong>. ADI guided Q3 on 20 May 2026 and the corpus holds a conference transcript
+from <strong>2 June</strong>. Deere's Q2 call was 21 May with an investor presentation on 26 May. Hays'
+Q4 update was 10 July with filings through 3 August. That window is strictly newer information than the
+anchor, and it is where management discusses bookings, backlog, channel inventory, pricing and
+end-market demand — leading indicators of the very quarter we are forecasting.</p>
+
+<p><code>signals.py</code> reads that window and returns a <strong>bounded tilt</strong>, not a competing
+forecast:</p>
+
+<pre><code>guidance midpoint 3900 x (1 + measured historical residual)
+                       x (1 + post-guidance signal tilt)   # capped at +/-2.5%</code></pre>
+
+<p>Caps are deliberately tight — 2.5% on revenue, 6% on EPS (which carries operating leverage), 1.0
+percentage point on margins — because the scoring function punishes a large miss ten times harder than
+it rewards a small win. Signals are mean-aggregated rather than summed, so ten weak observations cannot
+outvote the cap by sheer count, and every signal's quote is verified against the source text exactly as
+facts are.</p>
+
+<div class="callout good">
+  <p><strong>It declines to invent signals.</strong> On ADI it read a single pricing observation at
+  strength 0.30 and produced a <strong>+0.75%</strong> tilt. On Deere it returned <strong>zero</strong>
+  signals and said so: <em>"No genuine post-guidance leading indicators for FY2026Q3 were found in the
+  supplied documents."</em> An estimator that always finds something is not measuring anything.</p>
+</div>
+
+<p>Where a metric has no guidance at all — Home Depot's and Deere's quarters are not separately guided —
+the tilt is applied to the seasonal trend instead, since it is then the only forward-looking input
+available.</p>
 
 <h3>The LLM sets named assumptions; Python does the arithmetic</h3>
 
