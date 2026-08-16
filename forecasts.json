@@ -1,0 +1,53 @@
+{
+  "generated_at": "2026-08-16T10:49:57.312509+00:00",
+  "companies": [
+    {
+      "ticker": "ADI",
+      "period": "FY2026Q3",
+      "values": {
+        "Revenue": 4018.198653198653,
+        "Adjusted diluted EPS": 2.9200925925925922,
+        "Adjusted gross margin": 0.0
+      },
+      "derivations": {
+        "Revenue": "weighted blend: guidance_anchor 3900 x weight 0.889 + seasonal_trend 4963.79 x weight 0.111 = 4018.2",
+        "Adjusted diluted EPS": "weighted blend: guidance_anchor 3.3 x weight 0.889 + seasonal_trend -0.119167 x weight 0.111 = 2.92009",
+        "Adjusted gross margin": "no historical actuals available; emitted zero as a last-resort placeholder"
+      },
+      "methods": {
+        "Revenue": "reconciled",
+        "Adjusted diluted EPS": "reconciled",
+        "Adjusted gross margin": "seasonal_trend"
+      },
+      "warnings": {
+        "Revenue": [
+          "guidance residual not calibrated (0 paired observations)",
+          "estimators disagree by 26.5% of the blended value",
+          "critic raised a concrete objection: The proposed 4,018.2 USDm is above management\u2019s FY2026 Q3 guidance range of 3,800\u20134,000 USDm ($3.9b \u00b1 $100m) cited in your own source. It overshoots the top end by 18.2 USDm, so the blend has produced a value inconsistent with the stated guidance for the same period and unit."
+        ],
+        "Adjusted diluted EPS": [
+          "guidance residual not calibrated (0 paired observations)",
+          "estimators disagree by 117.1% of the blended value",
+          "critic raised a concrete objection: You blended incompatible units. The FY2026Q3 adjusted EPS guidance is $3.30 (USD/share), but you averaged it with a \u201cseasonal_trend\u201d of -0.119167 that appears to be a percentage (-11.9167%), treating it as an absolute dollar amount. Your math subtracts only $0.013 (=-0.119167\u00d70.111) from the weighted guidance, which is dimensionally wrong. If -0.119167 is a percent, it must first be applied to an EPS level (e.g., -11.9167% of $3.30 \u2248 -$0.39) before combining. As used, the 2.92009 result is on the wrong basis."
+        ],
+        "Adjusted gross margin": [
+          "no history: value is a placeholder, not an estimate",
+          "critic raised a concrete objection: The 0% is explicitly a placeholder (\u201cno historical actuals available; emitted zero as a last-resort placeholder\u201d), not a derived adjusted gross margin for ADI in FY2026Q3. That\u2019s the wrong basis: ADI\u2019s adjusted gross margin is typically well above 50% in filings, so a 0% figure is not a forecast and is implausible for this period and unit."
+        ]
+      },
+      "findings": {
+        "Revenue": [
+          "critic: The proposed 4,018.2 USDm is above management\u2019s FY2026 Q3 guidance range of 3,800\u20134,000 USDm ($3.9b \u00b1 $100m) cited in your own source. It overshoots the top end by 18.2 USDm, so the blend has produced a value inconsistent with the stated guidance for the same period and unit."
+        ],
+        "Adjusted diluted EPS": [
+          "critic: You blended incompatible units. The FY2026Q3 adjusted EPS guidance is $3.30 (USD/share), but you averaged it with a \u201cseasonal_trend\u201d of -0.119167 that appears to be a percentage (-11.9167%), treating it as an absolute dollar amount. Your math subtracts only $0.013 (=-0.119167\u00d70.111) from the weighted guidance, which is dimensionally wrong. If -0.119167 is a percent, it must first be applied to an EPS level (e.g., -11.9167% of $3.30 \u2248 -$0.39) before combining. As used, the 2.92009 result is on the wrong basis."
+        ],
+        "Adjusted gross margin": [
+          "critic: The 0% is explicitly a placeholder (\u201cno historical actuals available; emitted zero as a last-resort placeholder\u201d), not a derived adjusted gross margin for ADI in FY2026Q3. That\u2019s the wrong basis: ADI\u2019s adjusted gross margin is typically well above 50% in filings, so a 0% figure is not a forecast and is implausible for this period and unit."
+        ]
+      },
+      "identity_issues": []
+    }
+  ],
+  "failed": []
+}
