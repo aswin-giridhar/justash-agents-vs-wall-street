@@ -49,6 +49,15 @@ period, plus recent results commentary. Identify signals that suggest the target
 period will come in ABOVE or BELOW the guidance midpoint.
 
 Count as signals:
+- EXPLICIT POSITIONING AGAINST CONSENSUS. This is the strongest signal available and
+  the most commonly overlooked. Companies say things like "at the top of the
+  consensus range", "in line with market expectations", "ahead of consensus", "below
+  the range". That is a direct statement about the sign of the surprise from the only
+  party that already knows. Treat "at the top of the range" or "ahead of" as a strong
+  ABOVE signal (strength 0.8-1.0), "below" as a strong BELOW signal, and "in line" as
+  no signal at all. Where a company issued one such statement and later issued a
+  DIFFERENT one, the LATER statement supersedes the earlier: an upgrade from "in line"
+  to "top of the range" is a strong above signal.
 - bookings, orders, backlog, book-to-bill, cancellations
 - channel or dealer inventory building or depleting
 - end-market demand commentary by segment
@@ -155,6 +164,11 @@ def measure(metric: Metric, max_chunks: int = 14) -> Tilt:
     anchor_date = _anchor_date(metric)
 
     queries = [
+        # Consensus positioning first: it is the most explicit directional statement
+        # a company ever makes, and the easiest to miss because it is one sentence
+        # of prose rather than a number in a table.
+        ("expect to be at the top of the consensus range in line with market "
+         "expectations ahead of consensus", None),
         ("bookings orders backlog book-to-bill demand strengthening", None),
         ("end market demand outlook industrial automotive consumer conditions", None),
         ("pricing tariffs foreign exchange cost headwind tailwind", None),

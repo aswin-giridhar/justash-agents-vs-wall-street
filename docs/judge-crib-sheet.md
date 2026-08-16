@@ -102,13 +102,32 @@ they ask if you can.
 
 ## If they ask: "how do you know it's any good?"
 
-> "We can't measure what we're graded on, because the Wall Street benchmark isn't
-> visible. But we can measure the statistic the scoring function is built from: how
-> often our absolute error lands inside the denominator floor. `python -m avws.backtest`
-> replays the identical chain over historical periods whose answers are in the corpus
-> and reports floor-band hit rate per metric."
+**Answer this one carefully — it is where honesty scores best, and where a bluff
+would be caught.**
 
-Be honest about the leak: facts are filtered by reporting period, not by document
+> "We can't measure what we're graded on, because the Wall Street benchmark isn't
+> visible. So we measure the statistic the scoring function is built from: how often
+> our absolute error lands inside the denominator floor.
+>
+> The result is 14%, and I don't want to oversell it — it measures our *seasonal
+> fallback* on sparse history, which is our weakest path. For a historical period
+> there's no guidance fact in the ledger and no sourced build-up components, so the
+> harness never exercises the two estimators that actually produce most of our twelve
+> numbers. It's evidence about our worst case, not our expected case.
+>
+> The more interesting part is that the first version of the harness measured nothing
+> at all. It drew its targets from the whole ledger including noisy row-matched facts,
+> so it was scoring forecasts against junk. It reported MAE of 31,275 on a metric near
+> 45,000 while the median error was 1,406 — that gap is the signature of a few
+> mis-attributed periods, not a real error distribution. We restricted targets to the
+> focused series extraction. A probe that can't separate a good forecast from a bad one
+> isn't evidence, and we'd rather publish a poor measured number than a flattering
+> meaningless one."
+
+That answer demonstrates you validate your own instruments, which is rarer and more
+impressive than a good score.
+
+Also be honest about the leak: facts are filtered by reporting period, not by document
 publication date, so a restatement could carry later knowledge.
 
 ## Numbers to have in your head
