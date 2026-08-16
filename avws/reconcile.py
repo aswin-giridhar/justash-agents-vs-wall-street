@@ -65,7 +65,30 @@ def weights_for(estimates: list[Estimate]) -> dict[str, float]:
 def combine(estimates: list[Estimate], metric_key: str) -> Estimate:
     usable = [e for e in estimates if e.confidence > 0.0]
     if not usable:
-        raise ValueError(f"no usable estimate for {metric_key}")
+        # Never blank. A missing forecast scores 5.0, the same as being wrong by ten
+        # times the floor, so the join must not be the one place that gives up.
+        # Raising here killed Deere's entire workbook when all three candidates for
+        # one metric came back at zero confidence: the guarantee was implemented at
+        # the leaves and broken at the join.
+        fallback = next(
+            (e for e in estimates if e.value not in (None, 0.0)), None
+        ) or (estimates[0] if estimates else None)
+        if fallback is None:
+            raise ValueError(f"no estimate at all for {metric_key}")
+        return Estimate(
+            metric_key=metric_key, value=fallback.value,
+            method=f"{fallback.method} (last resort)",
+            derivation=(
+                f"{fallback.derivation}\n  LAST RESORT: every candidate returned "
+                f"zero confidence, so the least-bad available value is submitted "
+                f"rather than none. A blank scores 5.0."
+            ),
+            assumptions=fallback.assumptions, inputs=fallback.inputs,
+            confidence=0.05,
+            warnings=list(fallback.warnings) + [
+                "no candidate had positive confidence; submitted as a last resort"
+            ],
+        )
 
     override = OVERRIDES.get(metric_key)
     if override:
