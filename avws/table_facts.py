@@ -89,6 +89,11 @@ BANDS: dict[str, tuple[float, float]] = {
 # units, thousands or millions depending on the statement.
 _RESCALE = (1.0, 1e-3, 1e-6, 1e3)
 
+# How much wider the fact-admission band is than the forecast-guard band, for money
+# and EPS metrics only. Ten times either way still catches a 1000x scale error while
+# admitting divisional, half-year and full-year components of the headline figure.
+FACT_BAND_WIDENING = 10.0
+
 
 def _basis_for(metric: Metric, row_label: str) -> str:
     text = f"{metric.label} {row_label}".lower()
@@ -104,6 +109,15 @@ def normalise(metric: Metric, value: float) -> tuple[float, str] | None:
 
     Returns (value, note) or None. The note records any rescaling applied so the
     evidence report shows it rather than hiding a silent correction.
+
+    The band here admits *facts*, which include the components a build-up needs, so
+    it is wider than the band that later guards the *forecast* in validate.py. Hays
+    group net fees run near 972 GBPm while its divisional components run 116-355;
+    a single band sized for the group rejected the very parts that sum to it.
+
+    Money metrics widen by 10x either way. Percentages do not: a margin's components
+    are still margins, and widening there would readmit the basis-point error that
+    put Home Depot comparable sales at -40 percentage points.
     """
     if value == 0:
         return None
@@ -113,6 +127,8 @@ def normalise(metric: Metric, value: float) -> tuple[float, str] | None:
         return (value, "")
 
     low, high = band
+    if not metric.is_percentage:
+        low, high = low / FACT_BAND_WIDENING, high * FACT_BAND_WIDENING
     # Column headers in these statements are bare years, and several metric bands
     # span 1990-2100, so "2026" would otherwise be recorded as a Deere segment
     # profit. Real reported figures in that range essentially always carry a

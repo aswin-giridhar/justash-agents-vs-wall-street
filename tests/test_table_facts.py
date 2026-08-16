@@ -54,3 +54,26 @@ def test_accepts_a_realistic_comparable_sales_figure():
 
 def test_zero_is_never_a_fact():
     assert normalise(get_metric("ADI:Revenue"), 0.0) is None
+
+
+def test_admits_divisional_components_below_the_group_band():
+    """Hays group net fees run near 972 GBPm; the divisional components that sum to
+    it run 116-355 and are exactly what the build-up needs."""
+    metric = get_metric("HAS:Net fees")
+    for divisional in (308.9, 192.2, 116.2, 355.1):
+        assert normalise(metric, divisional) is not None, divisional
+
+
+def test_widening_does_not_apply_to_percentages():
+    """A margin's components are still margins, so widening there would readmit the
+    basis-point error that put HD comparable sales at -40 percentage points."""
+    metric = get_metric("HD:Comparable sales, total company")
+    assert normalise(metric, -40.0) is None
+    assert normalise(metric, 55.0) is None
+
+
+def test_still_catches_a_thousandfold_scale_error_after_widening():
+    metric = get_metric("ADI:Revenue")
+    value, note = normalise(metric, 3_623_465.0)
+    assert value == pytest.approx(3623.465)
+    assert "rescaled" in note

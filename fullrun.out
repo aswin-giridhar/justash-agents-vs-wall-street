@@ -1,16 +1,43 @@
-2026-08-16T11:13:35Z  AVWS run start; companies=['HD', 'ADI', 'HAS', 'DE']
-2026-08-16T11:13:35Z  building corpus index
-2026-08-16T11:13:35Z  corpus indexed: 1139 documents
-2026-08-16T11:13:35Z  evidence ledger reset
-2026-08-16T11:13:35Z  [HD] Home Depot - FY2026Q2
-2026-08-16T11:13:35Z    [HD:Net sales] extracting evidence
-2026-08-16T11:14:13Z    [HD:Net sales] tables=34 chunks=18 llm_returned=4 llm_kept=3 rejected_unverifiable_quotes=0 rejected_out_of_band=1 total_facts=37
-2026-08-16T11:14:28Z    [HD:Net sales] signal tilt +0.0000 (cap 0.025) from 0 verified signals
-2026-08-16T11:14:28Z    [HD:Net sales] guidance_anchor -> no guidance fact, skipped
-2026-08-16T11:14:51Z    [HD:Net sales] build_up -> unavailable: ["build-up unavailable, missing components: ['expected_comp_sales_growth', 'non_comp_contribution']"]
-2026-08-16T11:14:51Z    [HD:Net sales] seasonal_trend -> 46052.5 (method seasonal_trend)
-2026-08-16T11:14:51Z    [HD:Net sales] reconciled -> 46052.5 via seasonal_trend
-2026-08-16T11:14:51Z    [HD:Adjusted diluted EPS] extracting evidence
-2026-08-16T11:15:31Z    [HD:Adjusted diluted EPS] tables=3 chunks=18 llm_returned=2 llm_kept=2 rejected_unverifiable_quotes=0 rejected_out_of_band=0 total_facts=5
-2026-08-16T11:15:56Z    [HD:Adjusted diluted EPS] signal tilt +0.0000 (cap 0.060) from 0 verified signals
-2026-08-16T11:15:56Z    [HD:Adjusted diluted EPS] guidance_anchor -> no guidance fact, skipped
+2026-08-16T11:16:44Z  AVWS run start; companies=['HD', 'ADI', 'HAS', 'DE']
+2026-08-16T11:16:44Z  building corpus index
+2026-08-16T11:16:44Z  corpus indexed: 1139 documents
+2026-08-16T11:16:44Z  evidence ledger reset
+2026-08-16T11:16:44Z  running 4 companies concurrently
+2026-08-16T11:16:44Z  [HD] Home Depot - FY2026Q2
+2026-08-16T11:16:44Z    [HD:Net sales] extracting evidence
+2026-08-16T11:16:44Z  [ADI] Analog Devices - FY2026Q3
+2026-08-16T11:16:44Z    [ADI:Revenue] extracting evidence
+2026-08-16T11:16:44Z  [HAS] Hays plc - FY2026
+2026-08-16T11:16:44Z    [HAS:Net fees] extracting evidence
+2026-08-16T11:16:44Z  [DE] Deere & Company - FY2026Q3
+2026-08-16T11:16:44Z    [DE:Worldwide net sales and revenues] extracting evidence
+2026-08-16T11:17:33Z    [DE:Worldwide net sales and revenues] tables=15 chunks=18 llm_returned=2 llm_kept=2 rejected_unverifiable_quotes=0 rejected_out_of_band=0 total_facts=17
+2026-08-16T11:17:37Z    [HAS:Net fees] tables=0 chunks=18 llm_returned=10 llm_kept=2 rejected_unverifiable_quotes=0 rejected_out_of_band=8 total_facts=2
+2026-08-16T11:17:55Z    [DE:Worldwide net sales and revenues] signal tilt +0.0000 (cap 0.025) from 0 verified signals
+2026-08-16T11:17:55Z    [DE:Worldwide net sales and revenues] guidance_anchor -> no guidance fact, skipped
+2026-08-16T11:17:55Z    [DE:Worldwide net sales and revenues] build_up -> no composition registered
+2026-08-16T11:17:55Z    [DE:Worldwide net sales and revenues] seasonal_trend -> 12977.9 (method seasonal_trend)
+2026-08-16T11:17:55Z    [DE:Worldwide net sales and revenues] reconciled -> 12977.9 via seasonal_trend
+2026-08-16T11:17:55Z    [DE:Diluted EPS (GAAP)] extracting evidence
+2026-08-16T11:17:59Z    [HAS:Net fees] signal tilt +0.0000 (cap 0.025) from 0 verified signals
+2026-08-16T11:17:59Z    [HAS:Net fees] guidance_anchor -> no guidance fact, skipped
+2026-08-16T11:18:08Z    [HD:Net sales] tables=34 chunks=18 llm_returned=4 llm_kept=3 rejected_unverifiable_quotes=0 rejected_out_of_band=1 total_facts=37
+2026-08-16T11:18:14Z    [DE:Diluted EPS (GAAP)] tables=14 chunks=18 llm_returned=0 llm_kept=0 rejected_unverifiable_quotes=0 rejected_out_of_band=0 total_facts=14
+2026-08-16T11:18:18Z    [ADI:Revenue] tables=39 chunks=18 llm_returned=8 llm_kept=8 rejected_unverifiable_quotes=0 rejected_out_of_band=0 total_facts=47
+2026-08-16T11:18:21Z    [HAS:Net fees] build_up -> unavailable: ["build-up unavailable, missing components: ['h1_fy26_net_fees', 'h2_fy25_net_fees', 'h2_fy26_actual_growth']"]
+2026-08-16T11:18:21Z    [HAS:Net fees] seasonal_trend -> 849.104 (method seasonal_trend)
+2026-08-16T11:18:21Z    [HAS:Net fees] reconciled -> 849.104 via seasonal_trend
+2026-08-16T11:18:21Z    [HAS:Pre-exceptional basic EPS] extracting evidence
+2026-08-16T11:18:35Z    [DE:Diluted EPS (GAAP)] signal tilt +0.0000 (cap 0.060) from 0 verified signals
+2026-08-16T11:18:35Z    [DE:Diluted EPS (GAAP)] guidance_anchor -> no guidance fact, skipped
+2026-08-16T11:18:40Z    [HD:Net sales] signal tilt +0.0000 (cap 0.025) from 0 verified signals
+2026-08-16T11:18:40Z    [HD:Net sales] guidance_anchor -> no guidance fact, skipped
+2026-08-16T11:19:02Z    [HD:Net sales] build_up -> unavailable: ["build-up unavailable, missing components: ['expected_comp_sales_growth', 'non_comp_contribution']"]
+2026-08-16T11:19:02Z    [HD:Net sales] seasonal_trend -> 46052.5 (method seasonal_trend)
+2026-08-16T11:19:02Z    [HD:Net sales] reconciled -> 46052.5 via seasonal_trend
+2026-08-16T11:19:02Z    [HD:Adjusted diluted EPS] extracting evidence
+2026-08-16T11:19:07Z    [DE:Diluted EPS (GAAP)] build_up -> unavailable: ["build-up unavailable, missing components: ['diluted_shares', 'fy26_guided_net_income', 'q3_share_of_annual_net_income']"]
+2026-08-16T11:19:07Z    [DE:Diluted EPS (GAAP)] seasonal_trend -> 4.1987 (method seasonal_trend)
+2026-08-16T11:19:07Z    [DE:Diluted EPS (GAAP)] reconciled -> 4.1987 via seasonal_trend
+2026-08-16T11:19:07Z    [DE:Production & Precision Ag operating profit] extracting evidence
+2026-08-16T11:19:09Z    [HAS:Pre-exceptional basic EPS] tables=0 chunks=18 llm_returned=6 llm_kept=6 rejected_unverifiable_quotes=0 rejected_out_of_band=0 total_facts=6
