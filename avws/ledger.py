@@ -16,6 +16,7 @@ The ledger holds facts only. It never holds a forecast.
 from __future__ import annotations
 
 import json
+import threading
 from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
@@ -69,10 +70,15 @@ def reset() -> None:
     path.write_text("", encoding="utf-8")
 
 
+_write_lock = threading.Lock()
+
+
 def append(fact: Fact) -> None:
     path = _path()
     path.parent.mkdir(parents=True, exist_ok=True)
-    with path.open("a", encoding="utf-8") as handle:
+    # The final run processes companies concurrently, so appends are serialised.
+    # Interleaved partial lines would corrupt the ledger the whole audit rests on.
+    with _write_lock, path.open("a", encoding="utf-8") as handle:
         handle.write(json.dumps(asdict(fact), ensure_ascii=False) + "\n")
 
 

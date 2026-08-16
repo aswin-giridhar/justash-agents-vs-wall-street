@@ -16,7 +16,9 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+import threading
 import traceback
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone
 
 from avws import ledger, reconcile, signals, validate
@@ -29,15 +31,17 @@ from avws.report import write_report
 from avws.workbook import write_workbook
 
 _log_handle = None
+_log_lock = threading.Lock()
 
 
 def log(message: str) -> None:
     stamp = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     line = f"{stamp}  {message}"
-    print(line, flush=True)
-    if _log_handle:
-        _log_handle.write(line + "\n")
-        _log_handle.flush()
+    with _log_lock:
+        print(line, flush=True)
+        if _log_handle:
+            _log_handle.write(line + "\n")
+            _log_handle.flush()
 
 
 def estimate_metric(metric: Metric) -> tuple[object, list, list]:
@@ -151,6 +155,8 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="Produce OpenStocks forecast workbooks.")
     parser.add_argument("--all", action="store_true", help="run all four companies")
     parser.add_argument("--ticker", choices=tickers(), help="run one company")
+    parser.add_argument("--sequential", action="store_true",
+                        help="disable concurrency; useful when reading the log live")
     args = parser.parse_args(argv)
 
     if not args.all and not args.ticker:
@@ -169,14 +175,31 @@ def main(argv: list[str] | None = None) -> int:
     log("evidence ledger reset")
 
     results, failures = [], []
-    for ticker in targets:
-        try:
-            results.append(run_company(ticker))
-        except Exception:  # noqa: BLE001
-            # One company failing must not lose the other three. The failure is
-            # recorded loudly; it is never converted into a silent empty result.
-            failures.append(ticker)
-            log(f"[{ticker}] FAILED\n{traceback.format_exc()}")
+    if args.sequential or len(targets) == 1:
+        log("running companies sequentially")
+        for ticker in targets:
+            try:
+                results.append(run_company(ticker))
+            except Exception:  # noqa: BLE001
+                # One company failing must not lose the other three. The failure is
+                # recorded loudly; never converted into a silent empty result.
+                failures.append(ticker)
+                log(f"[{ticker}] FAILED\n{traceback.format_exc()}")
+    else:
+        # The final-run window is 45 minutes and a sequential pass takes most of it,
+        # leaving no room to retry after a crash. Companies are independent up to
+        # the shared ledger file, whose writes are locked.
+        log(f"running {len(targets)} companies concurrently")
+        with ThreadPoolExecutor(max_workers=len(targets)) as pool:
+            futures = {pool.submit(run_company, t): t for t in targets}
+            for future in as_completed(futures):
+                ticker = futures[future]
+                try:
+                    results.append(future.result())
+                except Exception:  # noqa: BLE001
+                    failures.append(ticker)
+                    log(f"[{ticker}] FAILED\n{traceback.format_exc()}")
+    results.sort(key=lambda r: targets.index(r["ticker"]))
 
     payload = {
         "generated_at": datetime.now(timezone.utc).isoformat(),

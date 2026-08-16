@@ -346,17 +346,47 @@ available.</p>
 The model's only job is to source each component from the ledger and say which fact it used. It is
 explicitly instructed that a missing component is recoverable and a fabricated one is not.</p>
 
-<pre><code>"HAS:Net fees":
+<p>Nine of the twelve metrics have a registered composition. Two of the remaining three —
+ADI revenue and adjusted EPS — are directly guided by the company and need none.</p>
+
+<pre><code># the year is closed; only the second half needs estimating
+"HAS:Net fees":
     h1_fy26_net_fees + h2_fy25_net_fees * (1 + h2_fy26_actual_growth/100)
 
-"ADI:Adjusted gross margin":
-    guided_adj_operating_margin + recent_adj_opex_ratio
+"HAS:Pre-exceptional operating profit":
+    h1_fy26_operating_profit + h2_fy25_operating_profit * (1 + h2_fy26_growth/100)
+
+# a real earnings bridge, reported in pence
+"HAS:Pre-exceptional basic EPS":
+    (operating_profit - net_finance) * (1 - tax_rate/100)
+        / weighted_average_basic_shares * 100
+
+# if the reaffirmed full-year guide holds and Q1 is known, the rest is arithmetic
+"HD:Comparable sales, total company":
+    (4 * fy26_guided_comp_growth - q1_fy26_actual_comp) / 3
+
+"HD:Adjusted diluted EPS":
+    fy25_adjusted_eps * (1 + guided_growth/100) * q2_share_of_annual/100
 
 "HD:Net sales":
     prior_year_net_sales * (1 + (comp_growth + non_comp_contribution)/100)
 
+# Deere guides full-year net income, not quarterly EPS
+"DE:Diluted EPS (GAAP)":
+    fy26_guided_net_income * q3_share_of_annual/100 / diluted_shares
+
 "DE:Production &amp; Precision Ag operating profit":
-    segment_net_sales * segment_operating_margin/100</code></pre>
+    segment_net_sales * segment_operating_margin/100
+
+# ADI guides operating margin but not gross margin; add back the opex ratio
+"ADI:Adjusted gross margin":
+    guided_adj_operating_margin + recent_adj_opex_ratio</code></pre>
+
+<p>The Home Depot comparable-sales composition is the clearest example of using a company's own
+commitment as a constraint. Home Depot reaffirmed full-year comparable-sales guidance and has reported
+Q1. If the full year is to land where management says it will, the remaining three quarters must
+average <code>(4G &minus; Q1) / 3</code>. That is not a prediction about the world; it is arithmetic on
+a statement the company has publicly committed to.</p>
 
 <p>"The model said 3958" is unreviewable. "H1 actual 464.6 plus H2 prior-year 507.8 grown at &minus;4.0%
 = 952.1" can be checked line by line by someone who has never seen the code.</p>
@@ -459,9 +489,14 @@ every request carrying our API key.</p>
   observations.</strong> Where fewer than three paired guidance-and-outcome periods exist, the residual
   is set to zero and the estimate reports that in its own derivation string rather than implying a
   calibration that does not exist.</li>
-  <li><span class="tag weak">gap</span><strong>Four of twelve metrics have a registered build-up.</strong>
-  The other eight fall through to the guidance anchor or the seasonal fallback. This is a time-driven
-  choice, not a claim that those metrics are unmodellable.</li>
+  <li><span class="tag weak">gap</span><strong>One metric has neither guidance nor a composition.</strong>
+  Deere's worldwide net sales and revenues rests on the seasonal path alone. Nine of twelve metrics have
+  a registered build-up and two more (ADI revenue and adjusted EPS) are directly guided, so this is the
+  single weakest number in the set and we would say so before a judge asked.</li>
+  <li><span class="tag weak">thin</span><strong>Signal tilts are read from management language.</strong>
+  Converting qualitative commentary into a numeric strength is the softest inference in the system.
+  It is capped tightly for exactly that reason, and it declines to fire when it finds nothing — Deere
+  returned zero signals rather than manufacturing one.</li>
   <li><span class="tag weak">gap</span><strong>Hays net fees is not reachable by table matching.</strong>
   Its divisional statement puts the label on a header row with values on the rows beneath, which our
   row matcher does not follow. That metric depends on the model path and the build-up.</li>

@@ -63,6 +63,35 @@ And the sharpest one:
 That answer does three things at once: shows honesty, shows the gate does real work,
 and shows you understand the domain distinction it caught.
 
+## If they ask: "isn't guidance anchoring obvious?" — YES, say this
+
+This is the question most likely to separate you from the field. Answer it before
+they ask if you can.
+
+> "It is, and a forecast equal to consensus scores exactly 1.0 — par. So anchoring is
+> our baseline, not our answer. Two things move us off it.
+>
+> First, we measure how the company has historically landed against its *own*
+> guidance, rather than assuming the midpoint is unbiased. ADI's last release says
+> outright that Q2 came in above the high end of its outlook.
+>
+> Second — and this is the part I think is underused — the frozen corpus contains
+> documents published *after* the guidance was issued. ADI guided Q3 on 20 May; there's
+> a conference transcript from 2 June. Deere's Q2 call was 21 May with an investor
+> presentation on 26 May. That window is strictly newer information than the anchor,
+> and it's where management talks about bookings, backlog, channel inventory and
+> pricing — leading indicators for the quarter we're forecasting.
+>
+> So we extract those signals, verify each quote against the source, and convert them
+> into a bounded tilt: guidance midpoint, times the measured historical residual, times
+> a post-guidance signal capped at 2.5% on revenue. It's a nudge, not a driver, because
+> the scoring function punishes a big miss ten times harder than it rewards a small
+> win.
+>
+> On ADI it read a pricing signal and tilted +0.75%. On Deere it found nothing and
+> returned zero rather than inventing something. An estimator that always finds a
+> signal isn't measuring one."
+
 ## If they ask: "why no embeddings / why no live web?"
 
 > "Financial retrieval here is literal — 'adjusted gross margin', 'net fees',
@@ -88,7 +117,10 @@ publication date, so a restatement could carry later knowledge.
 |---|---|
 | Documents in corpus | 1,139 |
 | Tests | 69 |
-| Metrics with a registered build-up | 4 of 12 |
+| Metrics with a registered build-up | 9 of 12 |
+| Metrics directly guided (need no build-up) | 2 (ADI revenue, ADI adj EPS) |
+| Weakest single metric | DE worldwide net sales — no guidance, no composition |
+| Signal tilt caps | 2.5% revenue, 6% EPS, 1.0pp margins |
 | ADI Q3 guidance | revenue $3.9bn ±$100m; adj EPS $3.30 ±$0.15 |
 | ADI Q2 GAAP vs adjusted EPS | $2.40 vs $3.09 |
 | Hays FY2025 group net fees | £972.4m |

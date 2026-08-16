@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import threading
 from datetime import datetime, timezone
 from typing import Any
 
@@ -21,6 +22,7 @@ from avws.config import LLM_LOG_DIR, MODEL
 
 _client: openai.OpenAI | None = None
 _call_count = 0
+_counter_lock = threading.Lock()
 
 
 def client() -> openai.OpenAI:
@@ -70,13 +72,15 @@ def complete(
         response = client().chat.completions.create(**request)
         temperature_used = None
 
-    _call_count += 1
+    with _counter_lock:
+        _call_count += 1
+        sequence = _call_count
     content = response.choices[0].message.content or "{}"
     parsed = json.loads(content)
 
     digest = hashlib.sha256((system + user + json.dumps(schema)).encode()).hexdigest()[:12]
     LLM_LOG_DIR.mkdir(parents=True, exist_ok=True)
-    (LLM_LOG_DIR / f"{_call_count:03d}-{schema_name}-{digest}.json").write_text(
+    (LLM_LOG_DIR / f"{sequence:03d}-{schema_name}-{digest}.json").write_text(
         json.dumps(
             {
                 "at": datetime.now(timezone.utc).isoformat(),
