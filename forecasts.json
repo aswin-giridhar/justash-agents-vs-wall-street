@@ -1,45 +1,45 @@
 {
-  "generated_at": "2026-08-16T12:17:32.485724+00:00",
+  "generated_at": "2026-08-16T12:26:21.854384+00:00",
   "companies": [
     {
       "ticker": "HD",
       "period": "FY2026Q2",
       "values": {
-        "Adjusted diluted EPS": 4.690021413276231,
-        "Comparable sales, total company": 2.2160798122065732,
-        "Net sales": 47502.083333333336
+        "Net sales": 47502.083333333336,
+        "Adjusted diluted EPS": 4.680010706638115,
+        "Comparable sales, total company": 2.2021126760563385
       },
       "derivations": {
-        "Adjusted diluted EPS": "prior-year same period FY2025Q2 (4.68) x (1 + YoY growth +0.21%) = 4.69\n  growth from consecutive pairs: FY2024Q2->FY2025Q2 +0.2%\n  post-guidance signal: none found; anchor left unadjusted",
-        "Comparable sales, total company": "weighted blend: build_up 2.46667 x weight 0.901 + seasonal_trend -0.075 x weight 0.099 = 2.21608",
-        "Net sales": "prior-year same period FY2025Q2 (45300) x (1 + YoY growth +4.86%) = 4.75e+04\n  growth from consecutive pairs: FY2024Q2->FY2025Q2 +4.9%\n  post-guidance signal: none found; anchor left unadjusted"
+        "Net sales": "prior-year same period FY2025Q2 (45300) x (1 + YoY growth +4.86%) = 4.75e+04\n  growth from consecutive pairs: FY2024Q2->FY2025Q2 +4.9%\n  post-guidance signal: none found; anchor left unadjusted",
+        "Adjusted diluted EPS": "prior-year same period FY2025Q2 (4.68) x (1 + YoY growth +0.00%) = 4.68\n  growth from consecutive pairs: FY2024Q2->FY2025Q2 +0.2%, FY2023Q2->FY2024Q2 -0.2%\n  post-guidance signal: none found; anchor left unadjusted",
+        "Comparable sales, total company": "weighted blend: build_up 2.46667 x weight 0.901 + seasonal_trend -0.216667 x weight 0.099 = 2.20211"
       },
       "methods": {
+        "Net sales": "seasonal_trend",
         "Adjusted diluted EPS": "seasonal_trend",
-        "Comparable sales, total company": "reconciled",
-        "Net sales": "seasonal_trend"
+        "Comparable sales, total company": "reconciled"
       },
       "warnings": {
+        "Net sales": [
+          "critic raised a concrete objection: You computed 47,502.1 USDm off a rounded anchor: FY2025Q2 is cited only as \u201c$45.3 billion,\u201d i.e., 45,300 USDm to the nearest $100m, not the exact net sales reported in the 10-Q. Using a base rounded to $0.1b (and a rounded 4.86% rate) to produce a result precise to the million overstates precision and almost certainly yields the wrong USDm figure. Pull the exact FY2025Q2 net sales (in USDm) and recompute; the answer will differ by tens to hundreds of millions."
+        ],
         "Adjusted diluted EPS": [
-          "critic raised a concrete objection: You\u2019re projecting FY2026Q2 by applying a +0.21% YoY change inferred from FY2024Q2\u2192FY2025Q2 EPS moving from $4.67 to $4.68, but those EPS inputs are rounded to the cent. Using two-decimal rounded figures to compute a sub\u2011percentage growth is numerically meaningless: the true YoY change could range from ~0.00% (e.g., $4.675/$4.675) to ~0.43% (e.g., $4.685/$4.665). Multiplying $4.68 by this rounding\u2011noise rate to get 4.69002 is an unsupported basis for FY2026Q2 and over-precise relative to how EPS is reported."
+          "critic raised a concrete objection: Wrong basis: the anchor \u201cadjusted diluted EPS\u201d of $4.68 for FY2025Q2 appears to be Home Depot\u2019s GAAP diluted EPS (HD typically does not publish a non\u2011GAAP adjusted EPS in its releases/10\u2011Qs). If the $4.68 is GAAP, then your FY2026Q2 value is on the wrong basis for an \u201cadjusted\u201d metric."
         ],
         "Comparable sales, total company": [
-          "estimators disagree by 114.7% of the blended value",
-          "critic raised a concrete objection: Wrong basis: the inputs mix U.S.-only comps with total-company comps. Your cited FY2025Q2 source explicitly says \u201ccomparable sales \u2026 increased 1.0%, and \u2026 in the U.S. increased 1.4%.\u201d Any seasonal/trend adjustment that uses the 1.4% U.S. figure (and the FY2024Q2 table\u2019s second value, (2.0)%, which likely refers to U.S. as well) is not on a total-company basis. For a total-company FY2026Q2 estimate you must use the total-company comps (e.g., 1.0% for FY2025Q2), not the U.S.-only figures; otherwise the 2.21608% result is on the wrong basis."
-        ],
-        "Net sales": [
-          "critic raised a concrete objection: Arithmetic mismatch with your own inputs: 45,300 (USDm) \u00d7 (1 + 4.86%) = 47,501.58 (USDm), not 47,502.1. The proposed value is overstated by ~0.5 USDm."
+          "estimators disagree by 121.9% of the blended value",
+          "critic raised a concrete objection: You anchored a quarterly metric (FY2026 Q2 comparable sales) to a full\u2011year guidance figure (\u201cFY2026: Comparable sales growth of approximately flat to 2.0%\u201d). That is a basis mismatch (annual vs quarterly). It also yields a Q2 point estimate of 2.20211%, which is above the stated 2.0% full\u2011year high end while Q1 was only +0.6%, flagging the inconsistency from using an annual guide to set a single quarter."
         ]
       },
       "findings": {
         "Net sales": [
-          "critic: Arithmetic mismatch with your own inputs: 45,300 (USDm) \u00d7 (1 + 4.86%) = 47,501.58 (USDm), not 47,502.1. The proposed value is overstated by ~0.5 USDm."
+          "critic: You computed 47,502.1 USDm off a rounded anchor: FY2025Q2 is cited only as \u201c$45.3 billion,\u201d i.e., 45,300 USDm to the nearest $100m, not the exact net sales reported in the 10-Q. Using a base rounded to $0.1b (and a rounded 4.86% rate) to produce a result precise to the million overstates precision and almost certainly yields the wrong USDm figure. Pull the exact FY2025Q2 net sales (in USDm) and recompute; the answer will differ by tens to hundreds of millions."
         ],
         "Adjusted diluted EPS": [
-          "critic: You\u2019re projecting FY2026Q2 by applying a +0.21% YoY change inferred from FY2024Q2\u2192FY2025Q2 EPS moving from $4.67 to $4.68, but those EPS inputs are rounded to the cent. Using two-decimal rounded figures to compute a sub\u2011percentage growth is numerically meaningless: the true YoY change could range from ~0.00% (e.g., $4.675/$4.675) to ~0.43% (e.g., $4.685/$4.665). Multiplying $4.68 by this rounding\u2011noise rate to get 4.69002 is an unsupported basis for FY2026Q2 and over-precise relative to how EPS is reported."
+          "critic: Wrong basis: the anchor \u201cadjusted diluted EPS\u201d of $4.68 for FY2025Q2 appears to be Home Depot\u2019s GAAP diluted EPS (HD typically does not publish a non\u2011GAAP adjusted EPS in its releases/10\u2011Qs). If the $4.68 is GAAP, then your FY2026Q2 value is on the wrong basis for an \u201cadjusted\u201d metric."
         ],
         "Comparable sales, total company": [
-          "critic: Wrong basis: the inputs mix U.S.-only comps with total-company comps. Your cited FY2025Q2 source explicitly says \u201ccomparable sales \u2026 increased 1.0%, and \u2026 in the U.S. increased 1.4%.\u201d Any seasonal/trend adjustment that uses the 1.4% U.S. figure (and the FY2024Q2 table\u2019s second value, (2.0)%, which likely refers to U.S. as well) is not on a total-company basis. For a total-company FY2026Q2 estimate you must use the total-company comps (e.g., 1.0% for FY2025Q2), not the U.S.-only figures; otherwise the 2.21608% result is on the wrong basis."
+          "critic: You anchored a quarterly metric (FY2026 Q2 comparable sales) to a full\u2011year guidance figure (\u201cFY2026: Comparable sales growth of approximately flat to 2.0%\u201d). That is a basis mismatch (annual vs quarterly). It also yields a Q2 point estimate of 2.20211%, which is above the stated 2.0% full\u2011year high end while Q1 was only +0.6%, flagging the inconsistency from using an annual guide to set a single quarter."
         ]
       },
       "identity_issues": []
@@ -48,45 +48,45 @@
       "ticker": "ADI",
       "period": "FY2026Q3",
       "values": {
-        "Revenue": 71165.26814243302,
-        "Adjusted gross margin": 72.45,
-        "Adjusted diluted EPS": 3.622111235119047
+        "Revenue": 3945.859013581502,
+        "Adjusted diluted EPS": 3.5115003091813213,
+        "Adjusted gross margin": 70.42500000000001
       },
       "derivations": {
-        "Revenue": "weighted blend: guidance_anchor+signal 72982.6 x weight 0.974 + seasonal_trend 3014.42 x weight 0.026 = 71165.3",
-        "Adjusted gross margin": "mean of last 4 reported levels (69.9, 71.6, 74.1, 72.2) = 71.95\n  71.95 % +0.500pp post-guidance signal = 72.45\n  post-guidance signal tilt +0.5000 (capped at +/-1.000) from 2 signals: +0.60 Planned incremental price increases and sticky, design-in pricing support higher ASPs, which should lift adjusted gross margin in Q3 if implemented during the quarter.; +0.40 Sustained bookings strength and rising output point to high factory utilization and a favorable demand backdrop, which typically expand gross margin in subsequent quarters such as Q3.\n    above (0.60): \"For us, look, we want to be fair to customers, and we're going to continue to look at what the cost environment is and where we think it's appropriate\"\n    above (0.40): \"'During our first quarter, bookings growth continued, driven by broad strength in Industrial and record orders for our Data Center segment. While the \"",
-        "Adjusted diluted EPS": "weighted blend: guidance_anchor+signal 3.63093 x weight 0.992 + seasonal_trend 2.52 x weight 0.008 = 3.62211"
+        "Revenue": "weighted blend: guidance_anchor 3972.16 x weight 0.973 + seasonal_trend 3014.42 x weight 0.027 = 3945.86",
+        "Adjusted diluted EPS": "weighted blend: guidance_anchor+signal 3.3495 x weight 0.980 + seasonal_trend 11.6115 x weight 0.020 = 3.5115",
+        "Adjusted gross margin": "mean of prior-year same period FY2025Q3 (69.2) and the last 4 reported levels (mean 70.85) = 70.03 (percentages averaged as levels, never compounded)\n  70.025 % +0.400pp post-guidance signal = 70.425\n  post-guidance signal tilt +0.4000 (capped at +/-1.000) from 2 signals: +0.50 Planned incremental price increases post-guidance support higher ASPs with largely fixed manufacturing costs, lifting adjusted gross margin in Q3 versus the guidance midpoint.; +0.30 A mix skewing toward Industrial and Data Center\u2014typically higher-margin businesses\u2014entering Q3 increases the likelihood that gross margin exceeds the guided midpoint if this momentum persists.\n    above (0.50): \"We might have incremental price increases. I would say strategically, like I said, we're trying to recover from the cost we've had historically and wi\"\n    above (0.30): \"Growth was led by our industrial and data center businesses. Industrial, which represented 50% of our second quarter revenue, finished up 20% sequenti\""
       },
       "methods": {
         "Revenue": "reconciled",
-        "Adjusted gross margin": "seasonal_trend+signal",
-        "Adjusted diluted EPS": "reconciled"
+        "Adjusted diluted EPS": "reconciled",
+        "Adjusted gross margin": "seasonal_trend+signal"
       },
       "warnings": {
         "Revenue": [
-          "estimators disagree by 98.3% of the blended value",
-          "critic raised a concrete objection: Wrong scale: The proposed 71,165.3 USDm ($71.2bn) for ADI FY2026Q3 contradicts the company\u2019s own guidance of $3.9bn \u00b1 $0.1bn (i.e., 3,800\u20134,000 USDm). Your blend uses a \u201cguidance_anchor\u201d of 72,982.6, which is ~18.7\u00d7 the guided midpoint (3,900), indicating a units/scale error (billions misread as millions or an extra 10^n applied)."
-        ],
-        "Adjusted gross margin": [
-          "critic raised a concrete objection: The +0.500 pp \u201cpost-guidance signal tilt\u201d is not based on ADI guidance. One of your cited quotes references \u201crecord orders for our Data Center segment,\u201d but ADI does not report a Data Center segment (ADI\u2019s end markets are Industrial, Automotive, Communications, and Consumer). That +0.40 signal (and thus the +0.50 pp uplift) is coming from another company, so the 72.45% rests on the wrong basis; absent that uplift, your figure would be 71.95%."
+          "estimators disagree by 24.3% of the blended value",
+          "critic raised a concrete objection: You misapplied management\u2019s guidance: the stated midpoint for FY2026Q3 is $3.9 billion (3,900 USDm), but your blend anchors on 3,972.16 USDm\u2014near the top of the \u00b1$100m range\u2014so the forecast is biased upward versus the actual guidance midpoint."
         ],
         "Adjusted diluted EPS": [
+          "guidance residual not calibrated (0 paired observations)",
           "seasonal fallback had no prior-year anchor; treat as weak evidence",
-          "estimators disagree by 30.7% of the blended value",
-          "critic raised a concrete objection: The proposed FY2026Q3 adjusted diluted EPS of $3.62211 is above ADI\u2019s own guidance range for that quarter: $3.30 \u00b1 $0.15 (i.e., $3.15\u2013$3.45). It exceeds the guided high by about $0.17, indicating the estimate is too high relative to management\u2019s stated range."
+          "estimators disagree by 235.3% of the blended value",
+          "critic raised a concrete objection: The blend is unit-inconsistent: you add a \u201cseasonal_trend\u201d of 11.6115 directly to quarterly EPS in USD/share. A $11.6115 per-share quarterly component is implausible versus ADI\u2019s FY2026Q3 guidance of $3.30 \u00b1 $0.15 (range $3.15\u2013$3.45) and likely represents either an annual EPS figure or an 11.6115% rate. This wrong-scale input inflates the result to 3.5115, even pushing it above the guided top end ($3.45). The seasonal term must be converted to a quarterly USD/share basis (or applied as a percentage to the base), not added as $11.6115."
+        ],
+        "Adjusted gross margin": [
+          "critic raised a concrete objection: You\u2019ve double-counted FY2025Q3. For a FY2026Q3 forecast, the \u201clast 4 reported\u201d quarters are FY2026Q2, FY2026Q1, FY2025Q4, and FY2025Q3\u2014so taking the mean of those four (70.85%) and then averaging it again with the prior-year same period FY2025Q3 (69.2%) gives FY2025Q3 five times the weight of any other quarter. That methodological error drags your base from 70.85% down to 70.025% before the +0.400 pp tilt, biasing the final 70.425% figure."
         ]
       },
       "findings": {
         "Revenue": [
-          "guidance: 71165.3 is 1724.8% away from the guided midpoint 3900 with no explicit range to justify it",
-          "critic: Wrong scale: The proposed 71,165.3 USDm ($71.2bn) for ADI FY2026Q3 contradicts the company\u2019s own guidance of $3.9bn \u00b1 $0.1bn (i.e., 3,800\u20134,000 USDm). Your blend uses a \u201cguidance_anchor\u201d of 72,982.6, which is ~18.7\u00d7 the guided midpoint (3,900), indicating a units/scale error (billions misread as millions or an extra 10^n applied)."
+          "critic: You misapplied management\u2019s guidance: the stated midpoint for FY2026Q3 is $3.9 billion (3,900 USDm), but your blend anchors on 3,972.16 USDm\u2014near the top of the \u00b1$100m range\u2014so the forecast is biased upward versus the actual guidance midpoint."
         ],
         "Adjusted diluted EPS": [
-          "guidance: 3.62211 is 9.8% away from the guided midpoint 3.3 with no explicit range to justify it",
-          "critic: The proposed FY2026Q3 adjusted diluted EPS of $3.62211 is above ADI\u2019s own guidance range for that quarter: $3.30 \u00b1 $0.15 (i.e., $3.15\u2013$3.45). It exceeds the guided high by about $0.17, indicating the estimate is too high relative to management\u2019s stated range."
+          "guidance: 3.5115 is 6.4% away from the guided midpoint 3.3 with no explicit range to justify it",
+          "critic: The blend is unit-inconsistent: you add a \u201cseasonal_trend\u201d of 11.6115 directly to quarterly EPS in USD/share. A $11.6115 per-share quarterly component is implausible versus ADI\u2019s FY2026Q3 guidance of $3.30 \u00b1 $0.15 (range $3.15\u2013$3.45) and likely represents either an annual EPS figure or an 11.6115% rate. This wrong-scale input inflates the result to 3.5115, even pushing it above the guided top end ($3.45). The seasonal term must be converted to a quarterly USD/share basis (or applied as a percentage to the base), not added as $11.6115."
         ],
         "Adjusted gross margin": [
-          "critic: The +0.500 pp \u201cpost-guidance signal tilt\u201d is not based on ADI guidance. One of your cited quotes references \u201crecord orders for our Data Center segment,\u201d but ADI does not report a Data Center segment (ADI\u2019s end markets are Industrial, Automotive, Communications, and Consumer). That +0.40 signal (and thus the +0.50 pp uplift) is coming from another company, so the 72.45% rests on the wrong basis; absent that uplift, your figure would be 71.95%."
+          "critic: You\u2019ve double-counted FY2025Q3. For a FY2026Q3 forecast, the \u201clast 4 reported\u201d quarters are FY2026Q2, FY2026Q1, FY2025Q4, and FY2025Q3\u2014so taking the mean of those four (70.85%) and then averaging it again with the prior-year same period FY2025Q3 (69.2%) gives FY2025Q3 five times the weight of any other quarter. That methodological error drags your base from 70.85% down to 70.025% before the +0.400 pp tilt, biasing the final 70.425% figure."
         ]
       },
       "identity_issues": []
@@ -95,40 +95,44 @@
       "ticker": "HAS",
       "period": "FY2026",
       "values": {
-        "Pre-exceptional basic EPS": 0.6145867287543656,
-        "Pre-exceptional operating profit": 24.287169543147208,
-        "Net fees": 276.0441576356371
+        "Net fees": 842.775432621535,
+        "Pre-exceptional operating profit": 44.5081010741229,
+        "Pre-exceptional basic EPS": 36.61983214662804
       },
       "derivations": {
-        "Pre-exceptional basic EPS": "prior-year same period FY2025 (1.31) x (1 + YoY growth -53.08%) = 0.6146\n  growth from consecutive pairs: FY2024->FY2025 -67.5%, FY2023->FY2024 -53.1%, FY2020->FY2021 -30.5%\n  post-guidance signal: none found; anchor left unadjusted",
-        "Pre-exceptional operating profit": "prior-year same period FY2025 (45.6) x (1 + YoY growth -46.65%) = 24.33\n  growth from consecutive pairs: FY2024->FY2025 -56.6%, FY2023->FY2024 -46.6%, FY2022->FY2023 -6.2%\n  24.3277 x (1 -0.0017 post-guidance signal) = 24.2872\n  post-guidance signal tilt -0.0017 (capped at +/-0.025) from 3 signals: -0.60 Softening Perm demand into the most recent quarter reduces high-margin net fees, pressuring FY26 operating profit unless offset elsewhere.; -0.30 Management flags ongoing challenging end-market conditions, implying continued revenue pressure in FY26, especially in Perm-heavy areas.; +0.70 Concrete cost reductions flowing into H2 should lift margins and support FY26 pre-exceptional operating profit despite softer demand.\n    below (0.60): \"What we've seen in the last quarter is a little bit of a drop in some of the Permanent contracts that we have in the Enterprise Solutions business in \"\n    below (0.30): \"Although we have limited forward visibility, we  are mindful of heightened global macro -economic uncertainty and expect near term market conditions t\"\n    above (0.70): \"We've taken significant cost actions in Q2, which will benefit our second half, including restructurings of operations and back-office functions.\"",
-        "Net fees": "prior-year same period H1 2025 (-1400) x (1 + YoY growth -119.85%) = 277.9\n  growth from consecutive pairs: FY 2024->H1 2025 -225.7%, FY 2023->FY 2024 -14.0%\n  277.897 x (1 -0.0067 post-guidance signal) = 276.044\n  post-guidance signal tilt -0.0067 (capped at +/-0.025) from 3 signals: -0.70 Fresh Q3 weakness in Permanent demand reduces fee-generating placements, pressuring FY26 net fees versus guidance.; -0.50 Management flags ongoing challenging conditions and continued Perm underperformance into Q4, implying softer full-year fee momentum.; +0.40 Higher pricing/mix in large markets like Germany supports fee rates and provides a tailwind to FY26 net fees despite volume pressure.\n    below (0.70): \"What we've seen in the last quarter is a little bit of a drop in some of the Permanent contracts that we have in the Enterprise Solutions business in \"\n    below (0.50): \"Although we have limited forward visibility, we  are mindful of heightened global macro -economic uncertainty and expect near term market conditions t\"\n    above (0.40): \"This was partially offset by a 3% increase in pricing and mix, benefiting from our pricing initiatives and targeting of resilient sectors.\""
+        "Net fees": "prior-year same period FY2025 (972.4) x (1 + YoY growth -13.33%) = 842.8\n  growth from consecutive pairs: FY2024->FY2025 -12.7%, FY2023->FY2024 -14.0%\n  post-guidance signal: none found; anchor left unadjusted",
+        "Pre-exceptional operating profit": "weighted blend: guidance_anchor 45.2 x weight 0.967 + seasonal_trend 24.3277 x weight 0.033 = 44.5081",
+        "Pre-exceptional basic EPS": "weighted blend: guidance_anchor+signal 37.772 x weight 0.969 + seasonal_trend 0.614587 x weight 0.031 = 36.6198"
       },
       "methods": {
-        "Pre-exceptional basic EPS": "seasonal_trend",
-        "Pre-exceptional operating profit": "seasonal_trend+signal",
-        "Net fees": "seasonal_trend+signal"
+        "Net fees": "seasonal_trend",
+        "Pre-exceptional operating profit": "reconciled",
+        "Pre-exceptional basic EPS": "reconciled"
       },
       "warnings": {
-        "Pre-exceptional basic EPS": [
-          "critic raised a concrete objection: The 1.31p anchor you used for FY2025 is almost certainly the half-year (H1 FY2025) pre-exceptional basic EPS from the interim results (shown as 1.31p vs 4.03p, -67%), not the full-year FY2025 figure. Using an H1 number to project a full-year FY2026 EPS is a period mismatch and will understate the base. Check the FY2025 full-year pre-exceptional basic EPS in the FY2025 annual results/RNS instead of the H1 1.31p."
+        "Net fees": [
+          "critic raised a concrete objection: You\u2019ve mixed bases. The -12.7% is a reported change derived from the actual GBPm figures (FY2024 1,113.6 to FY2025 972.4), but the -14.0% for FY2023\u2192FY2024 is almost certainly Hays\u2019 like\u2011for\u2011like/constant\u2011currency disclosure (how they usually present YoY net\u2011fee movements), not a reported change in GBPm. Averaging a reported change with an LFL change and then applying it to the reported FY2025 base (972.4 GBPm) puts the FY2026 forecast on the wrong basis. This is checkable against Hays\u2019 FY2024 results, where the -14.0% is identified as LFL rather than reported."
         ],
         "Pre-exceptional operating profit": [
-          "critic raised a concrete objection: You used \u00a345.6m as the \u201cprior-year FY2025\u201d base, but \u00a345.6m is H1 FY2025 pre-exceptional operating profit (vs \u00a3105.1m in H1 FY2024, -57%), not a full-year FY2025 figure. Building an FY2026 full-year forecast off a half-year base is the wrong fiscal period/basis and will understate the result."
+          "guidance residual not calibrated (2 paired observations)",
+          "estimators disagree by 46.9% of the blended value",
+          "critic raised a concrete objection: You\u2019ve mixed bases: the only documented FY2026 figure is the FY-level consensus guidance of \u00a345.2m (pre-exceptional operating profit), but you diluted it with a \u201cseasonal_trend\u201d input of 24.3277 that is not evidenced as an FY metric and is almost certainly a sub\u2011period figure. Blending an FY guidance number with a non\u2011FY seasonal value produces 44.5081 that is not on a consistent FY basis."
         ],
-        "Net fees": [
-          "critic raised a concrete objection: The base you use is a unit/scale misread: \u201cprior-year same period H1 2025 (-1400)\u201d improperly treats a \u201c(1.4)\u201d in the H1 FY25 table (e.g., Australia & New Zealand 74.3 (1.4) \u2026) as -1,400 GBPm of net fees. That \u201c(1.4)\u201d is a percentage change (\u22121.4%), not an amount, and Hays\u2019 H1 FY25 Group net fees are positive and in the low hundreds of \u00a3m, not negative \u00a31.4bn. With the base off by orders of magnitude and wrong sign, the derived FY2026 276.044 GBPm is invalid."
+        "Pre-exceptional basic EPS": [
+          "guidance residual not calibrated (0 paired observations)",
+          "estimators disagree by 101.5% of the blended value",
+          "critic raised a concrete objection: The 37.772 \u201cguidance anchor\u201d you used is clearly the FY26 effective tax rate guidance (~38%) misapplied as an EPS level in GBp. ETR is a percentage, not an earnings-per-share figure, so blending 37.772 (a % tax rate) with any EPS inputs produces an EPS on the wrong basis. This is why the result (~36.62 GBp) simply mirrors the ~38% tax rate rather than any earnings metric."
         ]
       },
       "findings": {
         "Net fees": [
-          "critic: The base you use is a unit/scale misread: \u201cprior-year same period H1 2025 (-1400)\u201d improperly treats a \u201c(1.4)\u201d in the H1 FY25 table (e.g., Australia & New Zealand 74.3 (1.4) \u2026) as -1,400 GBPm of net fees. That \u201c(1.4)\u201d is a percentage change (\u22121.4%), not an amount, and Hays\u2019 H1 FY25 Group net fees are positive and in the low hundreds of \u00a3m, not negative \u00a31.4bn. With the base off by orders of magnitude and wrong sign, the derived FY2026 276.044 GBPm is invalid."
+          "critic: You\u2019ve mixed bases. The -12.7% is a reported change derived from the actual GBPm figures (FY2024 1,113.6 to FY2025 972.4), but the -14.0% for FY2023\u2192FY2024 is almost certainly Hays\u2019 like\u2011for\u2011like/constant\u2011currency disclosure (how they usually present YoY net\u2011fee movements), not a reported change in GBPm. Averaging a reported change with an LFL change and then applying it to the reported FY2025 base (972.4 GBPm) puts the FY2026 forecast on the wrong basis. This is checkable against Hays\u2019 FY2024 results, where the -14.0% is identified as LFL rather than reported."
         ],
         "Pre-exceptional basic EPS": [
-          "critic: The 1.31p anchor you used for FY2025 is almost certainly the half-year (H1 FY2025) pre-exceptional basic EPS from the interim results (shown as 1.31p vs 4.03p, -67%), not the full-year FY2025 figure. Using an H1 number to project a full-year FY2026 EPS is a period mismatch and will understate the base. Check the FY2025 full-year pre-exceptional basic EPS in the FY2025 annual results/RNS instead of the H1 1.31p."
+          "critic: The 37.772 \u201cguidance anchor\u201d you used is clearly the FY26 effective tax rate guidance (~38%) misapplied as an EPS level in GBp. ETR is a percentage, not an earnings-per-share figure, so blending 37.772 (a % tax rate) with any EPS inputs produces an EPS on the wrong basis. This is why the result (~36.62 GBp) simply mirrors the ~38% tax rate rather than any earnings metric."
         ],
         "Pre-exceptional operating profit": [
-          "critic: You used \u00a345.6m as the \u201cprior-year FY2025\u201d base, but \u00a345.6m is H1 FY2025 pre-exceptional operating profit (vs \u00a3105.1m in H1 FY2024, -57%), not a full-year FY2025 figure. Building an FY2026 full-year forecast off a half-year base is the wrong fiscal period/basis and will understate the result."
+          "critic: You\u2019ve mixed bases: the only documented FY2026 figure is the FY-level consensus guidance of \u00a345.2m (pre-exceptional operating profit), but you diluted it with a \u201cseasonal_trend\u201d input of 24.3277 that is not evidenced as an FY metric and is almost certainly a sub\u2011period figure. Blending an FY guidance number with a non\u2011FY seasonal value produces 44.5081 that is not on a consistent FY basis."
         ]
       },
       "identity_issues": []
@@ -137,41 +141,42 @@
       "ticker": "DE",
       "period": "FY2026Q3",
       "values": {
-        "Production & Precision Ag operating profit": 579.0314220281361,
-        "Worldwide net sales and revenues": 10496.865570309501,
-        "Diluted EPS (GAAP)": 8.298200110803325
+        "Worldwide net sales and revenues": 10492.49369793536,
+        "Diluted EPS (GAAP)": 8.433130193905818,
+        "Production & Precision Ag operating profit": 733.6550468920152
       },
       "derivations": {
-        "Production & Precision Ag operating profit": "prior-year same period FY2025Q3 (580) x (1 + YoY growth -0.17%) = 579\n  growth from consecutive pairs: FY2024Q3->FY2025Q3 -50.1%, FY2020Q3->FY2021Q3 +49.8%\n  post-guidance signal: none found; anchor left unadjusted",
-        "Worldwide net sales and revenues": "prior-year same period FY2025Q3 (12018) x (1 + YoY growth -12.69%) = 1.049e+04\n  growth from consecutive pairs: FY2024Q3->FY2025Q3 -8.6%, FY2023Q3->FY2024Q3 -16.8%\n  10492.5 x (1 +0.0004 post-guidance signal) = 10496.9\n  post-guidance signal tilt +0.0004 (capped at +/-0.025) from 3 signals: +0.30 A weaker USD increases translated international sales into dollars, providing a tailwind to reported Q3 net sales if currency conditions persist.; +0.35 Steady-to-improving SAT demand supports shipments and revenue into Q3, a seasonally important period, raising the chance of sales modestly exceeding guidance.; -0.60 A sharp South America industry decline in large ag equipment points to weaker orders and shipments in Q3, weighing on worldwide net sales versus guidance.\n    above (0.30): \"The U.S. dollar was weaker year-over-year against several relevant currencies for Deere, particularly the euro and Brazilian real. The translation imp\"\n    above (0.35): \"For Small Ag & Turf in the U.S. and Canada, industry demand is expected to remain steady, ranging from flat to up 5%. We're projecting modest strength\"\n    below (0.60): \"Industry sales of tractors and combines are now expected to decline about 15%.\"",
-        "Diluted EPS (GAAP)": "no FY2026Q3 prior-year figure; most recent comparable FY2024Q3 (6.29) compounded over 2 year(s) at +15.79% = 8.433\n  growth from consecutive pairs: FY2023Q3->FY2024Q3 -38.3%, FY2022Q3->FY2023Q3 +65.6%, FY2021Q3->FY2022Q3 +15.8%\n  8.43313 x (1 -0.0160 post-guidance signal) = 8.2982\n  post-guidance signal tilt -0.0160 (capped at +/-0.060) from 3 signals: -0.70 Lower near-term equipment demand in South America points to weaker shipments and mix in Q3 for Deere\u2019s large ag business, pressuring EPS versus guidance.; -0.60 With ag and turf backlogs down versus last year heading into the seasonally strong Q3 period, Deere likely has fewer scheduled deliveries, implying lower revenue and EPS risk to the downside.; +0.50 A materially larger CF backlog and planned production increases support stronger Q3 shipments and margins in Construction & Forestry, offering some upside to EPS.\n    below (0.70): \"Demand in South America is expected to decrease. Although crop production and yields remain strong and crop prices have improved, high interest rates,\"\n    below (0.60): \"The dollar amount of backlog orders as of November 2, 2025, was approximately $4.0 billion for the PPA segment and $1.9 billion for the SAT segment, c\"\n    above (0.50): \"The dollar amount of backlog orders for the CF segment was approximately $3.8 billion at November 2, 2025, compared with $2.2 billion at October 27, 2\""
+        "Worldwide net sales and revenues": "prior-year same period FY2025Q3 (12018) x (1 + YoY growth -12.69%) = 1.049e+04\n  growth from consecutive pairs: FY2024Q3->FY2025Q3 -8.6%, FY2023Q3->FY2024Q3 -16.8%\n  post-guidance signal: none found; anchor left unadjusted",
+        "Diluted EPS (GAAP)": "no FY2026Q3 prior-year figure; most recent comparable FY2024Q3 (6.29) compounded over 2 year(s) at +15.79% = 8.433\n  growth from consecutive pairs: FY2023Q3->FY2024Q3 -38.3%, FY2022Q3->FY2023Q3 +65.6%, FY2021Q3->FY2022Q3 +15.8%\n  post-guidance signal: none found; anchor left unadjusted",
+        "Production & Precision Ag operating profit": "weighted blend: build_up 752.983 x weight 0.889 + seasonal_trend 579.031 x weight 0.111 = 733.655"
       },
       "methods": {
-        "Production & Precision Ag operating profit": "seasonal_trend",
-        "Worldwide net sales and revenues": "seasonal_trend+signal",
-        "Diluted EPS (GAAP)": "seasonal_trend+signal"
+        "Worldwide net sales and revenues": "seasonal_trend",
+        "Diluted EPS (GAAP)": "seasonal_trend",
+        "Production & Precision Ag operating profit": "reconciled"
       },
       "warnings": {
-        "Production & Precision Ag operating profit": [
-          "critic raised a concrete objection: The -0.17% YoY change you apply to FY2025Q3 ($580m) is not the FY2025Q3\u2192FY2026Q3 growth; it\u2019s an average of two unrelated periods (FY2024Q3\u2192FY2025Q3 \u221250.1% and FY2020Q3\u2192FY2021Q3 +49.8%). Averaging those non\u2011contiguous swings to proxy FY2026Q3 is a wrong basis and effectively just carries forward FY2025Q3 (~$580m) with no justification tied to the actual FY2025\u2192FY2026 period."
-        ],
         "Worldwide net sales and revenues": [
-          "critic raised a concrete objection: You anchored the trend on a misstated prior-year change: Deere reported FY2025Q3 worldwide net sales and revenues down 9% to $12,018m, but you used \u22128.6% for FY2024Q3\u2192FY2025Q3. Using the reported \u22129% (for the same metric and period) would steepen your averaged decline and lower the FY2026Q3 estimate by roughly $25\u201330m, so 10,496.9 USDm is biased high off an incorrect basis."
+          "critic raised a concrete objection: You derived the -12.69% YoY by averaging prior YoY changes, but your own source says Q3 FY2025 worldwide net sales and revenues declined 9%, while you used -8.6% for FY2024Q3\u2192FY2025Q3. That mismatch indicates you computed the growth rates on a different basis than \u201cWorldwide net sales and revenues\u201d (e.g., net sales or another adjusted measure) and then applied them to the GAAP \"worldwide net sales and revenues\" base. Using a mixed basis makes the $10,492.5m forecast wrong on basis."
         ],
         "Diluted EPS (GAAP)": [
           "seasonal fallback had no prior-year anchor; treat as weak evidence",
-          "critic raised a concrete objection: Wrong basis: You anchored FY2026Q3 to FY2024Q3\u2019s GAAP diluted EPS of $6.29 and applied a two-year compounded growth to reach ~$8.43 before the tilt. The correct like-for-like comparable for FY2026Q3 is FY2025Q3, not FY2024Q3. Using 2024Q3 introduces an extra year of growth and mismatches the fiscal period, so the $8.2982 figure is on the wrong basis. This is checkable against Deere\u2019s fiscal calendar and reported quarterly EPS (FY2026Q3 should be compared year-over-year to FY2025Q3)."
+          "critic raised a concrete objection: You anchored FY2026Q3 to FY2024Q3 ($6.29) and applied a two\u2011year compound rate, but the correct like\u2011for\u2011like prior period for FY2026Q3 is FY2025Q3 (one year prior). Deere would have reported FY2025Q3 diluted EPS by Aug 2025, so using FY2024Q3 as the \u201cmost recent comparable\u201d is a one\u2011year\u2011off prior\u2011year carryforward error that can be checked against the FY2025Q3 report."
+        ],
+        "Production & Precision Ag operating profit": [
+          "estimators disagree by 23.7% of the blended value",
+          "critic raised a concrete objection: The stated derivation doesn\u2019t match the proposed value. Using your figures and weights: 752.983\u00d70.889 + 579.031\u00d70.111 = 733.674 USDm, not 733.655 USDm. Either the weights/inputs or the result is rounded or incorrect, but as presented the identity fails by 0.019 USDm (~$19k)."
         ]
       },
       "findings": {
         "Worldwide net sales and revenues": [
-          "critic: You anchored the trend on a misstated prior-year change: Deere reported FY2025Q3 worldwide net sales and revenues down 9% to $12,018m, but you used \u22128.6% for FY2024Q3\u2192FY2025Q3. Using the reported \u22129% (for the same metric and period) would steepen your averaged decline and lower the FY2026Q3 estimate by roughly $25\u201330m, so 10,496.9 USDm is biased high off an incorrect basis."
+          "critic: You derived the -12.69% YoY by averaging prior YoY changes, but your own source says Q3 FY2025 worldwide net sales and revenues declined 9%, while you used -8.6% for FY2024Q3\u2192FY2025Q3. That mismatch indicates you computed the growth rates on a different basis than \u201cWorldwide net sales and revenues\u201d (e.g., net sales or another adjusted measure) and then applied them to the GAAP \"worldwide net sales and revenues\" base. Using a mixed basis makes the $10,492.5m forecast wrong on basis."
         ],
         "Diluted EPS (GAAP)": [
-          "critic: Wrong basis: You anchored FY2026Q3 to FY2024Q3\u2019s GAAP diluted EPS of $6.29 and applied a two-year compounded growth to reach ~$8.43 before the tilt. The correct like-for-like comparable for FY2026Q3 is FY2025Q3, not FY2024Q3. Using 2024Q3 introduces an extra year of growth and mismatches the fiscal period, so the $8.2982 figure is on the wrong basis. This is checkable against Deere\u2019s fiscal calendar and reported quarterly EPS (FY2026Q3 should be compared year-over-year to FY2025Q3)."
+          "critic: You anchored FY2026Q3 to FY2024Q3 ($6.29) and applied a two\u2011year compound rate, but the correct like\u2011for\u2011like prior period for FY2026Q3 is FY2025Q3 (one year prior). Deere would have reported FY2025Q3 diluted EPS by Aug 2025, so using FY2024Q3 as the \u201cmost recent comparable\u201d is a one\u2011year\u2011off prior\u2011year carryforward error that can be checked against the FY2025Q3 report."
         ],
         "Production & Precision Ag operating profit": [
-          "critic: The -0.17% YoY change you apply to FY2025Q3 ($580m) is not the FY2025Q3\u2192FY2026Q3 growth; it\u2019s an average of two unrelated periods (FY2024Q3\u2192FY2025Q3 \u221250.1% and FY2020Q3\u2192FY2021Q3 +49.8%). Averaging those non\u2011contiguous swings to proxy FY2026Q3 is a wrong basis and effectively just carries forward FY2025Q3 (~$580m) with no justification tied to the actual FY2025\u2192FY2026 period."
+          "critic: The stated derivation doesn\u2019t match the proposed value. Using your figures and weights: 752.983\u00d70.889 + 579.031\u00d70.111 = 733.674 USDm, not 733.655 USDm. Either the weights/inputs or the result is rounded or incorrect, but as presented the identity fails by 0.019 USDm (~$19k)."
         ]
       },
       "identity_issues": []

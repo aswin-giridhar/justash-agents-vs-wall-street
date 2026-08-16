@@ -41,6 +41,23 @@ OVERRIDES: dict[str, tuple[str, str]] = {
 }
 
 
+def weights_for(estimates: list[Estimate]) -> dict[str, float]:
+    """Normalised weight per candidate method. Exposed so the decision layer can
+    build a weighted predictive distribution from the same numbers."""
+    usable = [e for e in estimates if e.confidence > 0.0]
+    if not usable:
+        return {}
+    has_guidance = any(e.method.startswith("guidance_anchor") for e in usable)
+    raw = {}
+    for e in usable:
+        base = BASE_WEIGHTS.get(_family(e.method), 0.25)
+        if has_guidance and _family(e.method) == "seasonal_trend":
+            base = SEASONAL_WEIGHT_WITH_GUIDANCE
+        raw[e.method] = base * e.confidence
+    total = sum(raw.values()) or 1.0
+    return {m: w / total for m, w in raw.items()}
+
+
 def combine(estimates: list[Estimate], metric_key: str) -> Estimate:
     usable = [e for e in estimates if e.confidence > 0.0]
     if not usable:

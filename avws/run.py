@@ -21,7 +21,9 @@ import traceback
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timezone
 
-from avws import ledger, reconcile, series, signals, validate
+from avws import (
+    calibration, decide, ledger, linkage, reconcile, series, signals, validate,
+)
 from avws.config import LOG_DIR, ROOT, ensure_dirs
 from avws.corpus import build_index
 from avws.estimators import buildup, guidance, seasonal
@@ -78,7 +80,16 @@ def estimate_metric(metric: Metric) -> tuple[object, list, list]:
     for signal in tilt.signals[:4]:
         log(f"      signal {signal.direction} {signal.strength:.2f}: {signal.why[:110]}")
 
-    anchor = guidance.estimate(metric.key, facts, metric.period)
+    # Guidance bias measured deliberately across the corpus rather than from
+    # whatever pairs happened to surface while extracting this metric.
+    calib = calibration.measure(metric, use_cache=_USE_SERIES_CACHE)
+    log(f"  [{metric.key}] calibration: {calib.describe()}")
+
+    anchor = guidance.estimate(
+        metric.key, facts, metric.period,
+        residual_pct=calib.residual if calib.measured else None,
+        calibration_pairs=calib.pairs, calibration_detail=calib.detail,
+    )
     if anchor:
         anchor = signals.apply(anchor, metric, tilt)
         candidates.append(anchor)
@@ -109,7 +120,20 @@ def estimate_metric(metric: Metric) -> tuple[object, list, list]:
         f"(method {fallback.method})")
 
     blended = reconcile.combine(candidates, metric.key)
-    log(f"  [{metric.key}] reconciled -> {blended.value:.6g} via {blended.method}")
+
+    # Decision layer: pick the value that minimises expected score rather than the
+    # value that is "right on average", and record where consensus probably sits.
+    weights = reconcile.weights_for(candidates)
+    decision = decide.choose(metric, candidates, weights, facts)
+    blended.value = decision.value
+    blended.derivation += f"\n  DECISION [{decision.method}]: {decision.describe()}"
+    if decision.consensus_proxy is not None and abs(decision.deviation_pct) > 0.05:
+        blended.warnings.append(
+            f"deviating {decision.deviation_pct:+.1%} from the consensus proxy"
+        )
+    log(f"  [{metric.key}] decision -> {decision.value:.6g} via {decision.method} "
+        f"(spread {decision.spread_pct:.1%}, consensus proxy "
+        f"{decision.consensus_proxy if decision.consensus_proxy is not None else 'n/a'})")
     return blended, facts, candidates
 
 
@@ -130,6 +154,26 @@ def run_company(ticker: str) -> dict:
             candidates_by_metric[metric.label] = candidates
 
     values = {label: est.value for label, est in estimates.items()}
+
+    # Linked P&L derivation. Estimating EPS independently of the operating profit
+    # above it allows contradictions that a real analyst's linked model forbids by
+    # construction: 44.5m of operating profit over 1,600m shares cannot support
+    # 36.6 pence. Where the chain is complete we derive rather than estimate.
+    values, derivations, linkage_notes = linkage.apply(ticker, metrics[0].company, values)
+    for note in linkage_notes:
+        log(f"  [{ticker}] LINKAGE {note}")
+    for derivation in derivations:
+        label = derivation.metric_key.split(":", 1)[1]
+        estimates[label].value = derivation.derived_value
+        estimates[label].method += "+derived"
+        estimates[label].derivation += (
+            f"\n  DERIVED FROM THE P&L: {derivation.arithmetic}"
+            f"\n  independent estimate was {derivation.independent_value:.4g} "
+            f"({derivation.divergence:.0%} divergence); the derived value is "
+            f"submitted because it is forced consistent with operating profit, "
+            f"share count and tax"
+        )
+
     identity_issues = validate.check_identities(ticker, values, facts_by_metric)
     if identity_issues:
         for issue in identity_issues:

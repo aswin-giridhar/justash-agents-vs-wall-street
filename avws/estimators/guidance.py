@@ -76,6 +76,8 @@ def estimate(
     facts: list[Fact],
     period: str,
     residual_pct: float | None = None,
+    calibration_pairs: int | None = None,
+    calibration_detail: list[str] | None = None,
 ) -> Estimate | None:
     anchor = _mid(facts, period)
     if anchor is None:
@@ -85,6 +87,8 @@ def estimate(
     pairs = 0
     if residual_pct is None:
         residual_pct, pairs, detail = measure_residual(facts)
+    elif calibration_detail is not None:
+        pairs, detail = calibration_pairs or 0, list(calibration_detail)
 
     value = anchor.value * (1.0 + residual_pct)
     if residual_pct:
