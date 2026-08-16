@@ -24,11 +24,29 @@ from avws.ledger import Fact
 from avws.registry import Metric
 
 
-def _ordered_actuals(facts: list[Fact]) -> list[Fact]:
-    actuals = [f for f in facts if f.basis in ("reported", "adjusted")]
+def _ordered_actuals(facts: list[Fact], target) -> list[Fact]:
+    """Actuals COMPARABLE WITH THE TARGET, deduplicated, oldest first.
+
+    Comparability is the whole point. A full year and a single quarter are different
+    quantities, and Q2 and Q3 are different quantities, so pooling them produces
+    nonsense growth rates. An earlier version did exactly that and the adversarial
+    critic caught it on seven of twelve metrics - "the median of a mixed set",
+    "you mixed quarters", "the -64.9% input is an H1 vs H1 change". Deere's segment
+    operating profit came out at 441 against a true level in the low thousands.
+
+    So: a full-year target admits only full-year actuals; a quarterly target admits
+    only the SAME quarter of other years.
+    """
     deduped: dict[str, Fact] = {}
-    for fact in actuals:
-        key = str(periods.parse(fact.period) or fact.period)
+    for fact in facts:
+        if fact.basis not in ("reported", "adjusted"):
+            continue
+        period = periods.parse(fact.period)
+        if period is None:
+            continue
+        if target is not None and period.quarter != target.quarter:
+            continue
+        key = str(period)
         existing = deduped.get(key)
         # Prefer the more precise figure when a period appears twice: press
         # releases round ("$3.62 billion") where statement tables do not (3,623).
@@ -56,7 +74,8 @@ def _recent_yoy_growth(actuals: list[Fact]) -> tuple[float | None, list[str]]:
 
 
 def estimate(metric: Metric, facts: list[Fact]) -> Estimate:
-    actuals = _ordered_actuals(facts)
+    target = periods.parse(metric.period)
+    actuals = _ordered_actuals(facts, target)
 
     if not actuals:
         return Estimate(
@@ -67,7 +86,6 @@ def estimate(metric: Metric, facts: list[Fact]) -> Estimate:
             warnings=["no history: value is a placeholder, not an estimate"],
         )
 
-    target = periods.parse(metric.period)
     values = [f.value for f in actuals]
 
     # Percentages are levels, not compounding quantities: a 73% margin does not

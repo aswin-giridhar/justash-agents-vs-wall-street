@@ -124,7 +124,11 @@ def run_company(ticker: str) -> dict:
     for metric in metrics:
         est = estimates[metric.label]
         history = ledger.history(metric.key)
-        est, findings = validate.gate(metric, est, history, identity_issues)
+        issues = list(identity_issues)
+        issues += validate.check_guidance_consistency(
+            metric, est.value, facts_by_metric[metric.key]
+        )
+        est, findings = validate.gate(metric, est, history, issues)
         findings_by_metric[metric.label] = findings
         for finding in findings:
             log(f"  [{metric.key}] GATE {finding}")

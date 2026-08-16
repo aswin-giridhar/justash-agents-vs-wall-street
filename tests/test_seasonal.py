@@ -1,0 +1,63 @@
+"""The seasonal estimator must never mix period types.
+
+Every case here comes from a real defect the adversarial critic found: pooling
+full-year figures with quarterly ones, and pairing different quarters, produced
+Deere segment operating profit of 441 against a true level in the low thousands.
+"""
+
+from avws.estimators import seasonal
+from avws.ledger import Fact
+from avws.registry import get_metric
+
+
+def _fact(period, value, metric_key="DE:Production & Precision Ag operating profit"):
+    return Fact(
+        metric_key=metric_key, company="Deere & Company", period=period,
+        value=value, unit="USDm", basis="reported", source_doc="d",
+        source_quote="q", confidence=0.8,
+    )
+
+
+def test_ignores_full_year_figures_when_the_target_is_a_quarter():
+    metric = get_metric("DE:Production & Precision Ag operating profit")  # FY2026Q3
+    facts = [
+        _fact("FY2024Q3", 1_500.0),
+        _fact("FY2025Q3", 1_600.0),
+        _fact("FY2025", 6_200.0),   # a full year - must not enter the series
+        _fact("FY2024", 5_900.0),
+    ]
+    est = seasonal.estimate(metric, facts)
+    # Anchored on FY2025Q3 = 1600 and grown, so it must stay in the segment's range
+    # rather than being dragged toward the annual numbers.
+    assert 1_000 < est.value < 2_500, est.derivation
+
+
+def test_ignores_other_quarters():
+    metric = get_metric("DE:Production & Precision Ag operating profit")  # Q3
+    facts = [
+        _fact("FY2024Q3", 1_000.0),
+        _fact("FY2025Q3", 1_100.0),
+        _fact("FY2026Q1", 300.0),   # a different quarter - must not enter
+        _fact("FY2026Q2", 2_900.0),
+    ]
+    est = seasonal.estimate(metric, facts)
+    assert 900 < est.value < 1_400, est.derivation
+
+
+def test_full_year_target_uses_only_full_year_actuals():
+    metric = get_metric("HAS:Net fees")  # FY2026, a full year
+    facts = [
+        _fact("FY2024", 1_113.6, "HAS:Net fees"),
+        _fact("FY2025", 972.4, "HAS:Net fees"),
+        _fact("FY2025Q3", 240.0, "HAS:Net fees"),   # a quarter - must not enter
+    ]
+    est = seasonal.estimate(metric, facts)
+    # FY2025 = 972.4 grown at the FY2024->FY2025 rate of about -12.7%
+    assert 780 < est.value < 1_000, est.derivation
+
+
+def test_returns_a_placeholder_rather_than_nothing_when_no_comparable_history():
+    metric = get_metric("DE:Production & Precision Ag operating profit")
+    est = seasonal.estimate(metric, [_fact("FY2025Q1", 300.0)])
+    assert est.value is not None
+    assert est.confidence <= 0.2

@@ -22,6 +22,14 @@ BASE_WEIGHTS = {
     "seasonal_trend": 0.25,
 }
 
+# Weight the seasonal trend drops to when company guidance exists for the period.
+SEASONAL_WEIGHT_WITH_GUIDANCE = 0.06
+
+
+def _family(method: str) -> str:
+    """Strip the '+signal' and '(override)' suffixes to get the estimator family."""
+    return method.split("+")[0].split(" ")[0]
+
 # Declared overrides, with the reason each one exists.
 OVERRIDES: dict[str, tuple[str, str]] = {
     "HAS:Net fees": (
@@ -41,7 +49,7 @@ def combine(estimates: list[Estimate], metric_key: str) -> Estimate:
     override = OVERRIDES.get(metric_key)
     if override:
         method, reason = override
-        chosen = next((e for e in usable if e.method == method), None)
+        chosen = next((e for e in usable if _family(e.method) == method), None)
         if chosen is not None:
             return Estimate(
                 metric_key=metric_key, value=chosen.value, method=f"{method} (override)",
@@ -59,9 +67,19 @@ def combine(estimates: list[Estimate], metric_key: str) -> Estimate:
             warnings=list(only.warnings),
         )
 
-    weights = {
-        e.method: BASE_WEIGHTS.get(e.method, 0.25) * e.confidence for e in usable
-    }
+    # When the company has published guidance for this exact period, a trend fit has
+    # very little to add: management is forecasting its own quarter with information
+    # no time series contains. Left at its normal weight the trend dragged ADI's
+    # revenue to 3593 against a guided 3900 +/- 100 - outside the range the company
+    # itself published, which is indefensible in front of a judge.
+    has_guidance = any(e.method.startswith("guidance_anchor") for e in usable)
+
+    weights = {}
+    for e in usable:
+        base = BASE_WEIGHTS.get(_family(e.method), 0.25)
+        if has_guidance and _family(e.method) == "seasonal_trend":
+            base = SEASONAL_WEIGHT_WITH_GUIDANCE
+        weights[e.method] = base * e.confidence
     total = sum(weights.values())
     if total <= 0:
         raise ValueError(f"all weights zero for {metric_key}")

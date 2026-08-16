@@ -79,6 +79,39 @@ def check_scale(metric: Metric, value: float, history: list[float]) -> list[str]
     return issues
 
 
+def check_guidance_consistency(
+    metric: Metric, value: float, facts: list[Fact]
+) -> list[str]:
+    """Flag a forecast that sits outside the company's own published guidance range.
+
+    Landing outside a range management published for this exact period is not
+    automatically wrong - companies beat the top end, and ADI said so about its own
+    last quarter - but it is a claim that needs a reason. Surfacing it forces the
+    reason to exist rather than arriving by accident through a weighted average.
+    """
+    guided = {
+        basis: [f.value for f in facts
+                if f.basis == basis and f.period == metric.period]
+        for basis in ("guidance_low", "guidance_mid", "guidance_high")
+    }
+    low = min(guided["guidance_low"], default=None)
+    high = max(guided["guidance_high"], default=None)
+    mid = guided["guidance_mid"][0] if guided["guidance_mid"] else None
+
+    if low is not None and high is not None:
+        if not (low <= value <= high):
+            return [f"guidance: {value:.6g} falls outside the guided range "
+                    f"[{low:g}, {high:g}] for {metric.period}"]
+        return []
+
+    if mid is not None and mid:
+        drift = abs(value - mid) / abs(mid)
+        if drift > 0.05:
+            return [f"guidance: {value:.6g} is {drift:.1%} away from the guided "
+                    f"midpoint {mid:g} with no explicit range to justify it"]
+    return []
+
+
 def check_identities(
     ticker: str, values: dict[str, float], facts_by_metric: dict[str, list[Fact]]
 ) -> list[str]:

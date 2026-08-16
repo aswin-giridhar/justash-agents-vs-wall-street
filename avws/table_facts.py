@@ -94,6 +94,11 @@ _RESCALE = (1.0, 1e-3, 1e-6, 1e3)
 # admitting divisional, half-year and full-year components of the headline figure.
 FACT_BAND_WIDENING = 10.0
 
+# Percentage readings below this magnitude are almost certainly decimal fractions
+# rather than percentage points. A genuine 0.05% comparable-sales figure is possible
+# but vanishingly rare; a 0.05 that means 5% is common.
+PERCENT_FRACTION_FLOOR = 0.2
+
 
 def _basis_for(metric: Metric, row_label: str) -> str:
     text = f"{metric.label} {row_label}".lower()
@@ -129,6 +134,14 @@ def normalise(metric: Metric, value: float) -> tuple[float, str] | None:
     low, high = band
     if not metric.is_percentage:
         low, high = low / FACT_BAND_WIDENING, high * FACT_BAND_WIDENING
+    elif abs(value) < PERCENT_FRACTION_FLOOR:
+        # A percentage arriving as a decimal fraction. Home Depot comparable sales
+        # came out at 0.073% because the estimator averaged 0.004 and 0.1504 -
+        # readings of 0.4% and 15.04% expressed as fractions, both of which sit
+        # inside a +/-25 band and so passed unchallenged. Reported comparable sales
+        # and margins are never this close to zero; reject rather than guess which
+        # convention was meant.
+        return None
     # Column headers in these statements are bare years, and several metric bands
     # span 1990-2100, so "2026" would otherwise be recorded as a Deere segment
     # profit. Real reported figures in that range essentially always carry a
