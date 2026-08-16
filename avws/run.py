@@ -166,7 +166,16 @@ def run_company(ticker: str) -> dict:
     # above it allows contradictions that a real analyst's linked model forbids by
     # construction: 44.5m of operating profit over 1,600m shares cannot support
     # 36.6 pence. Where the chain is complete we derive rather than estimate.
-    values, derivations, linkage_notes = linkage.apply(ticker, metrics[0].company, values)
+    # Metrics the company guides directly. Guidance outranks our own derivation of
+    # the same number, so for those the linked chain is a check, not a substitution.
+    guided_labels = {
+        m.label for m in metrics
+        if any(f.basis.startswith("guidance") and f.period == m.period
+               for f in facts_by_metric.get(m.key, []))
+    }
+    values, derivations, linkage_notes = linkage.apply(
+        ticker, metrics[0].company, values, guided_labels=guided_labels
+    )
     for note in linkage_notes:
         log(f"  [{ticker}] LINKAGE {note}")
     for derivation in derivations:

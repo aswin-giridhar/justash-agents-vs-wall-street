@@ -37,6 +37,10 @@ Rules:
    A missing driver is recoverable; a fabricated one corrupts the whole derivation.
 3. Share counts are in MILLIONS of shares.
 4. Tax rate is a percentage (24.5 means 24.5%).
+7. `recent_opex_ratio_pct` is adjusted operating expenses as a percentage of revenue
+   in the most recent reported quarter, i.e. adjusted gross margin percentage MINUS
+   adjusted operating margin percentage. If a company reported a 73.0% adjusted gross
+   margin and a 49.0% adjusted operating margin, that is 24.0.
 5. Net finance charge is a POSITIVE number representing a cost to be subtracted.
    If the company earns net finance income, return it as a negative number.
 6. Prefer the basis the metric requires: pre-exceptional or adjusted figures where
@@ -62,6 +66,7 @@ DRIVER_SCHEMA = {
                             "net_finance_charge",
                             "effective_tax_rate_pct",
                             "minority_interest",
+                            "recent_opex_ratio_pct",
                         ],
                     },
                     "value": {"type": "number"},
@@ -100,6 +105,8 @@ def fetch_drivers(ticker: str, company: str) -> tuple[dict[str, float], list[str
         "weighted average number of shares basic diluted earnings per share",
         "net finance charge interest payable receivable",
         "effective tax rate income tax expense profit before tax",
+        "adjusted gross margin percentage adjusted operating margin percentage "
+        "operating expenses percentage of revenue",
     ):
         for doc, _s, chunk in search(query, ticker=ticker, doc_type="FILING",
                                     since="2024-06-01", k=5):
@@ -178,29 +185,130 @@ def derive_eps(
     )
 
 
-def apply(ticker: str, company: str, values: dict[str, float]) -> tuple[
-    dict[str, float], list[Derivation], list[str]
-]:
+def derive_adi_eps(
+    values: dict[str, float], drivers: dict[str, float]
+) -> Derivation | None:
+    """Derive ADI adjusted diluted EPS from revenue and adjusted gross margin.
+
+    ADI's three metrics are genuinely linked, which independent estimation ignores:
+
+        revenue x (adjusted gross margin - opex ratio) = adjusted operating income
+        (operating income - net interest) x (1 - tax) / diluted shares = adjusted EPS
+
+    So a revenue forecast and a margin forecast already imply an EPS. Estimating EPS
+    separately lets the three contradict each other; deriving it makes the trio
+    consistent by construction and turns a disagreement into a visible signal that
+    one of the two inputs is wrong.
+    """
+    revenue = values.get("Revenue")
+    gross_margin = values.get("Adjusted gross margin")
+    independent = values.get("Adjusted diluted EPS")
+    shares = drivers.get("weighted_average_diluted_shares_m")
+    opex_ratio = drivers.get("recent_opex_ratio_pct")
+    if not all((revenue, gross_margin, independent, shares, opex_ratio)):
+        return None
+
+    operating_margin = gross_margin - opex_ratio
+    operating_income = revenue * operating_margin / 100.0
+    finance = drivers.get("net_finance_charge", 0.0)
+    tax_rate = drivers.get("effective_tax_rate_pct", 12.0)
+    derived = (operating_income - finance) * (1 - tax_rate / 100.0) / shares
+
+    arithmetic = (
+        f"revenue {revenue:.6g} x (adj gross margin {gross_margin:.4g}% - opex ratio "
+        f"{opex_ratio:.4g}%) = {operating_income:.6g} adj operating income; "
+        f"({operating_income:.6g} - {finance:.4g} net finance) x (1 - {tax_rate:.4g}% "
+        f"tax) / {shares:.6g}m diluted shares = {derived:.4g} USD/share"
+    )
+    return Derivation(
+        metric_key="ADI:Adjusted diluted EPS",
+        derived_value=derived, independent_value=independent,
+        arithmetic=arithmetic,
+        drivers={
+            "revenue": revenue, "adjusted_gross_margin": gross_margin,
+            "opex_ratio_pct": opex_ratio, "net_finance_charge": finance,
+            "effective_tax_rate_pct": tax_rate,
+            "weighted_average_diluted_shares_m": shares,
+        },
+    )
+
+
+# Which metric each company's linked chain derives, and the function that does it.
+DERIVERS = {
+    "HAS": ("Pre-exceptional basic EPS", lambda v, d: derive_eps("HAS", v, d)),
+    "ADI": ("Adjusted diluted EPS", derive_adi_eps),
+}
+
+# Beyond this divergence the derived value is reported but NOT substituted: a gap
+# that large means an input is wrong, and silently replacing the estimate would hide
+# which one. It is surfaced as a warning instead.
+MAX_SUBSTITUTION_DIVERGENCE = 0.35
+
+
+def apply(
+    ticker: str,
+    company: str,
+    values: dict[str, float],
+    guided_labels: set[str] | None = None,
+) -> tuple[dict[str, float], list[Derivation], list[str]]:
     """Replace derivable metrics with their derived values.
 
     Returns the corrected values, the derivations performed, and log notes. The
     independent estimate is retained inside the Derivation so the evidence report
     can show both and the size of the disagreement.
     """
+    registered = DERIVERS.get(ticker)
     metrics = {m.label for m in metrics_for(ticker)}
-    if ticker != "HAS" or "Pre-exceptional basic EPS" not in metrics:
+    if registered is None or registered[0] not in metrics:
         return values, [], ["no linked derivation registered for this company"]
 
+    label, derive = registered
     drivers, notes = fetch_drivers(ticker, company)
-    derivation = derive_eps(ticker, values, drivers)
+    derivation = derive(values, drivers)
     if derivation is None:
-        return values, [], notes + ["linked derivation unavailable: drivers missing"]
+        return values, [], notes + [
+            f"linked derivation of {label} unavailable: drivers missing"
+        ]
+
+    # Linkage propagates errors as readily as it catches them: a weakly evidenced
+    # input produces a weakly evidenced output. Deriving ADI's adjusted EPS from our
+    # own gross-margin forecast gave 2.94 against company guidance of 3.30, because
+    # the margin forecast was too low - trading strong evidence for weak. So where
+    # the company guides the metric directly, that guidance outranks our derivation
+    # and the chain becomes a consistency CHECK rather than a substitution.
+    if guided_labels and label in guided_labels:
+        notes.append(
+            f"{label} is guided by the company, so the linked derivation is reported "
+            f"as a consistency check rather than substituted. Derived "
+            f"{derivation.derived_value:.4g} vs submitted "
+            f"{derivation.independent_value:.4g} ({derivation.divergence:.0%} "
+            f"divergence). Chain: {derivation.arithmetic}"
+        )
+        if derivation.divergence > 0.10:
+            notes.append(
+                f"WARN {label}: a {derivation.divergence:.0%} gap between the guided "
+                f"estimate and the P&L chain means one of the other two metrics for "
+                f"this company is probably mis-forecast"
+            )
+        return values, [derivation], notes
+
+    if derivation.divergence > MAX_SUBSTITUTION_DIVERGENCE:
+        # Reporting without substituting. A divergence this large means one of the
+        # inputs is wrong, and quietly replacing the estimate would hide which.
+        notes.append(
+            f"{label}: derived {derivation.derived_value:.4g} vs independent "
+            f"{derivation.independent_value:.4g} — {derivation.divergence:.0%} "
+            f"divergence exceeds the {MAX_SUBSTITUTION_DIVERGENCE:.0%} substitution "
+            f"limit, so the independent estimate stands and the gap is flagged. "
+            f"Chain: {derivation.arithmetic}"
+        )
+        return values, [], notes
 
     corrected = dict(values)
-    corrected["Pre-exceptional basic EPS"] = derivation.derived_value
+    corrected[label] = derivation.derived_value
     notes.append(
-        f"EPS derived from the P&L: {derivation.arithmetic}; independent estimate "
-        f"was {derivation.independent_value:.4g} "
+        f"{label} derived from the P&L: {derivation.arithmetic}; independent "
+        f"estimate was {derivation.independent_value:.4g} "
         f"({derivation.divergence:.0%} divergence)"
     )
     return corrected, [derivation], notes
