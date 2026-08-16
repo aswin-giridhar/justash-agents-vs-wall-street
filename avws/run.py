@@ -19,7 +19,7 @@ import sys
 import traceback
 from datetime import datetime, timezone
 
-from avws import ledger, reconcile, validate
+from avws import ledger, reconcile, signals, validate
 from avws.config import LOG_DIR, ROOT, ensure_dirs
 from avws.corpus import build_index
 from avws.estimators import buildup, guidance, seasonal
@@ -53,11 +53,21 @@ def estimate_metric(metric: Metric) -> tuple[object, list, list]:
 
     candidates = []
 
+    # Post-guidance leading indicators. Guidance anchoring alone reproduces what
+    # every team with the 8-K can do; the tilt is what moves us off the anchor with
+    # cited evidence published after the guidance was issued.
+    tilt = signals.measure(metric)
+    log(f"  [{metric.key}] signal tilt {tilt.fraction:+.4f} "
+        f"(cap {tilt.cap:.3f}) from {len(tilt.signals)} verified signals")
+    for signal in tilt.signals[:4]:
+        log(f"      signal {signal.direction} {signal.strength:.2f}: {signal.why[:110]}")
+
     anchor = guidance.estimate(metric.key, facts, metric.period)
     if anchor:
+        anchor = signals.apply(anchor, metric, tilt)
         candidates.append(anchor)
         log(f"  [{metric.key}] guidance_anchor -> {anchor.value:.6g} "
-            f"(confidence {anchor.confidence:.2f})")
+            f"(method {anchor.method}, confidence {anchor.confidence:.2f})")
     else:
         log(f"  [{metric.key}] guidance_anchor -> no guidance fact, skipped")
 
@@ -73,8 +83,14 @@ def estimate_metric(metric: Metric) -> tuple[object, list, list]:
         log(f"  [{metric.key}] build_up -> no composition registered")
 
     fallback = seasonal.estimate(metric, facts)
+    # Where there is no guidance to anchor on - Home Depot's and Deere's quarters -
+    # the signal tilt is the only forward-looking input available, so it is applied
+    # to the trend instead.
+    if anchor is None:
+        fallback = signals.apply(fallback, metric, tilt)
     candidates.append(fallback)
-    log(f"  [{metric.key}] seasonal_trend -> {fallback.value:.6g}")
+    log(f"  [{metric.key}] seasonal_trend -> {fallback.value:.6g} "
+        f"(method {fallback.method})")
 
     blended = reconcile.combine(candidates, metric.key)
     log(f"  [{metric.key}] reconciled -> {blended.value:.6g} via {blended.method}")
