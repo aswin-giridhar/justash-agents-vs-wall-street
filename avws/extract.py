@@ -143,6 +143,20 @@ def plan_for(metric: Metric) -> list[Probe]:
                   "FILING", since="2025-10-01", k=4, intent="guidance"),
             Probe("production and precision agriculture net sales operating profit segment",
                   "FILING", since="2025-01-01", k=6, intent="component"),
+            # Deere guides at SEGMENT and FULL-YEAR level inside its earnings deck
+            # rather than as a quarterly number in the press release. Without these
+            # probes the outlook never reaches the ledger, the build-up components
+            # cannot be sourced, and every Deere metric falls through to a trend
+            # fit that contradicts the company's own published forecast.
+            Probe("Deere and Company outlook net income attributable effective tax "
+                  "rate fiscal year forecast", "FILING", since="2026-01-01", k=5,
+                  intent="guidance"),
+            Probe("business segment outlook net sales operating margin FY 2026 "
+                  "forecast production precision ag small ag turf construction "
+                  "forestry", "FILING", since="2026-01-01", k=6, intent="guidance"),
+            Probe("segment outlook net sales down percent operating margin range "
+                  "fiscal 2026 forecast", None, since="2026-01-01", k=5,
+                  intent="guidance"),
         ],
     }
     return probes + extra.get(metric.ticker, [])

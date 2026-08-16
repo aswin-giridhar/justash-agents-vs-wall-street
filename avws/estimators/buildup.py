@@ -242,10 +242,13 @@ COMPOSITIONS: dict[str, Composition] = {
         components=(
             Component("prior_year_q3_net_sales", "Reported worldwide net sales and "
                       "revenues in Q3 of the prior fiscal year", "USDm"),
-            Component("fy26_guided_net_sales_change", "Expected full-year FY2026 "
-                      "change in worldwide net sales and revenues implied by the "
-                      "company's outlook, including its segment net sales guidance",
-                      "%"),
+            Component("fy26_guided_net_sales_change", "MIDPOINT of the full-year "
+                      "FY2026 change in worldwide net sales and revenues implied by "
+                      "the company's segment outlook. Deere guides each segment "
+                      "separately - for example Production & Precision Ag 'down "
+                      "5-10%' - so weight the segment guides by their FY2025 net "
+                      "sales to get the group figure. A guide of 'down 5-10%' means "
+                      "-7.5 for that segment.", "%"),
         ),
         formula=lambda c: c["prior_year_q3_net_sales"]
         * (1 + c["fy26_guided_net_sales_change"] / 100.0),
@@ -283,15 +286,28 @@ COMPOSITIONS: dict[str, Composition] = {
             "its net sales multiplied by its operating margin."
         ),
         components=(
-            Component("segment_net_sales", "Expected Production & Precision Ag "
-                      "segment net sales for the target quarter", "USDm"),
-            Component("segment_operating_margin", "Expected Production & Precision "
-                      "Ag segment operating margin for the target quarter", "%"),
+            Component("fy25_segment_net_sales", "Reported FY2025 full-year "
+                      "Production & Precision Ag segment net sales", "USDm"),
+            Component("fy26_segment_sales_change", "MIDPOINT of the company's FY2026 "
+                      "outlook for the change in Production & Precision Ag segment "
+                      "net sales. A guide of 'down 5-10%' means -7.5.", "%"),
+            Component("fy26_segment_operating_margin", "MIDPOINT of the company's "
+                      "FY2026 outlook for Production & Precision Ag segment "
+                      "operating margin. A guide of '11-13%' means 12.", "%"),
+            Component("q3_share_of_segment_annual_profit", "Q3's historical share of "
+                      "the full-year Production & Precision Ag operating profit, "
+                      "from prior years", "%"),
         ),
-        formula=lambda c: c["segment_net_sales"] * c["segment_operating_margin"] / 100.0,
+        formula=lambda c: (
+            c["fy25_segment_net_sales"] * (1 + c["fy26_segment_sales_change"] / 100.0)
+            * c["fy26_segment_operating_margin"] / 100.0
+            * c["q3_share_of_segment_annual_profit"] / 100.0
+        ),
         render=lambda c, v: (
-            f"segment net sales {c['segment_net_sales']:g} x operating margin "
-            f"{c['segment_operating_margin']:g}% = {v:.4g} USDm"
+            f"FY25 segment sales {c['fy25_segment_net_sales']:g} x (1 + "
+            f"{c['fy26_segment_sales_change']:g}% guided change) x "
+            f"{c['fy26_segment_operating_margin']:g}% guided margin x "
+            f"{c['q3_share_of_segment_annual_profit']:g}% Q3 share = {v:.4g} USDm"
         ),
     ),
 }
