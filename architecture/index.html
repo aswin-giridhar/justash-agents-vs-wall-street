@@ -455,6 +455,20 @@ because it is a second-order signal about a period the anchor already covers.</p
 sources each component from the ledger <em>and</em> from retrieved documents, and says which it used;
 it is told explicitly that a missing component is recoverable and a fabricated one is not.</p>
 
+<p><strong>Driver decomposition.</strong> Where a metric has genuine drivers we model them apart and
+keep both routes. Home Depot reports comparable sales as average ticket × customer transactions,
+and those move for different reasons — ticket tracks commodity prices and big-ticket demand,
+transactions track footfall. A second composition builds comparable sales from that pair, giving an
+independent route to the same number. A forecast that arrives at the right answer through
+offsetting wrong drivers is not one worth trusting, and two routes that agree are far stronger
+evidence than one route unchecked.</p>
+
+<p>Two inputs to the Home Depot chain are <strong>computed rather than asked for</strong>, because
+we already hold them as evidence: the prior-year same-quarter value comes from the extracted
+series, and the non-comparable contribution is total growth minus comparable growth, which is its
+definition. A company-level driver fetch had returned Q1 net sales when Q2 was needed — re-deriving
+by inference what you already hold as evidence adds an error path for nothing.</p>
+
 <p>Components carry <strong>plausibility bounds</strong>, because an unconstrained assumption is the
 same hazard as an unconstrained fact. Asked for Q3's share of Deere's annual segment operating
 profit, the model returned <strong>55.3%</strong> — a quarter cannot be over half a year — and the
